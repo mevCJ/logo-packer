@@ -34,6 +34,8 @@ Open the extension in Window > Extensions > Logo Packer and follow the instructi
 ## Exporting Files
 ![export-files-demo](https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/export-files.gif?raw=true)
 
+:tv: [Video Demo](https://youtu.be/8cH3x6DNdsM)
+
 # Donate / Support
 Your support is greatly appreciated! If you'd lke to support the developer and the project for further development, feel free to donate!
 
