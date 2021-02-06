@@ -34,7 +34,7 @@ function generateLogoVariation(label) {
 		initArtboardsLength = app.activeDocument.artboards.length;
 	}
 
-	app.activeDocument.artboards[initArtboardsLength - 1].name = 'color'
+	app.activeDocument.artboards[initArtboardsLength - 1].name = label + '_color'
 
 	//paste and group
 	app.paste();
@@ -82,7 +82,7 @@ function generateLogoVariation(label) {
 		var y2 = mainArtboard.artboardRect[3];
 
 		app.activeDocument.artboards.add([x2 + 100, y1, x2 + 100 + (x2 - x1), y2]);
-		app.activeDocument.artboards[initArtboardsLength + i].name = artboardsName[i]
+		app.activeDocument.artboards[initArtboardsLength + i].name = label + '_' + artboardsName[i]
 
 		firstObj.duplicate();
 		firstObj.translate(firstObj.width + 100, 0);
@@ -117,6 +117,7 @@ function fillColor(obj, color) {
 
 function exportFiles() {
 
+	var cancel = false;
 	var dlg = new Window('dialog', 'Export Artboards',undefined,{independent: true});
 	var dir = ''
 
@@ -133,10 +134,12 @@ function exportFiles() {
 
 	btnPnl.okBtn = btnPnl.add('button', undefined, 'Ok', {name:'ok'});
 	btnPnl.okBtn.onClick = function() { dir = dirEt.text; dlg.close(); };
+	btnPnl.cancelBtn = btnPnl.add('button', undefined, 'Cancel', {name:'cancel'});
+	btnPnl.cancelBtn.onClick = function() { cancel = true; dlg.close(); };
 
 	dlg.show();
 
-	if (app.documents.length > 0) {
+	if (app.documents.length > 0 && !cancel) {
 		var artboardsNum = app.activeDocument.artboards.length;
 		var artboardName = '';
 		var document = app.activeDocument;
@@ -163,7 +166,6 @@ function exportFiles() {
 		options.compatibility = PDFCompatibility.ACROBAT5;
 		options.generateThumbnails = true;
 		options.preserveEditability = true;
-		options.artboardRage = '0-2'; //ignore white artboard
 
 		destFile = new File(dir + '/' + document.name.split('.')[0] + ".pdf");
 		document.saveAs(destFile, options)
@@ -240,16 +242,20 @@ function exportFiles() {
 
 				var scale = size / document.height;
 
-				if (scale <= 7.76) {
+				// if (scale <= 7.76) {
 					options.verticalScale = 100 * scale;
 					options.horizontalScale = 100 * scale;
 
 					document.exportFile(file, ExportType.PNG24, options);
-				} else {
-					Window.alert("Cannot scale to required size. Artboard too small.");
-					reopenDocument(document, afile);
-					return;
-				}
+				// } else {
+					// options.verticalScale = 10 * scale;
+					// options.horizontalScale = 10 * scale;
+
+					// document.exportFile(file, ExportType.JPEG, options);
+					// Window.alert("Cannot scale to required size. Artboard too small.");
+					// reopenDocument(document, afile);
+					// return;
+				// }
 			}
 		}
 
@@ -274,9 +280,13 @@ function exportFiles() {
 
 					document.exportFile(file, ExportType.JPEG, options);
 				} else {
-					Window.alert("Cannot scale to required size. Artboard too small.");
-					reopenDocument(document, afile);
-					return;
+					options.verticalScale = 10 * scale;
+					options.horizontalScale = 10 * scale;
+
+					document.exportFile(file, ExportType.JPEG, options);
+					// Window.alert("Cannot scale to required size. Artboard too small.");
+					// reopenDocument(document, afile);
+					// return;
 				}
 			}
 		}
