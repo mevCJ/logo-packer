@@ -3,3 +3,7 @@ logo: https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/logo.jpg?raw=tru
 google_analytics: G-2NVL54S6KC
 title: Logo variations and exports in minutes | Logo Packer
 description: Adobe Illustrator extension that generates multiple logo variation and export them automatically
+plugins:
+  - jemoji
+gems:
+  - jemoji
