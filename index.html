@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="css/boilerplate.css" />
+    <link id="hostStyle" rel="stylesheet" href="css/styles.css" />
+    <title></title>
+</head>
+
+<body class="hostElt">
+
+    <div style="padding: 2rem;" id="content">
+
+        <h1 class="hostFont">Instructions</h1>
+        <ol>
+            <li>Click on the object that you want to generate</li>
+            <li>Select the label from the dropdown</li>
+            <li>Click on Generate Variations</li>
+            <li>Repeat for any other object</li>
+        </ol>
+
+        <p style="text-align: center; margin-top: 20px;">
+            <label for="logotype">Select your label: </label>
+            <select style="margin-bottom: 10px; padding: 0;" name="type" id="logotype_select">
+                <option value="full_logo">Full logo</option>
+                <option value="symbol">Symbol</option>
+                <option value="name">Name</option>
+                <option value="slogan">Slogan</option>
+            </select><br>
+            <button id="generate_btn" class="hostButton">Generate Variations</button>
+        </p>
+        <p style="text-align: center; margin-top: 20px;">
+            <button style="margin-top:10px" id="export_btn" class="hostButton">Export Files</button>
+        </p>
+    </div>
+
+    <script src="js/libs/CSInterface.js"></script>
+    <script src="js/libs/jquery-2.0.2.min.js"></script>
+    <script src="js/libs/jquery-cep-dropzone.js"></script>
+    <script src="js/themeManager.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
