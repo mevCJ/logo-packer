@@ -116,26 +116,25 @@ function fillColor(obj, color) {
 }
 
 function exportFiles() {
-
 	var cancel = false;
-	var dlg = new Window('dialog', 'Export Artboards',undefined,{independent: true});
+	var dlg = new Window('dialog', 'Export Artboards', undefined, { independent: true });
 	var dir = ''
 
 	// PANEL to hold options
 	var msgPnl = dlg.add('panel', undefined, 'Select your folder');
 	var btnPnl = dlg.add('group', undefined, '');
 
-	var dirGrp = msgPnl.add( 'group', undefined, '') ;
-	var dirEt = dirGrp.add('edittext', undefined, dir); 
-	dirEt.size = [ 300,20 ];
+	var dirGrp = msgPnl.add('group', undefined, '');
+	var dirEt = dirGrp.add('edittext', undefined, dir);
+	dirEt.size = [300, 20];
 
-	var chooseBtn = dirGrp.add('button', undefined, 'Choose ...' );
-	chooseBtn.onClick = function() { dirEt.text = Folder.selectDialog(); }
+	var chooseBtn = dirGrp.add('button', undefined, 'Choose ...');
+	chooseBtn.onClick = function () { dirEt.text = Folder.selectDialog(); }
 
-	btnPnl.okBtn = btnPnl.add('button', undefined, 'Ok', {name:'ok'});
-	btnPnl.okBtn.onClick = function() { dir = dirEt.text; dlg.close(); };
-	btnPnl.cancelBtn = btnPnl.add('button', undefined, 'Cancel', {name:'cancel'});
-	btnPnl.cancelBtn.onClick = function() { cancel = true; dlg.close(); };
+	btnPnl.okBtn = btnPnl.add('button', undefined, 'Ok', { name: 'ok' });
+	btnPnl.okBtn.onClick = function () { dir = dirEt.text; dlg.close(); };
+	btnPnl.cancelBtn = btnPnl.add('button', undefined, 'Cancel', { name: 'cancel' });
+	btnPnl.cancelBtn.onClick = function () { cancel = true; dlg.close(); };
 
 	dlg.show();
 
@@ -154,11 +153,8 @@ function exportFiles() {
 
 		Window.alert("Please wait until the success message is shown. This may take a few minutes...");
 
-		for (var i = 0; i < artboardsNum; i++) {
-			app.activeDocument.artboards.setActiveArtboardIndex(i);
-			artboardName = app.activeDocument.artboards[i].name;
-			main(artboardName, i);
-		}
+		main();
+
 
 		document = app.activeDocument;
 		//save pdf
@@ -191,14 +187,16 @@ function exportFiles() {
 	}
 
 
-	function main(artboardName, curloop) {
+	function main() {
 		// var sizes = [1024, 512, 300, 256, 150, 100, 64, 50, 32, 16];
 		var sizes = [1024, 256, 64, 32, 16];
 		var document = app.activeDocument;
 		var afile = document.fullName;
-		var filename = artboardName;
+		var whatToExport = new ExportForScreensItemToExport();
+		whatToExport.assets = [];
+		whatToExport.artboards = '1-' + document.artboards.length;
 
-		var svgFolder = new Folder(afile.parent.fsName + "/SVG");
+		var svgFolder = new Folder(afile.parent.fsName);
 		if (!svgFolder.exists) {
 			svgFolder.create();
 		}
@@ -216,82 +214,47 @@ function exportFiles() {
 		var size, file;
 
 		if (svgFolder != null) {
-			var options = new ExportOptionsSVG();
+			var options = new ExportForScreensOptionsWebOptimizedSVG();
 			options.cssProperties = SVGCSSPropertyLocation.PRESENTATIONATTRIBUTES;
-			options.documentEncoding = SVGDocumentEncoding.UTF8;
 			options.fontType = SVGFontType.OUTLINEFONT;
-			options.fontSubsetting = SVGFontSubsetting.None;
-			options.preserveEditability = false;
-			options.embedRasterImages = true;
 
-			file = new File(svgFolder.fsName + '/' + filename + ".svg");
-
-			document.exportFile(file, ExportType.SVG, options);
+			document.exportForScreens(svgFolder, ExportForScreensType.SE_SVG, options, whatToExport);
 		}
 
 		if (pngFolder != null) {
-			var options = new ExportOptionsPNG24();
-			options.antiAliasing = false;
+			var options = new ExportForScreensOptionsPNG24();
+			options.antiAliasing = AntiAliasingMethod.ARTOPTIMIZED;
 			options.transparency = true;
-			options.artBoardClipping = true;
+			options.scaleType = ExportForScreensScaleType.SCALEBYRESOLUTION;
+			options.scaleTypeValue = 300;
 
-			for (var i = 0; i < sizes.length; i++) {
-				size = sizes[i];
-
-				file = new File(pngFolder.fsName + '/' + filename + "-" + size + "px.png");
-
-				var scale = size / document.height;
-
-				// if (scale <= 7.76) {
-					options.verticalScale = 100 * scale;
-					options.horizontalScale = 100 * scale;
-
-					document.exportFile(file, ExportType.PNG24, options);
-				// } else {
-					// options.verticalScale = 10 * scale;
-					// options.horizontalScale = 10 * scale;
-
-					// document.exportFile(file, ExportType.JPEG, options);
-					// Window.alert("Cannot scale to required size. Artboard too small.");
-					// reopenDocument(document, afile);
-					// return;
-				// }
-			}
+			document.exportForScreens(pngFolder, ExportForScreensType.SE_PNG24, options, whatToExport);
 		}
 
 		//ignore white object
-		if (jpgFolder != null && curloop != 3) {
-			var options = new ExportOptionsJPEG();
-			options.antiAliasing = false;
-			options.qualitySetting = 100;
-			options.optimization = true;
-			options.artBoardClipping = true;
+		if (jpgFolder != null) {
+			var options = new ExportForScreensOptionsJPEG();
+			options.antiAliasing = AntiAliasingMethod.ARTOPTIMIZED;
+			options.scaleType = ExportForScreensScaleType.SCALEBYRESOLUTION;
+			options.scaleTypeValue = 300;
 
-			for (var i = 0; i < sizes.length; i++) {
-				size = sizes[i];
+			var newArtboards = ''
 
-				file = new File(jpgFolder.fsName + '/' + filename + "-" + size + "px.jpg");
-
-				var scale = size / document.height;
-
-				if (scale <= 7.76) {
-					options.verticalScale = 100 * scale;
-					options.horizontalScale = 100 * scale;
-
-					document.exportFile(file, ExportType.JPEG, options);
-				} else {
-					options.verticalScale = 10 * scale;
-					options.horizontalScale = 10 * scale;
-
-					document.exportFile(file, ExportType.JPEG, options);
-					// Window.alert("Cannot scale to required size. Artboard too small.");
-					// reopenDocument(document, afile);
-					// return;
+			for (var i = 0; i <= document.artboards.length; i++) {
+				if (i % 4 !== 0) {
+					newArtboards += i;
+					if (i !== document.artboards.length-1)
+						newArtboards += ', '
 				}
 			}
+
+			whatToExport.artboards = newArtboards;
+
+			// file = new File(jpgFolder.fsName + '/' + filename + "-" + size + "px.jpg");
+			document.exportForScreens(jpgFolder, ExportForScreensType.SE_JPEG100, options, whatToExport);
 		}
 
-		reopenDocument(document, afile);
+		// reopenDocument(document, afile);
 	}
 
 	function reopenDocument(document, afile) {
