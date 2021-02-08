@@ -16,7 +16,7 @@ Download the files on [Github](https://github.com/mevCJ/logo-packer) and place t
 
 ### CEP extensions folder in Windows: 
 ``` bash
-C:\Program Files\Adobe\Adobe Illustrator CC 2019\Support Files\Required
+C:\Program Files\Adobe\Adobe Illustrator CC 2019\Support Files\Required\CEP\extensions
 ```
 
 ### CEP extensions folder in MacOS: 
