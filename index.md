@@ -2,11 +2,12 @@
 
 Logo Packer is an open-sourced Adobe Illustrator extensions that allows you to generate your logo in multiple variations and export them for your clients in minutes.
 
-:hourglass: Helps you to spend more time on perfecting your logo instead of creating final files for your client
+:hourglass: Increase your productivity by skipping the mundane exporting and packaging task.
 
 :black_nib: Generates CMYK, black, white and colored version of your logo with a click
 
 :open_file_folder: Organize your files in structured and named directories.
+Logo Packer is an open-sourced Adobe Illustrator extensions that allows you to generate your logo in multiple variations and export them for your clients in minutes.
 
 # Installation
 ## Installing manually
