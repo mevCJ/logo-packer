@@ -9,13 +9,15 @@ Logo Packer is an open-sourced Adobe Illustrator extensions that allows you to g
 :open_file_folder: Organize your files in structured and named directories.
 Logo Packer is an open-sourced Adobe Illustrator extensions that allows you to generate your logo in multiple variations and export them for your clients in minutes.
 
+<a href="https://github.com/mevCJ/logo-packer/archive/main.zip" rel="some text">![Download Button](https://dabuttonfactory.com/button.png?t=Download&f=Open+Sans-Bold&ts=26&tc=fff&hp=45&vp=20&c=11&bgt=unicolored&bgc=3f8ecd)</a>
+
 # Installation
 ## Installing manually
 Download the files on [Github](https://github.com/mevCJ/logo-packer) and place the files into the CEP extension folder. 
 
 ### CEP extensions folder in Windows: 
 ``` console
-C:\Program Files\Adobe\Adobe Illustrator CC 2019\Support Files\Required
+C:\Program Files\Adobe\Adobe Illustrator CC 2019\Support Files\Required\CEP\extensions\
 ```
 
 ### CEP extensions folder in MacOS: 
