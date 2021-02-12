@@ -24,7 +24,7 @@ C:\Program Files\Adobe\Adobe Illustrator CC 2019\Support Files\Required\CEP\exte
 /Library/Application Support/Adobe/CEP/extensions
 ```
 
-Enabling debug mode:
+### Enabling debug mode:
 
 Win: 
 regedit > HKEY_CURRENT_USER/Software/Adobe/CSXS.9, (CSXS.8 for CC 2018) then add a new entry PlayerDebugMode of type "string" with the value of "1".
