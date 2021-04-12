@@ -22,10 +22,18 @@ C:\Program Files\Adobe\Adobe Illustrator CC 2019\Support Files\Required
 /Library/Application Support/Adobe/CEP/extensions
 ```
 
-Enabling debug mode:
-Win: regedit > HKEY_CURRENT_USER/Software/Adobe/CSXS.9, (CSXS.8 for CC 2018) then add a new entry PlayerDebugMode of type "string" with the value of "1".
+<i>note: if the CEP extension folder doesn't exist, simply create one in /Library/Application Support/Adobe </i>
 
-macOS: In the terminal, type: defaults write com.adobe.CSXS.10 PlayerDebugMode 1 (The plist is also located at /Users//Library/Preferences/com.adobe.CSXS.10.plist) (CSXS.8 for CC2018)
+### Enabling debug mode:
+
+**Windows:** 
+1. Run regedit 
+2. Navigate to HKEY_CURRENT_USER/Software/Adobe/CSXS.9, (CSXS.8 for CC 2018)
+3. Add a new entry named PlayerDebugMode of type "string" with the value of "1".
+
+**macOS:**
+
+In the terminal, type: defaults write com.adobe.CSXS.10 PlayerDebugMode 1 (The plist is also located at /Users//Library/Preferences/com.adobe.CSXS.10.plist) (CSXS.8 for CC2018)
 
 ## Download from Adobe Exchange
 <i>To be added</i>
