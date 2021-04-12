@@ -16,7 +16,7 @@ Download the files on [Github](https://github.com/mevCJ/logo-packer) and place t
 
 ### CEP extensions folder in Windows: 
 ``` bash
-C:\Program Files\Adobe\Adobe Illustrator CC 2019\Support Files\Required\CEP\extensions
+C:\Program Files\Adobe\Adobe Illustrator CC 2019\Support Files\Required
 ```
 
 ### CEP extensions folder in MacOS: 
@@ -24,14 +24,19 @@ C:\Program Files\Adobe\Adobe Illustrator CC 2019\Support Files\Required\CEP\exte
 /Library/Application Support/Adobe/CEP/extensions
 ```
 
+<i>note: if the CEP extension folder doesn't exist, simply create one in /Library/Application Support/Adobe </i>
+
 ### Enabling debug mode:
 
-Win: 
-regedit > HKEY_CURRENT_USER/Software/Adobe/CSXS.9, (CSXS.8 for CC 2018) then add a new entry PlayerDebugMode of type "string" with the value of "1".
+**Windows:** 
+1. Run regedit 
+2. Navigate to HKEY_CURRENT_USER/Software/Adobe/CSXS.9, (CSXS.8 for CC 2018)
+3. Add a new entry named PlayerDebugMode of type "string" with the value of "1".
 
-macOS:
-In the terminal, type: defaults write com.adobe.CSXS.10 PlayerDebugMode 1 (The plist is also located at /Users/<username>/Library/Preferences/com.adobe.CSXS.10.plist)
-(CSXS.8 for CC2018)
+**macOS:**
+
+In the terminal, type: defaults write com.adobe.CSXS.10 PlayerDebugMode 1 (The plist is also located at /Users//Library/Preferences/com.adobe.CSXS.10.plist) (CSXS.8 for CC2018)
+
 
 
 ## Download from Adobe Exchange
