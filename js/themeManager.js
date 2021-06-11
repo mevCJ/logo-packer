@@ -102,6 +102,8 @@ var themeManager = (function () {
         addRule(styleId, ".hostButton:hover", "background-color:" + "#" + bgdColor);
         addRule(styleId, ".hostButton:active", "background-color:" + "#" + darkBgdColor);
         addRule(styleId, ".hostButton", "border-color: " + "#" + lightBgdColor);        
+        addRule(styleId, "#dragOver", "background: " + "#" + bgdColor);   
+        console.log("PanelBgColor "+bgdColor);     
 
     }
     

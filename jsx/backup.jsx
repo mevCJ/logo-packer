@@ -1,7 +1,7 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, regexp: true, indent: 4, maxerr: 50 */
 /*global $, Folder*/
 
-function generateLogoVariation(label) {
+function generateLogoVariation(logotype) {
 	var addDocName = 'logo_var.ai';
 
 	var hasDoc = false;
@@ -34,7 +34,7 @@ function generateLogoVariation(label) {
 		initArtboardsLength = app.activeDocument.artboards.length;
 	}
 
-	app.activeDocument.artboards[initArtboardsLength - 1].name = label + '_color'
+	app.activeDocument.artboards[initArtboardsLength - 1].name = logotype + '_color'
 
 	//paste and group
 	app.paste();
@@ -82,7 +82,7 @@ function generateLogoVariation(label) {
 		var y2 = mainArtboard.artboardRect[3];
 
 		app.activeDocument.artboards.add([x2 + 100, y1, x2 + 100 + (x2 - x1), y2]);
-		app.activeDocument.artboards[initArtboardsLength + i].name = label + '_' + artboardsName[i]
+		app.activeDocument.artboards[initArtboardsLength + i].name = logotype + '_' + artboardsName[i]
 
 		firstObj.duplicate();
 		firstObj.translate(firstObj.width + 100, 0);
