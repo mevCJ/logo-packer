@@ -123,13 +123,14 @@
                         $svg = $("<svg/>");
 
                     $target.focus();
-                    $target.val("");
-                    // Doesnt work in newer AI versions
+                    // $target.val("");
+                    // Paste command doesnt work in newer CEP engines, not allowed due to security
                     // document.execCommand("paste");
                     // svg = $target.val();
-                    // $svg.val("");
+                    $svg.val("");
                     // svg = cleanSvg(svg);
-
+                    // $target.val("");
+                    // $target.val(svg);
 
                     // https://www.c-sharpcorner.com/forums/how-do-get-clipboard-value-in-jquery
                     // var svgData = clipboard.getData("Text");
@@ -142,9 +143,6 @@
                     // var svgData = event.originalEvent.clipboardData.getData('text/plain');
                     // console.log(svgData)
 
-
-                    // $target.val("");
-                    // $target.val(svg);
 
                     // $target.val(parseSVG(svg));
                     // Works with manually pasteing svg code in textarea

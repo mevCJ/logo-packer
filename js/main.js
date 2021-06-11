@@ -107,16 +107,20 @@
         });
         
         $("#export_btn").click(function () {
-            getValues();
             exportingFiles(true);
-            csInterface.evalScript(`exportFiles('${mediaType}','${forMats}')`, function (run) {
-                exportingFiles(false);
-                if (run == "true") {
-                    throwMessage(run, "Export done");
-                } else {
-                    throwMessage(run, "Export cancelled");
-                }
-            });
+            getValues();
+            // compensate slower CS versions 
+            // panel wont show export animation otherwise
+            setTimeout(function () {
+                csInterface.evalScript(`exportFiles('${mediaType}','${forMats}')`, function (run) {
+                    if (run == "true") {
+                        throwMessage(run, "Export done");
+                    } else {
+                        throwMessage(run, "Export cancelled");
+                    }
+                    exportingFiles(false);
+                });
+            },100);
         });
         $("#instructions").click(function () {
             $("body").toggleClass("closed").toggleClass("open");
