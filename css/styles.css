@@ -360,7 +360,7 @@ select {
     /* z-index: 1; */
     position: relative;
     color: rgba(var(--grayRGB));
-    line-height: 1;
+    line-height: 1.3;
 }
 
 .dropzone.is-dragover {
