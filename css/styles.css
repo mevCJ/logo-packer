@@ -1,35 +1,618 @@
 /*Your styles*/
+:root {
+    --blue1: #2b7af9; /* #1473e6; */
+    --blueRGB: 43, 122, 249;
+    --blue2: #00c8ff;
+    --blue2RGB: 0, 200, 255;
+    --blue3: #181827;
+    --blue4: #ccf1ff;
+    --blue5: #1e76e3;
+    --main: #d0d0d0;
+    --mainRGB: 208, 208, 208;
+    --gray: rgba(255, 255, 255, 0.5);
+    --grayRGB: 255, 255, 255, 0.5;
+    --second: #181827;
+    --secondRGB: 24, 24, 39;
+    --accent: #00e5e5;
+    --accentRGB: 0, 229, 229;
+    --width: 100%; /* calc(100% - 30px) */
+    --placeholder: rgb(34, 34, 34);
+    --darkbg: #333;
+    --darkbgRGB: 51, 51, 51;
+    --filter: invert(100%) sepia(0%) saturate(2990%) hue-rotate(80deg) brightness(86%) contrast(88%);
+    /* --filter: invert(100%) sepia(0%) saturate(6000%) hue-rotate(38deg) brightness(116%) contrast(63%); */
+}
+::selection {
+    background-color: rgb(var(--blueRGB));
+    color: white;
+}
+
+svg, img {
+    width: 100%;
+}
+
+:focus {
+    border-radius: 4px;
+    outline: 0;
+}
+/* -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6); */
+/* box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6); */
+/* box-shadow: 0 0 2px 2px var(--blue1); */
+
+/* Scrollbar */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-o-scrollbar {
+    width: 8px;
+}
+::-moz-scrollbar {
+    width: 8px;
+}
+::-ms-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar:hover {
+    width: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+}
+html {
+    font-family: Helvetica, Arial, sans-serif;
+    padding: 0.25rem !important;
+    /* height: 100% !important; */
+    width: calc(100% - 0.5rem);
+    /* cursor: url(../icons/Cur_Fist_11_11.cur), default !important; */
+}
 
 
 
+body.open #dropIcon {
+    top: 15%; /* calc(15% + 130px); */
+}
 
+#content {
+    filter: blur(0);
+    opacity: 1;
+    transition: all 0.15s;
+}
+#content.blur {
+    filter: blur(2px); /* contrast(175%) brightness(3%); */
+    opacity: 0.35;
+}
 
+#content > *:not(#settings) {
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+body.closed #instructions {
+    height: 25px;
+}
+body.open #instructions {
+    height: 115px;
+}
+#messages {
+    z-index: 999;
+    position: absolute;
+    width: calc(100% - 1rem);
+    /* height: 100%; */
+    height: 2rem;
+    top: 0.25rem;
+    left: 0.5rem;
+    padding: 0.25rem;
+    padding-top: 0.4rem;
+    margin-top: 0.25rem;
+    color: white;
+    border-radius: 4px;
+    /* font-size: 12px; */
+    text-align: center;
+    line-height: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.2s;
+}
+.hidden {
+    display: none;
+    opacity: 0;
+    z-index: 0;
+}
+.visible {
+    opacity: 1;
+    display: block;
+    background: var(--blue1);
+}
+.active {
+    opacity: 1;
+    background-color: var(--blue1) !important;
+    background-color: rgb(var(--blueRGB)) !important;
+}
+.disabled {
+    opacity: 0.25 !important;
+    pointer-events: none !important;
+}
+.error {
+    /* background: rgba(var(--darkbgRGB), 0.2); */
+    color: var(--main);
+    background: #333;
+}
+button,
+select {
+    max-height: 2rem !important;
+    padding: 4px !important;
+    border: 1px solid rgba(0, 0, 0, 0.4) !important;
+}
+button {
+    width: 100%;
+    border-radius: 0.35rem;
+}
+/* INPUT */
+input[type="radio"],
+input[type="checkbox"] {
+    -webkit-appearance: none;
+    display: inline-block;
+    margin: 0px;
+    margin-right: 4px;
+    padding: 2px;
+    width: 14px;
+    height: 14px;
+    border-style: solid;
+}
+input:checked {
+    padding: 4px;
+}
+input[type="radio"] {
+    border-radius: 0.5rem;
+}
+input[type="checkbox"] {
+    border-radius: 0.15rem;
+}
+input + label {
+    display: inline-block;
+    vertical-align: super;
+}
+label {
+    /* height: 8px; */
+    height: auto !important;
+}
+input:checked {
+    background-color: var(--blue1);
+}
+
+input {
+    background: #333;
+    color: white;
+    padding: 6px;
+    padding-bottom: 3px;
+    width: 12px;
+    border-radius: 3px;
+    width: var(--width);
+    height: auto;
+    border: none;
+    /* font-size: 12px; */
+}
+input::placeholder {
+    color: rgba(var(--grayRGB));
+    color: rgba(255, 255, 255, 0.5);
+}
+input:hover,
+select:hover {
+    box-shadow: 0 0 1px 1px rgba(var(--blueRGB), 1);
+}
+
+option {
+    background: #555;
+}
+
+ol {
+    -webkit-margin-before: 0.15rem;
+    -webkit-margin-after: 0.5rem;
+    -webkit-margin-start: 2px;
+    -webkit-margin-end: 0px;
+    -webkit-padding-start: 12px;
+}
+li {
+    font-weight: 200;
+    /* color: rgba(255, 255, 255, 0.4); */
+}
+.flex {
+    display: flex;
+    align-items: center !important;
+}
+.flex-row {
+    flex-direction: row;
+}
+.flex-column {
+    flex-direction: column;
+}
+.flex-between {
+    justify-content: space-between;
+}
+.full-width {
+    max-width: 100% !important;
+}
 /*
 Those classes will be edited at runtime with values specified
 by the settings of the CC application
 */
-.hostFontColor{}
-.hostFontFamily{}
-.hostFontSize{}
+.hostFontColor {
+}
+.hostFontFamily {
+}
+.hostFontSize {
+}
 
 /*font family, color and size*/
-.hostFont{}
+.hostFont {
+}
 /*background color*/
-.hostBgd{}
+.hostBgd {
+}
 /*lighter background color*/
-.hostBgdLight{}
+.hostBgdLight {
+}
 /*darker background color*/
-.hostBgdDark{}
+.hostBgdDark {
+}
 /*background color and font*/
-.hostElt{}
+.hostElt *,
+.hostElt h1 {
+    /* font-weight: 200 !important; */
+    font-family: Helvetica, Arial, sans-serif !important;
+    font-size: 12px;
+    text-rendering: geometricPrecision;
+    /* -webkit-font-smoothing: antialiased; */
+    /*     -moz-osx-font-smoothing: grayscale; */
+}
+.hostElt h1 {
+    margin-block-start: 0;
+}
+.hostButton,
+select {
+    padding: 6px;
+    border-radius: 4px;
+    height: auto;
+    vertical-align: middle;
+    font-family: inherit;
+    line-height: normal;
+    color: inherit;
+    font-size: inherit;
+    background: inherit;
+}
+input,
+button,
+select {
+    border-width: 0.05rem;
+}
+
+/* BUTTONS */
+.genButtons,
+.radioButtons {
+    display: flex;
+    flex-wrap: wrap;
+    flex-flow: unset;
+    vertical-align: middle;
+    align-items: center;
+    line-height: 1;
+}
+/* Buttons stacked like blender */
+.genButtons {
+    flex-direction: column;
+}
+
+.genButtons button#generate_btn,
+.genButtons button#loadJSON_btn {
+    border-bottom-width: 0.05rem;
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0px;
+}
+.genButtons #export_btn,
+.genButtons button#saveJSON_btn {
+    border-top:none;
+    border-top-right-radius: 0px;
+    border-top-left-radius: 0px;
+}
+
+.radioButtons > *,
+.row > .col label {
+    margin-right: 8px;
+}
+
+.btn50 {
+    width: 48%;
+    margin-right: 4%;
+}
+.radioButtons > *:last-of-type,
+.row .col:last-of-type,
+.btn50:last-of-type {
+    margin-right: 0;
+}
+#project .row.radioButtons,
+#settings .row.radioButtons {
+    align-items: start;
+}
+/* END BUTTONS */
+
+.cep-dropzone {
+    margin-bottom: 8px;
+    position: relative;
+}
+.dropzone {
+    /* width: 300px; */
+    height: 96px;
+    width: var(--width);
+    border: 1px dashed rgb(43, 122, 249);
+    cursor: default;
+    /* z-index: 1; */
+    position: relative;
+    color: rgba(var(--grayRGB));
+    line-height: 1.3;
+}
+
+.dropzone.is-dragover {
+    border: 1px dashed #222;
+    background: rgba(68, 68, 68, 0.5);
+    cursor: copy;
+}
+#dragOver{
+    display: none;
+    position: relative;
+}
+#dragOver.is-dragover,
+#dragOver.exporting {
+    display: block;
+    height: 100% !important;
+    width: 100% !important;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    /* background: rgba(68, 68, 68, 1); */
+    z-index: 999;
+    cursor: none;
+    pointer-events: none !important;
+}
+.dropzone.is-dragover::placeholder {
+    color: white;
+}
+
+/* .is-dragover,
+.dropzone.is-dragover,
+.dropzone.is-dragover * {
+    cursor: url(../icons/Cur_Fist_11_11.cur), default !important;
+    cursor: -webkit-grabbing !important;
+    cursor: -moz-grabbing !important;
+}
+.dropzone {
+    cursor: url(../icons/Cur_Hand_11_11.cur), move;
+    cursor: -webkit-grab;
+    cursor: -moz-grab;
+} */
+#clientName {
+    width: 100%;
+    margin-right: auto;
+}
+#dropIcon,
+#dropOver,
+#dropOverTxt {
+    position: absolute;
+    top: 15%;
+    left: calc(50% - 24px);
+    display: block;
+    /* text-indent: -9999px; */
+    width: 48px;
+    height: 48px;
+    background-size: 48px 48px;
+    z-index: 2;
+    transition: top 0.25s;
+    cursor: none;
+    pointer-events: none;
+    text-align: center;
+}
+#dropOver {
+    z-index: 9999;
+    top: 25%;
+    left: calc(50% - 18px);
+}
+#dropOverTxt {
+    top: 40%;
+    width: 60px;
+    text-align: center;
+    left: calc(50% - 30px);
+    display: block;
+    text-indent: 0;
+    width: initial;
+    height: initial;
+}
+.svgHolder {
+    padding: 8px;
+    width: 49%;
+    max-width: 49%;
+    background: white;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.svgHolder svg {
+    height: 48px;
+}
+
+.flex.flex-row {
+    flex-wrap: wrap;
+}
+.flex .svgHolder:nth-of-type(odd) {
+    margin-right: 2%;
+}
+/* ICONS */
+.icon,
+.errIcon:before,
+.project h1:before,
+#instructions h1:before,
+.settings h1:before {
+    height: 14px;
+    width: 14px !important;
+    background-size: contain;
+    display: inline-block;
+    vertical-align: middle;
+    background-color: var(--main);
+    background-color: rgb(var(--mainRGB));
+    content: "" !important;
+    display: inline-flex;
+    padding: 0;
+    margin: 0;
+    margin-top: -2px;
+    margin-right: 4px;
+    opacity: 1;
+    /* https://codepen.io/sosuke/pen/Pjoqqp */
+    /* filter: var(--filter); */
+}
+.icon-btn {
+    cursor: pointer;
+}
+.clearDestFolder {
+    -webkit-mask-image: url(../icons/delete.svg);
+    mask-image: url(../icons/delete.svg);
+}
+.errIcon:before {
+    -webkit-mask-image: url(../icons/warning.svg);
+    mask-image: url(../icons/warning.svg);
+}
+.expIcon {
+    background: url(../icons/export-icon.svg);
+}
+.dropIcon {
+    background: url(../icons/drop-icon.svg);
+}
+.loading {
+    background-image: url(../images/radial-dark.gif);
+    left: calc(50% - 24px) !important;
+}
+.folder {
+    -webkit-mask-image: url(../icons/folder-close.svg);
+    mask-image: url(../icons/folder-close.svg);
+}
+.openDestFolder {
+    -webkit-mask-image: url(../icons/open-external.svg);
+    mask-image: url(../icons/open-external.svg);
+}
+.reload {
+    -webkit-mask-image: url(../icons/reload.svg);
+    mask-image: url(../icons/reload.svg);
+}
+.import {
+    -webkit-mask-image: url(../icons/import.svg);
+    mask-image: url(../icons/import.svg);
+}
+.export {
+    -webkit-mask-image: url(../icons/export.svg);
+    mask-image: url(../icons/export.svg);
+}
+.save {
+    -webkit-mask-image: url(../icons/save.svg);
+    mask-image: url(../icons/save.svg);
+}
+.project h1:before {
+    -webkit-mask-image: url(../icons/folder-structure.svg);
+    mask-image: url(../icons/folder-structure.svg);
+}
+#instructions h1:before {
+    -webkit-mask-image: url(../icons/helpcenter.svg);
+    mask-image: url(../icons/helpcenter.svg);
+}
+.settings h1:before {
+    -webkit-mask-image: url(../icons/settings.svg);
+    mask-image: url(../icons/settings.svg);
+}
+/* END ICONS */
 
 
-.hostButton{
-    border:1px solid;
-    border-radius:2px;
-    height:20px;
-    vertical-align:bottom;
-    font-family:inherit;
-    color:inherit;
-    font-size:inherit;
+#instructions {
+    padding: 0;
+    cursor: help;
+    height: 100%;
+    transition: height 0.2s;
+    overflow: hidden;
+}
+
+.project,
+.settings {
+    padding: 0;
+    cursor: default;
+    height: 100%;
+    transition: height 0.2s;
+    overflow: hidden;
+}
+
+.hostElt #project > *,
+.hostElt #settings > * {
+    /* font-size: 9px !important; */
+    line-height: 1 !important;
+    /* align-items: center !important; */
+}
+.hostElt #project div,
+.hostElt #settings div:not(.col-column),
+.col-column div {
+    padding-bottom: 0.25rem;
+}
+/* #settings .radioButtons {
+    display: flex;
+    flex-direction: column;
+} */
+.row {
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    flex-flow: unset;
+    align-items: center;
+    vertical-align: top;
+}
+
+#project .iconSettings,
+#settings .iconSettings {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+}
+.col {
+    display: flex;
+    align-items: center;
+    flex-basis: 0;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+    max-width: 100%;
+}
+.col div {
+    align-items: center;
+    display: flex;
+}
+.col:nth-of-type(1) {
+    min-width: 75px !important;
+    max-width: 75px !important;
+}
+.row .col:nth-of-type(2) {
+    max-width: 30%;
+}
+.col-column {
+    flex-direction: column;
+    align-items: start !important;
+    display: flex;
+}
+/* .col-column label { */
+label {
+    padding-top: 2px;
 }

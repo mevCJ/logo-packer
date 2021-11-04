@@ -31,7 +31,12 @@ audio:not([controls]) { display: none; }
  * 3. Prevent iOS text size adjust on device orientation change, without disabling user zoom: h5bp.com/g
  */
 
-html { font-size: 100%; overflow-y: scroll; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+html { 
+   font-size: 100%; 
+   /* overflow-y: scroll;  */
+   -webkit-text-size-adjust: 100%; 
+   -ms-text-size-adjust: 100%; 
+}
 
 body { margin: 0; font-size: 100%; line-height: 1.231; }
 
@@ -135,7 +140,7 @@ form { margin: 0; }
 fieldset { border: 0; margin: 0; padding: 0; }
 
 /* Indicate that 'label' will shift focus to the associated form element */
-label { cursor: pointer; }
+/* label { cursor: pointer; } */
 
 /*
  * 1. Correct color not inheriting in IE6/7/8/9
@@ -273,9 +278,10 @@ td { vertical-align: top; }
 p { margin: 0; }
 
 html {
-    overflow-y: auto;
-    background-color: transparent;
-    height: 100%;
+   background-color: transparent;
+   /* Turned off, messes with panel width */
+   /* overflow-y: auto; */
+    /* height: 100%; */
 }
 
 body {
