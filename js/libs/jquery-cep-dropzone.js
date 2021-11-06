@@ -109,27 +109,27 @@
          * @returns void
          */
         function dropEventHandler(event) {
-
             event.preventDefault();
-
+            
+            
             var $target = $(event.target);
             var csInterface = new CSInterface();
             csInterface.evalScript('app.executeMenuCommand("copy")', function(result) {
                 try {
                     var svg,
-                        $svg = $('<svg/>');
-
+                    $svg = $('<svg/>');
+                    
                     $target.focus();
-                    $target.val('');
-
+                    // $target.val('');
+                    
                     document.execCommand("paste");
-                    $target.val('234300');
+                    
                     svg = $target.val();
-                    alert(result);
+                    // console.log("SVG paste "+document.execCommand("paste", false,null))
+                    
                     svg = cleanSvg(svg);
-
+                    
                     $target.val(svg);
-
                     if (onSuccess instanceof Function) {
                         onSuccess.apply(this, [event, svg]);
                     }
@@ -164,5 +164,6 @@
 
             return this;
         });
+
     };
 })(jQuery);

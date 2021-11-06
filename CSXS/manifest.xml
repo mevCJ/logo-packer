@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="6.0" ExtensionBundleId="com.doingdesign.logopacker" ExtensionBundleVersion="1.0.0"
-		ExtensionBundleName="Logo Packer" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ExtensionManifest Version="6.0" ExtensionBundleId="com.doingdesign.logopacker" ExtensionBundleVersion="1.0.0" ExtensionBundleName="Logo Packer"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<ExtensionList>
 		<Extension Id="com.doingdesign.logopacker" Version="1.0.0" />
 	</ExtensionList>
@@ -19,8 +19,12 @@
 		<Extension Id="com.doingdesign.logopacker">
 			<DispatchInfo >
 				<Resources>
-				<MainPath>./index.html</MainPath>
-				<ScriptPath>./jsx/hostscript.jsx</ScriptPath>
+					<MainPath>./index.html</MainPath>
+					<ScriptPath>./jsx/hostscript.jsx</ScriptPath>
+					<CEFCommandLine>
+                        <Parameter>--mixed-context</Parameter>
+                        <Parameter>--enable-nodejs</Parameter>
+                    </CEFCommandLine>
 				</Resources>
 				<Lifecycle>
 					<AutoVisible>true</AutoVisible>
@@ -30,18 +34,18 @@
 					<Menu>Logo Packer</Menu>
 					<Geometry>
 						<Size>
-							<Height>300</Height>
+							<Height>250</Height>
 							<Width>300</Width>
 						</Size>
-                    <!--<MinSize>
-                            <Height>550</Height>
-                            <Width>400</Width>
-                        </MinSize>
-                        <MaxSize>
-                            <Height>550</Height>
-                            <Width>400</Width>
-                        </MaxSize>-->
-                        
+						<MinSize>
+							<Height>250</Height>
+							<Width>250</Width>
+						</MinSize>
+						<MaxSize>
+							<Height>850</Height>
+							<Width>500</Width>
+						</MaxSize>
+
 					</Geometry>
 					<Icons>
 						<Icon Type="Normal">./icons/iconNormal.png</Icon>
@@ -49,7 +53,7 @@
 						<Icon Type="Disabled">./icons/iconDisabled.png</Icon>
 						<Icon Type="DarkNormal">./icons/iconDarkNormal.png</Icon>
 						<Icon Type="DarkRollOver">./icons/iconDarkRollover.png</Icon>
-					</Icons>					
+					</Icons>
 				</UI>
 			</DispatchInfo>
 		</Extension>

@@ -1,46 +1,181 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="css/boilerplate.css" />
+        <link id="hostStyle" rel="stylesheet" href="css/styles.css" />
+        <title>Logo Packer</title>
+    </head>
 
-<head>
-    <meta charset="utf-8">
-    <link rel="stylesheet" href="css/boilerplate.css" />
-    <link id="hostStyle" rel="stylesheet" href="css/styles.css" />
-    <title></title>
-</head>
+    <body class="hostElt closed">
+        <div id="dragOver">
+            <div id="dropOver" class="hostFont"></div>
+            <div id="dropOverTxt" class="hostFont">Generate files</div>
+        </div>
+        <div id="messages" class="hidden"></div>
+        <div style="padding: 0.5rem; padding-top: 0.25rem" id="content">
+            <div id="project" class="project flex flex-row flex-between">
+                <h1 class="hostFont">Generate Logo</h1>
+            </div>
+            <div class="row radioButtons">
+                <div class="col">
+                    <label>Client:&nbsp;</label>
+                </div>
+                <div class="col full-width">
+                    <input id="clientName" name="clientname" placeholder="Untitled..." />
+                </div>
+            </div>
+            <div class="row radioButtons">
+                <div class="col">
+                    <label for="type">Type:&nbsp;</label>
+                </div>
+                <div class="col">
+                    <select name="type" id="logotype">
+                        <option value="select">Select...</option>
+                        <option value="logo">Logo</option>
+                        <option value="logomark">Logomark</option>
+                        <option value="logotype">Logotype</option>
+                        <option value="slogan">Slogan</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row radioButtons" id="mediatype">
+                <div class="col">
+                    <label for="mediatype">Media:&nbsp;</label>
+                </div>
+                <div class="col">
+                    <input type="radio" class="hostButton" name="media" value="Print" />
+                    <label for="print">Print</label>
+                </div>
+                <div class="col">
+                    <input type="radio" class="hostButton" name="media" value="Digital" />
+                    <label for="digital">Digital</label>
+                </div>
+            </div>
+            <div class="row radioButtons" id="separator">
+                <div class="col">
+                    <label for="separator">Separator:&nbsp;</label>
+                </div>
+                <div class="col">
+                    <input type="radio" class="hostButton" name="separator" id="dash" value="dash" />
+                    <label for="Dash">Dash</label>
+                </div>
+                <div class="col">
+                    <input type="radio" class="hostButton" name="separator" id="underscore" value="underscore" />
+                    <label for="underscore">Underscore</label>
+                </div>
+            </div>
+            <!-- <div class="cep-dropzone">
+                <div id="dropIcon" class="dropIcon"></div>
+            </div> -->
+            <!-- <div class="flex flex-row">
+                <div id="svgHolder" class="svgHolder"></div>
+            </div> -->
+            <div class="genButtons mb-3 mt-2">
+                <button id="generate_btn" class="hostButton">Generate logos</button>
+            </div>
 
-<body class="hostElt">
 
-    <div style="padding: 2rem;" id="content">
+            <div id="settings mb-3">
+                <div class="settings flex flex-row flex-between">
+                    <h1 class="hostFont">Export Settings</h1>
+                    <div class="iconSettings">
+                        <div id="resetJSON_btn" class="icon icon-btn reload"></div>
+                        <div id="saveJSON_btn" class="icon icon-btn save"></div>
+                        <div id="importJSON_btn" class="icon icon-btn import"></div>
+                        <div id="exportJSON_btn" class="icon icon-btn export"></div>
+                    </div>
+                </div>
+                <div class="row radioButtons flex mt-1">
+                    <div class="col">
+                        <label>Destination:&nbsp;</label>
+                    </div>
+                    <div class="col full-width flex space-between align-center" style="align-items: center;">
+                        <input style="width: 60%;" id="expPath" name="exportpath" placeholder="Export path..." />
+                        <div>
+                            <div id="setDestFolder" class="icon icon-btn folder"></div>
+                            <div id="openDestFolder" class="icon icon-btn openDestFolder disabled"></div>
+                            <div id="clearDestFolder" class="icon icon-btn clearDestFolder disabled"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row radioButtons mt-1" id="formats">
+                    <div class="col">
+                        <label for="formats">Formats:&nbsp;</label>
+                    </div>
+                    <div class="col col-column">
+                        <div>
+                            <input type="checkbox" class="hostButton" name="formats" value="ai" />
+                            <label for="ai">Ai</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" class="hostButton" name="formats" value="pdf" />
+                            <label for="pdf">Pdf</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" class="hostButton" name="formats" value="svg" />
+                            <label for="svg">Svg</label>
+                        </div>
+                    </div>
+                    <div class="col col-column">
+                        <div>
+                            <input type="checkbox" class="hostButton" name="formats" value="jpg" />
+                            <label for="jpg">Jpg</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" class="hostButton" name="formats" value="png" />
+                            <label for="png">Png</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="genButtons mt-2 mb-3">
+                    <button id="export_btn" class="hostButton disabled">Export files</button>
+                </div>
+            </div>
+            <div id="instructions">
+                <div style="display: flex">
+                    <h1 class="hostFont">Instructions</h1>
+                </div>
+                <ol>
+                    <li>Click on the object that you want to generate</li>
+                    <li>Set export type from dropdown</li>
+                    <li>Click on Generate Variations</li>
+                    <li>Repeat for any other object</li>
+                    <li>Click on export</li>
+                </ol>
+            </div>
+        </div>
 
-        <h1 class="hostFont">Instructions</h1>
-        <ol style="padding: 0">
-            <li>Click on the object that you want to generate</li>
-            <li>Select the label from the dropdown</li>
-            <li>Click on Generate Variations</li>
-            <li>Repeat for any other object</li>
-            <li>Click on export</li>
-        </ol>
-
-        <p style="text-align: center; margin-top: 20px;">
-            <label for="logotype">Select your label: </label>
-            <select style="margin-bottom: 10px; padding: 0;" name="type" id="logotype_select">
-                <option value="full_logo">Full logo</option>
-                <option value="symbol">Symbol</option>
-                <option value="name">Name</option>
-                <option value="slogan">Slogan</option>
-            </select><br>
-            <button id="generate_btn" class="hostButton">Generate Variations</button>
-        </p>
-        <p style="text-align: center;">
-            <button style="margin-top:10px" id="export_btn" class="hostButton">Export Files</button>
-        </p>
-    </div>
-
-    <script src="js/libs/CSInterface.js"></script>
-    <script src="js/libs/jquery-2.0.2.min.js"></script>
-    <script src="js/libs/jquery-cep-dropzone.js"></script>
-    <script src="js/themeManager.js"></script>
-    <script src="js/main.js"></script>
-</body>
-
+        <script src="js/libs/CEPEngine.js"></script>
+        <script src="js/libs/CSInterface.js"></script>
+        <script src="js/json.js"></script>
+        <script src="js/themeManager.js"></script>
+        <script src="js/monitorCheck.js"></script>
+        <script src="js/main.js"></script>
+        <script src="js/libs/jquery-cep-dropzone-org.js"></script>
+        <!-- <script src="js/libs/jquery-cep-dropzone.js"></script> -->
+        <script>
+            $(function () {
+                $(".cep-dropzone").cepDropZone({
+                    onSuccess: function (event, svg) {
+                        console.log("CEP Drag-n-Drop finished successfully (custom)", svg);
+                    },
+                    onError: function (event, error) {
+                        console.error("Oops! CEP Drag-n-Drop encountered an error. (custom)");
+                    },
+                });
+                // document.addEventListener("paste", (event) => {
+                //     const text = event.clipboardData.getData("text/plain");
+                //     console.log(document.execCommand(text));
+                // });
+                // document.addEventListener("paste", function (event) {
+                //     if (event.clipboardData.types.indexOf("text/html") > -1) {
+                //         var oldData = event.clipboardData.getData("text/html");
+                //         var newData = "<b>Oh Yeah!</b> " + oldData;
+                //         event.preventDefault();
+                //     }
+                // });
+            });
+        </script>
+    </body>
 </html>
