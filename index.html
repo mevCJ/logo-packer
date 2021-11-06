@@ -15,21 +15,8 @@
         <div id="messages" class="hidden"></div>
         <div style="padding: 0.5rem; padding-top: 0.25rem" id="content">
             <div id="project" class="project flex flex-row flex-between">
-                <h1 class="hostFont">Project</h1>
-                <div class="iconSettings">
-                    <div id="setDestFolder" class="icon icon-btn folder"></div>
-                    <div id="openDestFolder" class="icon icon-btn openDestFolder disabled"></div>
-                    <div id="clearDestFolder" class="icon icon-btn clearDestFolder disabled"></div>
-                </div>
+                <h1 class="hostFont">Generate Logo</h1>
             </div>
-            <!-- <div class="row radioButtons">
-                <div class="col">
-                    <label>Folder:&nbsp;</label>
-                </div>
-                <div class="col">
-                    <input id="setDestFolder" name="destfolder" placeholder="choose..." />
-                </div>
-            </div> -->
             <div class="row radioButtons">
                 <div class="col">
                     <label>Client:&nbsp;</label>
@@ -78,44 +65,41 @@
                     <label for="underscore">Underscore</label>
                 </div>
             </div>
-            <div class="cep-dropzone">
+            <!-- <div class="cep-dropzone">
                 <div id="dropIcon" class="dropIcon"></div>
-            </div>
+            </div> -->
             <!-- <div class="flex flex-row">
                 <div id="svgHolder" class="svgHolder"></div>
             </div> -->
-            <div class="genButtons">
+            <div class="genButtons mb-3 mt-2">
                 <button id="generate_btn" class="hostButton">Generate logos</button>
-                <!-- <button id="digital_btn" class="hostButton btn50">Digital Logos</button> -->
-                <button id="export_btn" class="hostButton disabled">Export files</button>
             </div>
-            <div id="settings">
+
+
+            <div id="settings mb-3">
                 <div class="settings flex flex-row flex-between">
-                    <h1 class="hostFont">Settings</h1>
+                    <h1 class="hostFont">Export Settings</h1>
                     <div class="iconSettings">
-                        <!-- <button id="resetJSON_btn" class="hostButton">reset JSON</button>
-                        <button id="loadJSON_btn" class="hostButton">Load JSON</button>
-                        <button id="saveJSON_btn" class="hostButton">Save JSON</button>
-                        <button id="importJSON_btn" class="hostButton">Import JSON</button> -->
                         <div id="resetJSON_btn" class="icon icon-btn reload"></div>
                         <div id="saveJSON_btn" class="icon icon-btn save"></div>
                         <div id="importJSON_btn" class="icon icon-btn import"></div>
                         <div id="exportJSON_btn" class="icon icon-btn export"></div>
                     </div>
-                    <!-- <div class="iconSettings">
-                        <div id="openDestFolder" class="icon icon-btn openDestFolder"></div>
-                        <div id="clearDestFolder" class="icon icon-btn clearDestFolder"></div>
-                    </div> -->
                 </div>
-                <div class="row radioButtons flex">
+                <div class="row radioButtons flex mt-1">
                     <div class="col">
                         <label>Destination:&nbsp;</label>
                     </div>
-                    <div class="col full-width">
-                        <input id="expPath" name="exportpath" placeholder="Export path..." />
+                    <div class="col full-width flex space-between align-center" style="align-items: center;">
+                        <input style="width: 60%;" id="expPath" name="exportpath" placeholder="Export path..." />
+                        <div>
+                            <div id="setDestFolder" class="icon icon-btn folder"></div>
+                            <div id="openDestFolder" class="icon icon-btn openDestFolder disabled"></div>
+                            <div id="clearDestFolder" class="icon icon-btn clearDestFolder disabled"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="row radioButtons" id="formats">
+                <div class="row radioButtons mt-1" id="formats">
                     <div class="col">
                         <label for="formats">Formats:&nbsp;</label>
                     </div>
@@ -144,6 +128,9 @@
                         </div>
                     </div>
                 </div>
+                <div class="genButtons mt-2 mb-3">
+                    <button id="export_btn" class="hostButton disabled">Export files</button>
+                </div>
             </div>
             <div id="instructions">
                 <div style="display: flex">
@@ -164,10 +151,7 @@
         <script src="js/json.js"></script>
         <script src="js/themeManager.js"></script>
         <script src="js/monitorCheck.js"></script>
-        <!-- <script src="js/libs/jquery-3.4.1.min.js"></script> -->
-        <!-- <script src="js/libs/jquery-2.0.2.min.js"></script> -->
         <script src="js/main.js"></script>
-        <!-- <script src="js/libs/paste.js"></script> -->
         <script src="js/libs/jquery-cep-dropzone-org.js"></script>
         <!-- <script src="js/libs/jquery-cep-dropzone.js"></script> -->
         <script>
