@@ -14,7 +14,7 @@ Logo Packer is an open-sourced Adobe Illustrator extensions that allows you to g
 [Click Here](https://mevcj.github.io/logo-packer/) to Github Pages
 
 # Installation
-## Download from Adobe Exchange (Recommended)
+## Install from Adobe Exchange (Recommended)
 👉 <a href="https://exchange.adobe.com/creativecloud.details.106003.html"><button name="button">Download on Adobe Exchange</button></a>
 
 ## Installing manually
