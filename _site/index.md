@@ -9,6 +9,9 @@ Logo Packer is an open-sourced Adobe Illustrator extensions that allows you to g
 :open_file_folder: Organize your files in structured and named directories.
 
 # Installation
+## Install from Adobe Exchange (Recommended)
+👉 <a href="https://exchange.adobe.com/creativecloud.details.106003.html"><button name="button">Download on Adobe Exchange</button></a>
+
 ## Installing manually
 Download the files on [Github](https://github.com/mevCJ/logo-packer) and place the files into the CEP extension folder. 
 
@@ -22,8 +25,6 @@ C:\Program Files\Adobe\Adobe Illustrator CC 2019\Support Files\Required
 /Library/Application Support/Adobe/CEP/extensions
 ```
 
-## Download from Adobe Exchange
-<i>To be added</i>
 
 # How to use
 Open the extension in Window > Extensions > Logo Packer and follow the instructions given.
