@@ -49,7 +49,9 @@ Your support is greatly appreciated! If you'd lke to support the developer and t
 
 <a href="https://www.buymeacoffee.com/doingdesign"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a pizza&emoji=🍕&slug=doingdesign&button_colour=5F7FFF&font_colour=ffffff&font_family=Poppins&outline_colour=000000&coffee_colour=FFDD00"></a>
 
-...or follow me on Instagram for more tools and logo inspiration [@doing.this](https://www.instagram.com/)
+...or follow me on Instagram for more tools and logo inspiration [@doing.this](https://www.instagram.com/doing.this)
+
+...or giving an upvote on [Product Hunt](https://www.producthunt.com/posts/logo-packer)
 
 ---------
 <i>Licensed Under MIT</i>
