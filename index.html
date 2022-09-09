@@ -7,7 +7,7 @@
         <title>Logo Packer</title>
     </head>
 
-    <body class="hostElt closed">
+    <body class="hostElt closed closedExtras">
         <div id="dragOver">
             <div id="dropOver" class="hostFont"></div>
             <div id="dropOverTxt" class="hostFont">Generate files</div>
@@ -45,10 +45,11 @@
                 <div class="col">
                     <select name="type" id="logotype">
                         <option value="select">Select...</option>
+                        <option value="alltypes">All Types</option>
                         <option value="logo">Logo</option>
-                        <option value="logomark">Logomark</option>
                         <option value="logotype">Logotype</option>
-                        <option value="slogan">Slogan</option>
+                        <option value="logomark">Logomark</option>
+                        <option value="payoff">Payoff</option>
                     </select>
                 </div>
             </div>
@@ -94,11 +95,12 @@
                     <h1 class="hostFont">Settings</h1>
                     <div class="iconSettings">
                         <!-- <button id="resetJSON_btn" class="hostButton">reset JSON</button>
-                        <button id="loadJSON_btn" class="hostButton">Load JSON</button>
-                        <button id="saveJSON_btn" class="hostButton">Save JSON</button>
-                        <button id="importJSON_btn" class="hostButton">Import JSON</button> -->
+                            <button id="saveJSON_btn" class="hostButton">Save JSON</button>
+                            <button id="loadJSON_btn" class="hostButton">Load JSON</button>
+                            <button id="importJSON_btn" class="hostButton">Import JSON</button> -->
+                            <!-- <div id="loadJSON_btn" class="icon icon-btn folder-open"></div> -->
                         <div id="resetJSON_btn" class="icon icon-btn reload"></div>
-                        <div id="saveJSON_btn" class="icon icon-btn save"></div>
+                        <!-- <div id="saveJSON_btn" class="icon icon-btn save"></div> -->
                         <div id="importJSON_btn" class="icon icon-btn import"></div>
                         <div id="exportJSON_btn" class="icon icon-btn export"></div>
                     </div>
@@ -145,6 +147,108 @@
                     </div>
                 </div>
             </div>
+            <div id="extras">
+                <div style="display: flex">
+                    <h1 class="hostFont">Extras</h1>
+                </div>
+                <!-- AUTORESIZE & SUBFOLDER -->
+                <div class="row radioButtons" id="autoResize">
+                    <div class="col">
+                        <!-- <label for="type">&nbsp;</label> -->
+                        <label for="">Auto resize:&nbsp;</label>
+                    </div>
+                    <div class="col full-width">
+                        <input type="checkbox"  class="hostButton" name="autoresize" value="autoresize"  checked/>
+                        <label for="">Adjust logo</label>
+                    </div>
+                </div>
+                <div class="row radioButtons" id="subFolders">
+                    <div class="col">
+                        <label for="folders">Folders:&nbsp;</label>
+                    </div>
+                    <div class="col full-width">
+                        <input type="checkbox"  class="hostButton" name="subfolders" value="subfolders" checked/>
+                        <label for="">Folders by type</label>
+                    </div>
+                </div>
+                <div class="row radioButtons" id="checkABhasArt">
+                    <div class="col">
+                        <label for="checkABhasArt">Artboards:&nbsp;</label>
+                    </div>
+                    <div class="col full-width">
+                        <input type="checkbox"  class="hostButton" name="checkABhasArt" value="checkABhasArt" checked  title="Slows the eport process down a bit"/>
+                        <label for="">Don't export empty</label>
+                    </div>
+                </div>
+                <hr class="solid">
+                <!-- <span style="line-height: 0;" >&nbsp;</span> -->
+                <!-- NEW BASE DOC -->
+                <div class="row radioButtons">
+                    <div class="col">
+                        <label for="type">Base Doc:&nbsp;</label>
+                    </div>
+                    <div class="col-column">
+                        <select name="type" id="baseDocType" style="width: auto;">
+                            <option value="select">Select</option>
+                            <option value="cmyk">cmyk</option>
+                            <option value="rgb">rgb</option>
+                        </select>
+                    </div>
+                    <div class="col col-column">
+                        <button id="newbasedoc_btn" class="hostButton">Make</button>
+                    </div>
+                </div>
+                <span style="line-height: .5; display:block;" >&nbsp;</span>
+                <!-- MARGINS -->
+                <div class="row radioButtons">
+                    <div class="col">
+                        <label for="type">Margins:&nbsp;</label>
+                    </div>
+                    <div class="col">
+                        <div class="col">
+                            <input id="margins" name="margins" placeholder="Amount..." />
+                        </div>
+                        <div style="margin-bottom: 0.5rem; line-height: 0;">&nbsp;</div>
+                        <select name="type" id="margintype" style="width: auto;">
+                            <option value="select">Select</option>
+                            <option value="mm">mm</option>
+                            <option value="cm">cm</option>
+                            <option value="in">in</option>
+                            <option value="pt">pt</option>
+                            <option value="px">px</option>
+                            <option value="pc">pc</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row radioButtons">
+                    <div class="col">
+                        <label for="type">&nbsp;</label>
+                    </div>
+                    <div class="col full-width">
+                        <button id="addmargins_btn" class="hostButton">Add Extra Margin</button>
+                    </div>
+                </div>
+                <hr class="solid">
+                <!-- <span style="line-height: .5; display:block;" >&nbsp;</span> -->
+                <!-- CLEANUP LOGO & SWATCHES -->
+                <div class="row radioButtons">
+                    <div class="col">
+                        <label for="type">Cleanup:</label>
+                    </div>
+                    <div class="col full-width">
+                        <button id="cleanupLogo_btn" class="hostButton">Cleanup Logo</button>
+                    </div>
+                </div>
+                <div class="row radioButtons">
+                    <div class="col">
+                        <label for="type">&nbsp;</label>
+                    </div>
+                    <div class="col full-width">
+                        <button id="clearSwatches_btn" class="hostButton">Clear Swatches</button>
+                    </div>
+                </div>
+            </div>
+            <!-- INSTRUCTIONS -->
             <div id="instructions">
                 <div style="display: flex">
                     <h1 class="hostFont">Instructions</h1>
@@ -158,15 +262,15 @@
                 </ol>
             </div>
         </div>
-
+        
         <script src="js/libs/CEPEngine.js"></script>
         <script src="js/libs/CSInterface.js"></script>
-        <script src="js/json.js"></script>
         <script src="js/themeManager.js"></script>
         <script src="js/monitorCheck.js"></script>
+        <script src="js/main.js"></script>
+        <script src="js/json.js"></script>
         <!-- <script src="js/libs/jquery-3.4.1.min.js"></script> -->
         <!-- <script src="js/libs/jquery-2.0.2.min.js"></script> -->
-        <script src="js/main.js"></script>
         <!-- <script src="js/libs/paste.js"></script> -->
         <script src="js/libs/jquery-cep-dropzone-org.js"></script>
         <!-- <script src="js/libs/jquery-cep-dropzone.js"></script> -->

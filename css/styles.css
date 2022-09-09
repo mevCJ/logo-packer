@@ -79,6 +79,10 @@ html {
 }
 
 
+/* Solid border */
+hr.solid {
+    border-top: 1px solid rgba(5, 5, 5, 0.25);
+  }
 
 body.open #dropIcon {
     top: 15%; /* calc(15% + 130px); */
@@ -94,15 +98,25 @@ body.open #dropIcon {
     opacity: 0.35;
 }
 
-#content > *:not(#settings) {
+#content > *:not(#settings){
     position: relative;
     margin-bottom: 0.5rem;
 }
+#extras > div {
+    position: relative;
+    margin-bottom: 0.25rem;
+}
 body.closed #instructions {
-    height: 25px;
+    height: 20px;
 }
 body.open #instructions {
     height: 115px;
+}
+body.closedExtras #extras {
+    height: 20px;
+}
+body.openExtras #extras {
+    height: auto;
 }
 #messages {
     z-index: 999;
@@ -156,6 +170,22 @@ select {
     padding: 4px !important;
     border: 1px solid rgba(0, 0, 0, 0.4) !important;
 }
+/* select {
+    padding: 3px 6px 2px !important;
+    box-sizing: initial;
+    -webkit-appearance: none;
+}
+select {
+  position: relative;
+}
+
+#logotype::after {
+  content: "▼";
+  font-size: 1rem;
+  top: 6px;
+  right: 10px;
+  position: absolute;
+} */
 button {
     width: 100%;
     border-radius: 0.35rem;
@@ -353,7 +383,7 @@ select {
 }
 .dropzone {
     /* width: 300px; */
-    height: 96px;
+    height: 110px;
     width: var(--width);
     border: 1px dashed rgb(43, 122, 249);
     cursor: default;
@@ -463,6 +493,7 @@ select {
 .errIcon:before,
 .project h1:before,
 #instructions h1:before,
+#extras h1:before,
 .settings h1:before {
     height: 14px;
     width: 14px !important;
@@ -506,6 +537,10 @@ select {
     -webkit-mask-image: url(../icons/folder-close.svg);
     mask-image: url(../icons/folder-close.svg);
 }
+.folder-open {
+    -webkit-mask-image: url(../icons/folder-open.svg);
+    mask-image: url(../icons/folder-open.svg);
+}
 .openDestFolder {
     -webkit-mask-image: url(../icons/open-external.svg);
     mask-image: url(../icons/open-external.svg);
@@ -530,23 +565,30 @@ select {
     -webkit-mask-image: url(../icons/folder-structure.svg);
     mask-image: url(../icons/folder-structure.svg);
 }
+.settings h1:before {
+    -webkit-mask-image: url(../icons/media.svg);
+    mask-image: url(../icons/media.svg);
+}
 #instructions h1:before {
     -webkit-mask-image: url(../icons/helpcenter.svg);
     mask-image: url(../icons/helpcenter.svg);
 }
-.settings h1:before {
+#extras h1:before {
     -webkit-mask-image: url(../icons/settings.svg);
     mask-image: url(../icons/settings.svg);
 }
 /* END ICONS */
 
 
-#instructions {
+#instructions,#extras {
     padding: 0;
     cursor: help;
     height: 100%;
     transition: height 0.2s;
     overflow: hidden;
+}
+#extras {
+    cursor: default;
 }
 
 .project,
@@ -566,6 +608,7 @@ select {
 }
 .hostElt #project div,
 .hostElt #settings div:not(.col-column),
+/* .hostElt #extras div:not(.col-column), */
 .col-column div {
     padding-bottom: 0.25rem;
 }

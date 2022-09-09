@@ -1,0 +1,55 @@
+/version 3
+/name [ 11
+	4c6f676f2d5061636b6572
+]
+/isOpen 1
+/actionCount 1
+/action-1 {
+	/name [ 16
+		4d616b6520436f6c6f722047726f7570
+	]
+	/keyIndex 0
+	/colorIndex 1
+	/isOpen 1
+	/eventCount 1
+	/event-1 {
+		/useRulersIn1stQuadrant 0
+		/internalName (ai_plugin_swatches)
+		/localizedName [ 8
+			5377617463686573
+		]
+		/isOpen 0
+		/isOn 1
+		/hasDialog 1
+		/showDialog 1
+		/parameterCount 1
+		/parameter-1 {
+			/key 1835363957
+			/showInPalette -1
+			/type (enumerated)
+			/name [ 15
+				4e657720436f6c6f722047726f7570
+			]
+			/value 17
+		}
+	}
+}
+
+# Omarat
+# https://community.adobe.com/t5/illustrator-discussions/script-to-create-a-template-layer-then-add-a-layer-possible/m-p/3111687#M154564
+# Example used for Make Color Group
+act_MakeColorGroup();
+
+function act_MakeColorGroup () {
+    var str = '/version 3' + '/name [ 11' + ' 4c6f676f2d5061636b6572' + ']' + '/isOpen 1' + '/actionCount 1' + '/action-1 {' + ' /name [ 16' + ' 4d616b6520436f6c6f722047726f7570' + ' ]' + ' /keyIndex 0' + ' /colorIndex 1' + ' /isOpen 1' + ' /eventCount 1' + ' /event-1 {' + ' /useRulersIn1stQuadrant 0' + ' /internalName (ai_plugin_swatches)' + ' /localizedName [ 8' + ' 5377617463686573' + ' ]' + ' /isOpen 0' + ' /isOn 1' + ' /hasDialog 1' + ' /showDialog 1' + ' /parameterCount 1' + ' /parameter-1 {' + ' /key 1835363957' + ' /showInPalette -1' + ' /type (enumerated)' + '/name [ 17' + ' 4e657720436f6c6f722047726f7570' + ']' + '/value 17' + '}' + '}' + '}';
+  var f = new File ('~/MakeColorGroup.aia');
+  f.open ('w');
+  f.write (str);
+  f.close ();
+  app.loadAction (f);
+  f.remove ();
+  app.doScript ("MakeColorGroup", "MakeColorGroup", false); // action name, set name
+
+  app.unloadAction ("MakeColorGroup", ""); // set name
+
+}

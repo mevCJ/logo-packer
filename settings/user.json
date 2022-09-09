@@ -1,0 +1,21 @@
+{
+    "generation": {
+        "client": "",
+        "type": "select",
+        "media": "",
+        "separator": {
+            "dash": false,
+            "underscrore": false
+        }
+    },
+    "export": {
+        "destfolder": "",
+        "formats": {
+            "ai": false,
+            "pdf": false,
+            "svg": false,
+            "jpg": false,
+            "png": false
+        }
+    }
+}

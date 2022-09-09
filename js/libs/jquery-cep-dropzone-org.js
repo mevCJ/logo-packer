@@ -63,7 +63,7 @@
                 // 'width'           : '100%',
                 width: "var(--width)",
                 // 'width'           : (bodyWidth - 48) + 'px',
-                height: "95px",
+                height: "110px",
                 padding: "0.5rem",
                 background: "#333",
                 border: "1px dashed rgb(43,122,249)",
@@ -192,7 +192,7 @@
                     // var logoType = $("#logotype").val();
 
                     getValues();
-                    csInterface.evalScript(`generateLogoVariation('${clientName}','${logoType}','${mediaType}','${sepaRator}','${forMats}')`, function (run) {
+                    csInterface.evalScript(`generateLogoVariation('${clientName}','${logoType}','${mediaType}','${sepaRator}','${forMats}','${autoResize}')`, function (run) {
                         outputRun(run);
                     });
 
