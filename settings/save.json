@@ -1,0 +1,26 @@
+{
+    "generation": {
+        "client": "surf",
+        "type": "alltypes",
+        "mediatype": "Digital",
+        "separator": {
+            "dash": true,
+            "underscore": false
+        }
+    },
+    "export": {
+        "destfolder": "~/Desktop/Export/Logo%20Packer/surfscool",
+        "formats": {
+            "ai": false,
+            "pdf": false,
+            "svg": true,
+            "jpg": true,
+            "png": true
+        }
+    },
+    "extras": {
+        "autoresize": true,
+        "subfolders": true,
+        "checkABhasArt": true
+    }
+}
