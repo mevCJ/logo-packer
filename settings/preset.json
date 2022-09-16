@@ -1,0 +1,18 @@
+{
+    "generation": {
+        "client": "Interior.com",
+        "type": "logo",
+        "media": "Digital",
+        "separator": "dash"
+    },
+    "export": {
+        "destfolder": "~/desktop/export",
+        "formats": {
+            "ai": true,
+            "pdf": false,
+            "svg": true,
+            "jpg": false,
+            "png": true
+        }
+    }
+}
