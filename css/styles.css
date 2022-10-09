@@ -242,6 +242,7 @@ input::placeholder {
 input:hover,
 select:hover {
     box-shadow: 0 0 1px 1px rgba(var(--blueRGB), 1);
+    background-color: rgba(var(--blueRGB), .5);
 }
 
 option {

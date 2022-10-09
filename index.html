@@ -15,12 +15,7 @@
         <div id="messages" class="hidden"></div>
         <div style="padding: 0.5rem; padding-top: 0.25rem" id="content">
             <div id="project" class="project flex flex-row flex-between">
-                <h1 class="hostFont">Project</h1>
-                <div class="iconSettings">
-                    <div id="setDestFolder" class="icon icon-btn folder"></div>
-                    <div id="openDestFolder" class="icon icon-btn openDestFolder disabled"></div>
-                    <div id="clearDestFolder" class="icon icon-btn clearDestFolder disabled"></div>
-                </div>
+                <h1 class="hostFont">Generate Logo</h1>
             </div>
             <!-- <div class="row radioButtons">
                 <div class="col">
@@ -88,11 +83,10 @@
             <div class="genButtons">
                 <button id="generate_btn" class="hostButton">Generate logos</button>
                 <!-- <button id="digital_btn" class="hostButton btn50">Digital Logos</button> -->
-                <button id="export_btn" class="hostButton disabled">Export files</button>
             </div>
             <div id="settings">
                 <div class="settings flex flex-row flex-between">
-                    <h1 class="hostFont">Settings</h1>
+                    <h1 class="hostFont">Export Settings</h1>
                     <div class="iconSettings">
                         <!-- <button id="resetJSON_btn" class="hostButton">reset JSON</button>
                             <button id="saveJSON_btn" class="hostButton">Save JSON</button>
@@ -113,8 +107,13 @@
                     <div class="col">
                         <label>Destination:&nbsp;</label>
                     </div>
-                    <div class="col full-width">
+                    <div class="col full-width flex" style="align-items: center">
                         <input id="expPath" name="exportpath" placeholder="Export path..." />
+                        <div class="iconSettings" style="margin-left: .5rem">
+                            <div id="setDestFolder" class="icon icon-btn folder"></div>
+                            <div id="openDestFolder" class="icon icon-btn openDestFolder disabled"></div>
+                            <div id="clearDestFolder" class="icon icon-btn clearDestFolder disabled"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="row radioButtons" id="formats">
@@ -146,7 +145,13 @@
                         </div>
                     </div>
                 </div>
+                <div class="genButtons">
+                    <button id="export_btn" class="hostButton disabled">Export files</button>
+                </div>
             </div>
+
+
+            
             <div id="extras">
                 <div style="display: flex">
                     <h1 class="hostFont">Extras</h1>
