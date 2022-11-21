@@ -37,6 +37,7 @@ $path = {
     window.logoType = $("#logotype").val();
     window.marginVal = $("#margins").val();
     window.marginType = $("#margintype").val();
+    window.allArtboards = $("input[name='allartboards']:checked").val();
     window.baseDocType = $("#baseDocType").val();
     window.autoResize = "";
     window.subFolders = "";
@@ -140,6 +141,7 @@ $path = {
             // panel wont show export animation otherwise
             setTimeout(function () {
                 csInterface.evalScript(`exportFiles('${mediaType}','${logoType}','${forMats}','${subFolders}','${checkABhasArt}')`, function (run) {
+                    console.log("ExportFiles var run "+ run)
                     if (run == "true") {
                         throwMessage(run, "Export done");
                     } else if(run=="formats") {
@@ -187,6 +189,18 @@ $path = {
                 });
             },100);
         });
+        $("#margins").on("change", function () {
+            getMarginValues();
+            setTimeout(function () {
+                csInterface.evalScript(`addMarginToArtboard('${marginVal}','${marginType}','${allArtboards}')`, function (run) {
+                    if (run == "true") {
+                        throwMessage(run, "Added Margins");
+                    } else {
+                        throwMessage(run, "Failed to add margins");
+                    }
+                });
+            },100);
+        });
         $("#cleanupLogo_btn").click(function () {
             getValues();
             setTimeout(function () {
@@ -222,6 +236,7 @@ $path = {
             console.log("Getting Margin values");
             marginVal = $("#margins").val();
             marginType = $("#margintype").val();
+            allArtboards = $("input[name='allartboards']:checked").val();
         };
         
         window.getBaseDocType = function () {
@@ -289,9 +304,37 @@ $path = {
             checkABhasArt = $("input:checkbox[name='checkABhasArt']:checked").val();
         };
         
-        $("input[type='radio']").click(function () {
-            mediaType = mediaType == "" ? $("input[name='media']:checked").val() : "";
+        $("input[type='radio']").on("change", function () {
+            getValues();
+            setPNGPrintNone();
         });
+        $("input[type='checkbox']").on("change", function () {
+            getValues();
+            setPNGPrintNone();
+        });
+        function setPNGPrintNone(){
+            // console.log("mediaType " + mediaType)
+            // mediaType = mediaType == "Print" ? $("input[name='media']:checked").val() : "";
+            var pngValue = $("input:checkbox[value=\"png\"]");
+            var pngLabel = $("label[for=\"png\"]");
+            // console.log("mediaType " + mediaType)
+            // console.log(mediaType == "Print")
+            if (mediaType == "Print"){
+                // console.log($("input:checkbox[value=\"png\"]:checked").val())
+                pngValue.prop("disabled",true);
+                pngValue.addClass("disabled");
+                pngLabel.addClass("disabled");
+                if ($("input:checkbox[value=\"png\"]:checked").val() == 'png'){
+                    pngValue.prop("checked", false)
+                    
+                }
+            } else {
+                // $("input:checkbox[value=\"png\"]").prop("checked", false)
+                pngValue.prop("disabled",false);
+                pngValue.removeClass("disabled");
+                pngLabel.removeClass("disabled");
+            }
+        }
         
         $("input[type='radio']").click(function () {
             sepaRator = sepaRator == "" ? $("input[name='separator']:checked").val() : "";

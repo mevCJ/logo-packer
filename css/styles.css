@@ -211,6 +211,9 @@ input[type="radio"] {
 input[type="checkbox"] {
     border-radius: 0.15rem;
 }
+input[type="checkbox"][disabled] {
+    filter: invert(25%);
+}
 input + label {
     display: inline-block;
     vertical-align: super;

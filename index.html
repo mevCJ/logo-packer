@@ -134,6 +134,10 @@
                             <input type="checkbox" class="hostButton" name="formats" value="svg" />
                             <label for="svg">Svg</label>
                         </div>
+                        <div>
+                            <input type="checkbox" class="hostButton" name="formats" value="eps" />
+                            <label for="eps">Eps</label>
+                        </div>
                     </div>
                     <div class="col col-column">
                         <div>
@@ -210,12 +214,12 @@
                         </div>
                         <div style="margin-bottom: 0.5rem; line-height: 0;">&nbsp;</div>
                         <select name="type" id="margintype" style="width: auto;">
-                            <option value="select">Select</option>
+                            <!-- <option value="select">Select</option> -->
+                            <option value="px">px</option>
                             <option value="mm">mm</option>
                             <option value="cm">cm</option>
                             <option value="in">in</option>
                             <option value="pt">pt</option>
-                            <option value="px">px</option>
                             <option value="pc">pc</option>
                         </select>
                     </div>
@@ -225,8 +229,14 @@
                         <label for="type">&nbsp;</label>
                     </div>
                     <div class="col full-width">
-                        <button id="addmargins_btn" class="hostButton">Add Extra Margin</button>
+                        <div>
+                            <input type="checkbox" class="hostButton" id="allartboards" name="allartboards" value="all" checked/>
+                            <label for="all">All Artboards</label>
+                        </div>
                     </div>
+                    <!-- <div class="col full-width">
+                        <button id="addmargins_btn" class="hostButton">Add Extra Margin</button>
+                    </div> -->
                 </div>
                 <hr class="solid">
                 <!-- <span style="line-height: .5; display:block;" >&nbsp;</span> -->
