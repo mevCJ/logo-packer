@@ -87,6 +87,7 @@ $path = {
     };
     window.outputRun = function (run) {
         console.log("starting generation")
+        console.log("run " + run)
         // console.log(run)
         if (run == "selection") {
             throwMessage(false, "Nothing selected");
@@ -180,7 +181,7 @@ $path = {
         $("#addmargins_btn").click(function () {
             getMarginValues();
             setTimeout(function () {
-                csInterface.evalScript(`addMarginToArtboard('${marginVal}','${marginType}')`, function (run) {
+                csInterface.evalScript(`addMarginToArtboard('${marginVal}','${marginType}','${logoType}')`, function (run) {
                     if (run == "true") {
                         throwMessage(run, "Added Margins");
                     } else {
@@ -192,7 +193,7 @@ $path = {
         $("#margins").on("change", function () {
             getMarginValues();
             setTimeout(function () {
-                csInterface.evalScript(`addMarginToArtboard('${marginVal}','${marginType}','${allArtboards}')`, function (run) {
+                csInterface.evalScript(`addMarginToArtboard('${marginVal}','${marginType}','${allArtboards}','${logoType}')`, function (run) {
                     if (run == "true") {
                         throwMessage(run, "Added Margins");
                     } else {
@@ -236,6 +237,7 @@ $path = {
             console.log("Getting Margin values");
             marginVal = $("#margins").val();
             marginType = $("#margintype").val();
+            logoType = $("#logotype").val();
             allArtboards = $("input[name='allartboards']:checked").val();
         };
         

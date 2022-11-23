@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.5.1] - 2022-11-22
+### Fixed
+- Logo type info would not adjust its location when margins being adjsuted, now it gets repositioned based on the added margin (still need work when logo color types are taken out)
+
 ## [0.5.0] - 2022-11-21
 ### Fixed
 - clear destination folder did not clean EPS files

@@ -27,6 +27,7 @@ var useTimer = false;
 
 var LOGO_INFO = "LOGO_INFO";
 var lyrLogoInfo;
+var initArtboardsLength = 1;
 // var logotypes = ['logo', 'logotype', 'logomark', 'payoff'];
 var logotypes = new Array();
 var destDir = '';
@@ -34,7 +35,7 @@ var allTypes;
 var dialogFolder;
 var setDest = new Folder();
 var addDocName;
-var logotype;
+var logotype = "";
 var checkABhasArt; // = true;
 var autoResize;
 var autoSubFolder;
@@ -94,7 +95,7 @@ function generateLogoVariation(clientName, logotype, mediaType, sepaRator, forMa
 }
 
 function createLogoTypes(docRef, clientName, logotype, mediaType, sepaRator, forMats, autoResize) {
-
+    logotype = logotype;
     // var run = false;
     separator = sepaRator;
     if (app.selection.length == 0) {
@@ -115,7 +116,7 @@ function createLogoTypes(docRef, clientName, logotype, mediaType, sepaRator, for
         addDocName = clientName;
         var selDoc; /* use Dropzone or selection */
         var hasDoc = false;
-        var initArtboardsLength = 1;
+        // var initArtboardsLength = 1;
         // colors variation
         // Set black and white print colors
         var black = mediaType == 'Print' ? new CMYKColor() : new RGBColor();
@@ -258,28 +259,29 @@ function createLogoTypes(docRef, clientName, logotype, mediaType, sepaRator, for
             docRef.artboards.setActiveArtboardIndex(docRef.artboards.length - 1);
             docRef.selectObjectsOnActiveArtboard();
         }
+        logotype = logotype;
+        run = setLogoInfo(docRef, logotype, initArtboardsLength, false);
+        // docRef.artboards.setActiveArtboardIndex(0);
+        // docRef.selectObjectsOnActiveArtboard();
 
-        // Add logo info
-        docRef.artboards.setActiveArtboardIndex(0);
-        docRef.selectObjectsOnActiveArtboard();
-
-        // Add logo info: Logo type & Media type
-        var ab = docRef.artboards[docRef.artboards.length - 4];
-        posX = ab.artboardRect[0]; // Left
-        posY = ab.artboardRect[1]; // Top
-        addLogoInfo(docRef, logotype, posX - 15, posY - 8, 'right');
-        addLogoInfo(docRef, "fullcolor", posX, posY + 20, 'left');
-        // Loop of 3 needs work if users adds custom variations like single color or different colored versions
-        // Variations like full-color + white text and full-color with black text are very common
-        for (var i = 0; i < 3; i++) {
-            var ab = docRef.artboards[(initArtboardsLength + i)];
-            posX = ab.artboardRect[0]; // Left
-            posY = ab.artboardRect[1]; // Top
-            addLogoInfo(docRef, artboardsName[i], posX, posY + 20, 'left');
-        }
-        // Deselect all
-        app.selection = null;
-        run = true;
+        // // alert(logotype)
+        // // Add logo info: Logo type & Media type
+        // var ab = docRef.artboards[docRef.artboards.length - 4];
+        // posX = ab.artboardRect[0]; // Left
+        // posY = ab.artboardRect[1]; // Top
+        // addLogoInfo(docRef, logotype, posX - 15, posY - 8, 'right');
+        // addLogoInfo(docRef, "fullcolor", posX, posY + 20, 'left');
+        // // Loop of 3 needs work if users adds custom variations like single color or different colored versions
+        // // Variations like full-color + white text and full-color with black text are very common
+        // for (var i = 0; i < 3; i++) {
+        //     var ab = docRef.artboards[(initArtboardsLength + i)];
+        //     posX = ab.artboardRect[0]; // Left
+        //     posY = ab.artboardRect[1]; // Top
+        //     addLogoInfo(docRef, artboardsName[i], posX, posY + 20, 'left');
+        // }
+        // // Deselect all
+        // app.selection = null;
+        // run = true;
     }
     // alert(run)
     return run
@@ -1051,10 +1053,51 @@ if (!infoColorRGB.exists) {
     infoColorRGB.blue = 255;
 }
 
+function setLogoInfo(docRef, logotype, initArtboardsLength, steps) {
+    appendLog('setLogoInfo()', logFile);
+    appendLog(initArtboardsLength, logFile);
+    // alert(logotype)
+    // Add logo info
+    // initArtboardsLength = app.activeDocument.artboards.length;
+    var artboardsName = ['grayscale', 'black', 'white'];
+    docRef.artboards.setActiveArtboardIndex(0);
+    docRef.selectObjectsOnActiveArtboard();
+
+    // Add logo info: Logo type & Media type
+    if (steps != false){
+        var ab = docRef.artboards[steps-1]; // correct with subtracting -1 for index starts at 0
+    } else{
+        var ab = docRef.artboards[docRef.artboards.length - 4];
+    }
+    posX = ab.artboardRect[0]; // Left
+    posY = ab.artboardRect[1]; // Top
+    addLogoInfo(docRef, logotype, posX - 15, posY - 8, 'right');
+    addLogoInfo(docRef, "fullcolor", posX, posY + 20, 'left');
+    // Loop of 3 needs work if users adds custom variations like single color or different colored versions
+    // Variations like full-color + white text and full-color with black text are very common
+    for (var i = 0; i < 3; i++) {
+        if (steps != false){
+            var ab = docRef.artboards[(steps+i)];
+        } else{
+            var ab = docRef.artboards[(initArtboardsLength + i)];
+        }
+        // changed this to 1, otherise wont work?!
+        // var ab = docRef.artboards[(1 + i)];
+        posX = ab.artboardRect[0]; // Left
+        posY = ab.artboardRect[1]; // Top
+        addLogoInfo(docRef, artboardsName[i], posX, posY + 20, 'left');
+    }
+    // Deselect all
+    app.selection = null;
+    run = true;
+    return run
+}
+
 function addLogoInfo(docRef, layerName, posX, posY, justDir) {
     // find existing layers or add new one
     var x = convertToPoints(posX);
     var y = convertToPoints(posY);
+
     try {
         lyrLogoInfo = docRef.layers.getByName(LOGO_INFO);
         lyrLogoInfo.locked = false;
@@ -1463,7 +1506,9 @@ function errorEvent(errorNumber) {
 // 
 // Add margins to Artboards
 // 
-function addMarginToArtboard(marginVal, margintype, allArtboards) {
+function addMarginToArtboard(marginVal, margintype, allArtboards, logotype) {
+    appendLog('addMarginsToArtboard()', logFile);
+    appendLog(initArtboardsLength, logFile);
     run = false;
     if (margins == "") {
         run = "margins";
@@ -1474,6 +1519,7 @@ function addMarginToArtboard(marginVal, margintype, allArtboards) {
         var title = "Add margin to Artboard(s)";
         var docRef = app.activeDocument;
         var ABs = docRef.artboards;
+        
         // var margins = 30*72/25.4;
         // var margins = 30*72;
         var margins = []
@@ -1507,6 +1553,28 @@ function addMarginToArtboard(marginVal, margintype, allArtboards) {
         } else {
             alert('Open a document before running this script', 'Error running FitArtboardToArt.jsx');
             run = false
+        }
+
+        // Update logo info around the artboards
+        logotypes = getArtboardLogoTypes(docRef, true);
+        // alert(logotypes)
+        try{
+            lyrLogoInfo = docRef.layers.getByName(LOGO_INFO);
+            lyrLogoInfo.locked = false;
+            lyrLogoInfo.remove();
+        } catch(e){
+            // do nothing
+        }
+        if (logotype == "alltypes") {
+            abLength = docRef.artboards.length / 4;
+            for (ab = 1; ab < docRef.artboards.length; ab+=4) {
+                // ab = ab == 0 ? 0 : ab+4;
+                app.selection = null;
+                docRef.artboards.setActiveArtboardIndex(ab-1); // correct -1 idnex starts at 0
+                run = setLogoInfo(docRef, logotypes[ab], ab, ab);
+            }
+        } else {
+            run = setLogoInfo(docRef, logotype, initArtboardsLength, false);
         }
         return run
     }
@@ -2062,7 +2130,7 @@ function startLog(targetPath) {
         // if (logFile.exists)
         // 	logFile.remove();
 
-        logFile.open('a'); // W overwrites - A appends
+        logFile.open('w'); // W overwrites - A appends
 
         // appendLog("extension "+extension, logFile);
         // appendLog("myDocuments "+myDocuments, logFile);
@@ -2119,7 +2187,9 @@ function newBaseDoc(clientName, docType) {
     try {
         if (clientName == "") {
             return run = "clientname"
-        } else if (docType == "select" || logotype == "") {
+            // no sure why added logotype here
+        // } else if (docType == "select" || logotype == "") {
+        } else if (docType == "select") {
             return run = "doctype"
         } else {
             var run = false;
