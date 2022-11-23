@@ -116,7 +116,7 @@ function createLogoTypes(docRef, clientName, logotype, mediaType, sepaRator, for
         addDocName = clientName;
         var selDoc; /* use Dropzone or selection */
         var hasDoc = false;
-        // var initArtboardsLength = 1;
+        initArtboardsLength = 1; // Reset always to 1 other we have generation error
         // colors variation
         // Set black and white print colors
         var black = mediaType == 'Print' ? new CMYKColor() : new RGBColor();
