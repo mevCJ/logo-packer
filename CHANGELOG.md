@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.5.2] - 2022-11-23
 ### Fixed
-- Issue with generation new logos when initial created document was close. Issue with initialArtboardLenght was kept in memory
+- Issue with generation new logos when initial created document was close. Issue with initialArtboardLength was kept in memory
 
 ## [0.5.1] - 2022-11-22
 ### Fixed
