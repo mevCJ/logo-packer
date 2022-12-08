@@ -73,6 +73,7 @@ var setting = {
         generation: {
             client: "",
             type: "select",
+            colors: { fullcolor: true, pms: false, grayscale: false, black: true, white: true },
             media: "",
             separator: {
                 dash: false,
@@ -82,6 +83,12 @@ var setting = {
         export: {
             destfolder: "",
             formats: { ai: false, pdf: false, svg: false, eps: false, jpg: false, png: false },
+        },
+        extras: {
+            autoresize: true,
+            subfolders: true,
+            checkABhasArt: true,
+            allartboards: true,
         },
     },
     loaded: !1,
@@ -122,6 +129,11 @@ var setting = {
                 $("#clientName").val(t.generation.client),
                 $("#logotype option[value=" + t.generation.type + "]").prop("selected", true),
                 $("input[value='"+ t.generation.mediatype+"']").prop("checked", true),
+                $("#colors input[value=fullcolor]").prop("checked", t.generation.colors.fullcolor),
+                $("#colors input[value=pms]").prop("checked", t.generation.colors.pms),
+                $("#colors input[value=grayscale]").prop("checked", t.generation.colors.grayscale),
+                $("#colors input[value=black]").prop("checked", t.generation.colors.black),
+                $("#colors input[value=white]").prop("checked", t.generation.colors.white),
                 // $("#separator input[value=" + t.generation.separator + "]").prop("checked", true),
                 $("input[value='dash']").prop("checked", t.generation.separator.dash),
                 $("input[value='underscore']").prop("checked", t.generation.separator.underscore),
@@ -135,6 +147,7 @@ var setting = {
                 $("#autoResize input[value=autoresize]").prop("checked", t.extras.autoresize),
                 $("#subFolders input[value=subfolders]").prop("checked", t.extras.subfolders),
                 $("#checkABhasArt input[value=checkABhasArt]").prop("checked", t.extras.checkABhasArt),
+                $("#allartboards input[value=allartboards]").prop("checked", t.extras.allartboards),
                 // destFolder = t.export.destfolder,
                 CS.evalScript(`setDestFolderFromJson('${t.export.destfolder}')`, function (run) {
                     // console.log(run.split(",")[0]);
@@ -180,6 +193,13 @@ var setting = {
                     client: $("#clientName").val(),
                     type: $("#logotype").val(),
                     mediatype: $("input[name='media']:checked").val(),
+                    colors: {
+                        fullcolor:$("input[value='fullcolor']").is(':checked'),
+                        pms:$("input[value='pms']").is(':checked'),
+                        grayscale:$("input[value='grayscale']").is(':checked'),
+                        black:$("input[value='black']").is(':checked'),
+                        white:$("input[value='white']").is(':checked'),
+                    },
                     // separator: $("input[name='separator']:checked").val(),
                     separator: {
                         dash: $("input[value='dash']").is(':checked'),
@@ -201,6 +221,7 @@ var setting = {
                     autoresize: $("input[name='autoresize']").is(':checked'),
                     subfolders: $("input[name='subfolders']").is(':checked'),
                     checkABhasArt: $("input[name='checkABhasArt']").is(':checked'),
+                    allartboards: $("input[name='allartboards']").is(':checked'),
                 },
             };
         } catch (e) {
@@ -247,6 +268,79 @@ var setting = {
             // $console.systemLog.write("varialbles.js => setting.export()", e);
         }
     },
+
+    readExportSettings: function (e,b,o) {
+        // Dirty clear for checkbox > need to fix error
+        $('input').each(function () {
+            $(this).prop('checked',false);
+        });
+        try {
+            if (b) var t = e;
+            var data = {
+                // ai: {
+                //     VersionAI: VersionAIDropdown.selection.index,
+                //     compatiblepdfAI: compatibelPDFAICheckbox.value,
+                //     includeLinkedAI: includeLinkedAICheckbox.value,
+                //     embedICCAI: embedICCProfilesAICheckbox.value,
+                //     includeCmykinRGBEPS: includeCmykinRGBEPSCheckbox.value,
+                //     usecompressionAI: useCompressionAICheckbox.value,
+                // },
+                // pdf: {
+                //     adobepresetPDF: pdfPresetsPDFDropdown.selection.index,
+                //     preserveEditabilityPDF: preserveEditingPDFCheckbox.value,
+                //     embedPageThumbnailsPDF: embedPageThumbnailsPDFCheckbox.value,
+                //     optimizeviewPDF: optimizeFastWebPDFCheckbox.value,
+                //     createlayersPDF: createAcrobatLayerPDFCheckbox.value,
+                // },
+                // eps: {
+                //     VersionEPS: VersionEPSDropdown.selection.index,
+                //     embedFontsEPS: embedFontsEPSCheckbox.value,
+                //     includeLinkedEPS: includeLinkedEPSCheckbox.value,
+                //     includeThumbsEPS: includeThumbsEPSCheckbox.value,
+                //     includeCmykinRGBEPS: includeCmykinRGBEPSCheckbox.value,
+                //     compatiblePrintingEPS: compatiblePrintingEPSCHeckbox.value,
+                //     adobeposttscriptEPS: adobePostscriptEPSDropdown.selection.index,
+                // },
+                svg: {
+                    StylingSVG: t.svg.StylingSVG,
+                    FontSVG: t.svg.FontSVG,
+                    imagesSVG: t.svg.imagesSVG,
+                    decimalSVG: t.svg.decimalSVG,
+                    minimizeSVG: t.svg.minimizeSVG,
+                    responsiveSVG: t.svg.responsiveSVG,
+                },
+                // jpg: {
+                //     compressionmethodJPG: compressionPresetsJPGDropdown.selection.index,
+                //     antialiasingJPG: antialiasingJPGDropdown.selection.index,
+                //     embedICCJPG: embedICCProfilesJPGCheckbox.value,
+                // },
+                // png: {
+                //     antialiasingPNG: antialiasingPNGDropdown.selection.index,
+                //     interlacedPNG: interlacedPNGCheckbox.value,
+                //     backgroundColorPNG: backgroundcolorPNGDropdown.selection.index,
+                // },
+                // activeTab: fileFormatsPanel_nav.selection.index,
+            }
+
+            return data
+        } catch (e) {
+            console.log(e);
+        }
+    },
+    loadExportSettings: function (e, t) {
+        try {
+            var o = $path.extension + '/settings/settings.json';
+            console.log("settings.json file "+ o)
+            if (o && o.length) {
+                var r = readFile(o, !0);
+                // setting.readExportSettings(r,true,false);
+                // console.log("read settings.json "+r)
+                // console.log(r)
+                return r
+            }
+            return !1;
+        } catch (e) {
+            console.log("setting.loadExportSettings()", e);
+        }
+    },
 };
-// setting.create();
-// setting.load();

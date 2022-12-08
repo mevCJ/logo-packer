@@ -66,6 +66,36 @@
                     <label for="digital">Digital</label>
                 </div>
             </div>
+            <div class="row radioButtons" id="colors">
+                <div class="col">
+                    <label for="colors">Colors:&nbsp;</label>
+                </div>
+                <div class="col col-column">
+                    <div>
+                        <input type="checkbox" class="hostButton" name="colors" value="fullcolor" checked/>
+                        <label for="fullcolor">Fullcolor</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" class="hostButton" name="colors" value="pms" />
+                        <label for="pms">PMS</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" class="hostButton" name="colors" value="grayscale" checked/>
+                        <label for="grayscale">Grayscale<label>
+                    </div>
+                </div>
+                <div class="col col-column">
+                    
+                    <div>
+                        <input type="checkbox" class="hostButton" name="colors" value="black" checked/>
+                        <label for="black">Black</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" class="hostButton" name="colors" value="white" checked/>
+                        <label for="white">White</label>
+                    </div>
+                </div>
+            </div>
             <div class="row radioButtons" id="separator">
                 <div class="col">
                     <label for="separator">Separator:&nbsp;</label>
@@ -92,7 +122,7 @@
             </div>
             <div id="settings">
                 <div class="settings flex flex-row flex-between">
-                    <h1 class="hostFont">Settings</h1>
+                    <h1 class="hostFont">Export Settings</h1>
                     <div class="iconSettings">
                         <!-- <button id="resetJSON_btn" class="hostButton">reset JSON</button>
                             <button id="saveJSON_btn" class="hostButton">Save JSON</button>
@@ -119,7 +149,7 @@
                 </div>
                 <div class="row radioButtons" id="formats">
                     <div class="col">
-                        <label for="formats">Formats:&nbsp;</label>
+                        <label for="formats">Formats:&nbsp;</label><div id="settingsIcon_btn" class="icon icon-btn settingsIcon"></div>
                     </div>
                     <div class="col col-column">
                         <div>
@@ -224,13 +254,13 @@
                         </select>
                     </div>
                 </div>
-                <div class="row radioButtons">
+                <div class="row radioButtons" id="allartboards">
                     <div class="col">
                         <label for="type">&nbsp;</label>
                     </div>
                     <div class="col full-width">
                         <div>
-                            <input type="checkbox" class="hostButton" id="allartboards" name="allartboards" value="all" checked/>
+                            <input type="checkbox" class="hostButton" name="allartboards" value="all" checked/>
                             <label for="all">All Artboards</label>
                         </div>
                     </div>

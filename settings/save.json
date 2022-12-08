@@ -1,8 +1,15 @@
 {
     "generation": {
-        "client": "square ",
+        "client": "square",
         "type": "logo",
         "mediatype": "Print",
+        "colors": {
+            "fullcolor": true,
+            "pms": true,
+            "grayscale": false,
+            "black": false,
+            "white": false
+        },
         "separator": {
             "dash": true,
             "underscore": false
@@ -13,7 +20,7 @@
         "formats": {
             "ai": true,
             "pdf": true,
-            "svg": true,
+            "svg": false,
             "eps": true,
             "jpg": true,
             "png": false
@@ -22,6 +29,7 @@
     "extras": {
         "autoresize": true,
         "subfolders": true,
-        "checkABhasArt": true
+        "checkABhasArt": true,
+        "allartboards": true
     }
 }

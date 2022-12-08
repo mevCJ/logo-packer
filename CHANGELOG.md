@@ -2,6 +2,36 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.5.8] - 2022-12-08
+### Fixed
+- Issue when conversion to Grayscale due to new added PMS. colors were much lighter
+
+### Added
+- Document Color Profile mismatch from Color Settings warning and option to show Assign Window so profiles will match
+- Custom Alert Dialog, closer to Script UI design
+
+## [0.5.7] - 2022-12-06
+### Added
+- PMS conversion method and updated Panel layout
+
+## [0.5.6] - 2022-12-01
+### Added
+- Export Settings Dialog implemention, settings can now be customized
+- Auto margin updates works for logoinfo as well know
+
+## [0.5.5] - 2022-11-30
+### Added
+- Integrated into panel layout & design of dialog
+
+## [0.5.4] - 2022-11-29
+### Added
+- Add color ouputs checkboxes
+- Design Export Settings Dialog
+
+## [0.5.3] - 2022-11-24
+### Added
+- Color Output checkboxes, users can now define what color variations are output
+
 ## [0.5.2] - 2022-11-23
 ### Fixed
 - Issue with generation new logos when initial created document was close. Issue with initialArtboardLength was kept in memory

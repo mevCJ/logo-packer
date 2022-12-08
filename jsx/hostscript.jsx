@@ -3,12 +3,33 @@
 // #include "Logger.jsxinc";
 // #includepath "/";
 // #include "/resizeLogo.jsx";
+// #include "json2.js";
+// #include "/cmyktopms.jsx"
+// test using json in hostcript
+// source: https://stackoverflow.com/a/55577307
+// #include "json.jsx";
 
+var obj = {
+	myNumber: 12345678,
+	myBool: true,
+	myString: "Hello\tWorld\u00a0: This is fine!",
+	myRegex: /[a-z\d]+/,
+	myArray: [ ['this', 'is'], [1], ['array', 'of', 'arrays'] ],
+	myObject: {a:1,b:2,c:3},
+	myUnit: UnitValue(5,'mm'),
+	myXML: <root><aaa xxx='yyy'>hello</aaa></root>,
+	myDate: new Date,
+	myFile: File("c:/test.txt"),
+	myNativeObj: $.global,
+};
+// var data = JSON(obj);
+// alert(typeof(data))
+// alert( JSON(obj,1) );
 
 ///////////////////////////////////////////////////
 // Logging & Timer
 // var PATH = require("path"),
-// CS = new CSInterface(),
+// CS = new CSInterface();
 // $path = {
 //     host: CS.getSystemPath(SystemPath.HOST_APPLICATION),
 //     myDocs: CS.getSystemPath(SystemPath.MY_DOCUMENTS),
@@ -28,6 +49,8 @@ var useTimer = false;
 var LOGO_INFO = "LOGO_INFO";
 var lyrLogoInfo;
 var initArtboardsLength = 1;
+var sourceProfile;
+var destinationProfile;
 // var logotypes = ['logo', 'logotype', 'logomark', 'payoff'];
 var logotypes = new Array();
 var destDir = '';
@@ -35,6 +58,7 @@ var allTypes;
 var dialogFolder;
 var setDest = new Folder();
 var addDocName;
+var colors = [];
 var logotype = "";
 var checkABhasArt; // = true;
 var autoResize;
@@ -46,7 +70,11 @@ var cleanedLogoItems = [''];
 var swatchesCleaned = false;
 var deletedPanelItems = false;
 var clearedItemsDocs = [''];
+var extensionRoot = '';
 
+function getColorProfile(activeDocument){
+    return activeDocument.colorProfileName;
+}
 
 // IndexOf update to use number as well
 // DBLjan
@@ -72,29 +100,86 @@ function getArtboardLogoTypes(docRef, strip) {
     return abLogotypes
 }
 
-function generateLogoVariation(clientName, logotype, mediaType, sepaRator, forMats, autoResize) {
+// Get logo colors list, return names and color object for black and white
+function getLogoColorList(colors, mediaType){
+    // colors variation
+    // Set black and white print colors
+    var black = mediaType == 'Print' ? new CMYKColor() : new RGBColor();
+    var white = mediaType == 'Print' ? new CMYKColor() : new RGBColor();
+    if (mediaType == 'Print'){
+        black.cyan = 0;
+        black.magenta = 0;
+        black.yellow = 0;
+        black.black = 100;
+        white.cyan = 0;
+        white.magenta = 0;
+        white.yellow = 0;
+        white.black = 0;
+    } else {
+        black.red = 0;
+        black.green = 0;
+        black.blue = 0;
+        white.blue = 255;
+        white.red = 255;
+        white.green = 255;
+    }
+    // var colors = ['grayscale', black, white];
+    // var artboardsNames = ['grayscale', 'black', 'white'];
+
+    // make string list of colors
+    // Make array of stringlist from HTML
+    // colors = colors.split(',');
+    var artboardsNames = colors.split(',');
+    var colors = colors.split(',');
+
+    // source https://www.geeksforgeeks.org/remove-elements-from-a-javascript-array/#:~:text=pop()%20function%3A%20This%20method,specific%20index%20of%20an%20array.
+    for (var i = 0; i < colors.length; i++) {
+        if (colors[i] === "fullcolor") {
+            colors.splice(i, 1);
+            artboardsNames.splice(i, 1);
+        }
+        if (colors[i] === "black") {
+            colors.splice(i, 1);
+            colors.push(black);
+            // artboardsNames.push("black");
+        }
+        if (colors[i] === "white") {
+            colors.splice(i, 1);
+            colors.push(white);
+            // artboardsNames.push("white");
+        }
+        // alert(colors[i])
+    }
+    // alert("colors.length "+colors.length)
+    // alert(artboardsNames)
+
+    return [colors, artboardsNames]
+}
+
+function generateLogoVariation(clientName, logotype, colors, mediaType, sepaRator, forMats, autoResize, extensionRoot) {
     docRef = app.activeDocument;
     logotypes = getArtboardLogoTypes(docRef, false);
     clearedItemsDocs = ['']; // clear list of doc with cleared swatches
+    sourceProfile = getColorProfile(docRef);
     if (logotype == "alltypes") {
         abLength = docRef.artboards.length;
         for (ab = 0; ab < abLength; ab++) {
             app.selection = null;
             docRef.artboards.setActiveArtboardIndex(ab);
             docRef.selectObjectsOnActiveArtboard();
-            createLogoTypes(docRef, clientName, logotypes[ab], mediaType, sepaRator, forMats, autoResize)
+            createLogoTypes(docRef, clientName, colors, logotypes[ab], mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile)
             // switch to generated logo
             app.documents.getByName(docRef.name).activate();
         }
         app.documents.getByName(clientName).activate();
     } else {
-        createLogoTypes(docRef, clientName, logotype, mediaType, sepaRator, forMats, autoResize);
+        createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile);
     }
     app.executeMenuCommand('fitall')
     return run
 }
 
-function createLogoTypes(docRef, clientName, logotype, mediaType, sepaRator, forMats, autoResize) {
+function createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile) {
     logotype = logotype;
     // var run = false;
     separator = sepaRator;
@@ -102,6 +187,8 @@ function createLogoTypes(docRef, clientName, logotype, mediaType, sepaRator, for
         run = "selection"
     } else if (clientName == "") {
         run = "clientname"
+    } else if (colors == "") {
+        run = "colors"
     } else if (logotype == "select" || logotype == "") {
         run = "logotype"
     } else if (mediaType == "undefined" || mediaType == "") {
@@ -117,30 +204,22 @@ function createLogoTypes(docRef, clientName, logotype, mediaType, sepaRator, for
         var selDoc; /* use Dropzone or selection */
         var hasDoc = false;
         initArtboardsLength = 1; // Reset always to 1 other we have generation error
-        // colors variation
-        // Set black and white print colors
-        var black = mediaType == 'Print' ? new CMYKColor() : new RGBColor();
-        var white = mediaType == 'Print' ? new CMYKColor() : new RGBColor();
-        if (mediaType == 'Print'){
-            black.cyan = 0;
-            black.magenta = 0;
-            black.yellow = 0;
-            black.black = 100;
-            white.cyan = 0;
-            white.magenta = 0;
-            white.yellow = 0;
-            white.black = 0;
-        } else {
-            black.red = 0;
-            black.green = 0;
-            black.blue = 0;
-            white.blue = 255;
-            white.red = 255;
-            white.green = 255;
-        }
         
-        var colors = ['grayscale', black, white];
-        var artboardsName = ['grayscale', 'black', 'white'];
+        // get list of colors
+        var colorList = getLogoColorList(colors, mediaType);
+        var colors = colorList[0];
+        var artboardsNames = colorList[1];
+        // alert("returned colors length list" +colors.length)
+        // alert("returned colors " +colors)
+        // alert("returned ABnames " +artboardsNames)
+
+        // Filter function 
+        // Source https://stackoverflow.com/a/20690490
+        // let forDeletion = ["black". "white"]
+        // colors = colors.filter(item => !forDeletion.includes(item))
+        
+
+        
         var mediatype = mediaType == 'Print' ? 'cmyk' : 'rgb';
         var rasterEffectSettings = mediaType == 'Print' ? '300' : '72'
         // var mediaTypeFolder = mediaType;
@@ -165,11 +244,33 @@ function createLogoTypes(docRef, clientName, logotype, mediaType, sepaRator, for
             app.documents.addDocument("", docPreset);
             // false so we clean new doc of all colors
             swatchesCleaned = false;
+
+            // Warn if source Document Color Profiles mismatches workign Color Profile Settings
+            destinationProfile = getColorProfile(app.activeDocument);
+            if (sourceProfile != destinationProfile){
+                // app.redraw();
+                // app.redraw();
+                // $.sleep(1000);
+                $.evalFile(new File(extensionRoot+'/jsx/alert-dialog.jsx'));
+
+                var title = "Warning!  Document Color Mismatch";
+                var msg1 = "Source: "+sourceProfile+"\nWorking: "+destinationProfile;
+                var msg2 = "The source logo has a diffirent Color Profile then the Color Management Settings. Do you want to assign the same Color Profile to the new document?";
+                var okStr = "Yes";
+                var cancelStr = "No";
+
+                scriptAlert(title, msg1, msg2, true, true, okStr, cancelStr);
+                assignProfile = scriptAlertResult;
+                // assignProfile = confirm("Warning Document Color Mismatch!\n"+"Source: "+sourceProfile+"\nWorking: "+destinationProfile+"\n\nThe source logo has a diffirent Color Profile then the Color Management Settings. Do you want set the new logo document to be the same as the source?");
+                if (assignProfile) app.executeMenuCommand('assignprofile')
+            }
+
         } else {
             app.documents.getByName(addDocName).activate();
             app.activeDocument.artboards.add([0, 0, 288, -480.503974801259]);
             initArtboardsLength = app.activeDocument.artboards.length;
         }
+
 
         // // Set new doc as Active working
         var docRef = app.activeDocument;
@@ -195,14 +296,22 @@ function createLogoTypes(docRef, clientName, logotype, mediaType, sepaRator, for
         app.executeMenuCommand('group');
 
         item = docRef.selection[0];
-        // alert(item.width)
+
         // check logo size
         if (item.width <= 70 || item.height <= 70) {
             resizeLogo(item, autoResize)
         }
 
         if (hasDoc) {
-            var prevArtboard = docRef.artboards[initArtboardsLength - 5]
+            // var prevArtboard = docRef.artboards[initArtboardsLength - 5]
+            
+            // works by more then 1
+            // var prevArtboard = docRef.artboards[initArtboardsLength - (colors.length +1)]
+            var prevArtboard = docRef.artboards[initArtboardsLength - colors.length]
+            // alert(prevArtboard)
+            // alert("initArtboardsLength " + initArtboardsLength)
+            // alert("colors.length "+ colors.length)
+            // alert("initArtboardsLength - colors.length " + (initArtboardsLength - colors.length))
             var initialObjHeight = Math.abs(prevArtboard.artboardRect[1] - prevArtboard.artboardRect[3]);
 
             //move copied items to previouse item's position
@@ -224,16 +333,23 @@ function createLogoTypes(docRef, clientName, logotype, mediaType, sepaRator, for
             }
 
         }
-
+        // alert("colors.length "+colors.length)
+        // alert("colors.length < "+i < colors.length)
         // Add grayscale, black & white version
         for (var i = 0; i < colors.length; i++) {
             var firstObj = app.selection[0];
-
+            var orgObj = app.selection[0];
+        
             var curFirstBoard = hasDoc ? (initArtboardsLength - 1 + i) : i;
             var mainArtboard;
-
-            if (i == 0)
+            
+            // alert(i)
+            // alert(i == 0)
+            // alert(initArtboardsLength - 1 + i)
+            // alert(curFirstBoard)
+            if (i == 0) {
                 docRef.fitArtboardToSelectedArt(curFirstBoard);
+            }
 
             //duplicate artboard
             mainArtboard = docRef.artboards[curFirstBoard];
@@ -246,49 +362,37 @@ function createLogoTypes(docRef, clientName, logotype, mediaType, sepaRator, for
             // alert(abT+" "+abL+' '+abR+' '+abB)
 
             docRef.artboards.add([abR + 100, abT, abR + 100 + (abR - abL), abB]);
-            docRef.artboards[initArtboardsLength + i].name = logotype + separator + artboardsName[i] + separator + mediatype
+            docRef.artboards[initArtboardsLength + i].name = logotype + separator + artboardsNames[i] + separator + mediatype
 
-            firstObj.duplicate();
-            firstObj.translate(firstObj.width + 100, 0);
 
-            // Add logo info
-            // addLogoInfo(docRef, artboardsName[i], posX);
-            fillColor(firstObj, colors[i]);
+            // Fixed for very light grayscale due to PMS version was used now
+            if (colors[i] != 'pms'){
+                orgObj.duplicate();
+                orgObj.translate(orgObj.width + 100, 0);
+                firstObj = orgObj;
+            } else {
+                firstObj.duplicate();
+                firstObj.translate(firstObj.width + 100, 0);
+            }
+
+            // Make color logo versions
+            fillColor(firstObj, colors[i], extensionRoot);
 
             //select the latest object
             docRef.artboards.setActiveArtboardIndex(docRef.artboards.length - 1);
             docRef.selectObjectsOnActiveArtboard();
         }
-        logotype = logotype;
-        run = setLogoInfo(docRef, logotype, initArtboardsLength, false);
-        // docRef.artboards.setActiveArtboardIndex(0);
-        // docRef.selectObjectsOnActiveArtboard();
 
-        // // alert(logotype)
-        // // Add logo info: Logo type & Media type
-        // var ab = docRef.artboards[docRef.artboards.length - 4];
-        // posX = ab.artboardRect[0]; // Left
-        // posY = ab.artboardRect[1]; // Top
-        // addLogoInfo(docRef, logotype, posX - 15, posY - 8, 'right');
-        // addLogoInfo(docRef, "fullcolor", posX, posY + 20, 'left');
-        // // Loop of 3 needs work if users adds custom variations like single color or different colored versions
-        // // Variations like full-color + white text and full-color with black text are very common
-        // for (var i = 0; i < 3; i++) {
-        //     var ab = docRef.artboards[(initArtboardsLength + i)];
-        //     posX = ab.artboardRect[0]; // Left
-        //     posY = ab.artboardRect[1]; // Top
-        //     addLogoInfo(docRef, artboardsName[i], posX, posY + 20, 'left');
-        // }
-        // // Deselect all
-        // app.selection = null;
-        // run = true;
+        // Add logo type & color version info
+        logotype = logotype;
+        run = setLogoInfo(docRef, logotype, artboardsNames, initArtboardsLength, false);
     }
     // alert(run)
     return run
 }
 
 //change object colors
-function fillColor(obj, color) {
+function fillColor(obj, color, extensionRoot) {
     var docRef = app.activeDocument;
     docRef.layers[0].hasSelectedArtwork = false;
     docRef.artboards.setActiveArtboardIndex(docRef.artboards.length - 1);
@@ -298,13 +402,30 @@ function fillColor(obj, color) {
         app.executeMenuCommand('Colors7');
         return;
     }
+    if (color == 'pms') {
+        // var ScriptFilePath = Folder($.fileName).parent.fsName;
+        // alert(Folder($.fileName))
+        // alert(Folder($.fileName).fsName)
+        // alert(Folder($.fileName).parent.fsName)
+        // alert(ScriptFilePath)
+        // var extensionRoot = getExtensionRootPath();
+        // alert(extensionRoot)
+        // $.evalFile(new File(extensionRoot + 'cmyktopms.jsx'));
+        // $.evalFile(new File('/cmyktopms.jsx'));
+        $.evalFile(new File(extensionRoot+'/jsx/cmyktopms.jsx'));
+        // $.evalFile(new File(extensionRoot+'/jsx/alert.jsx'));
+        // $.sleep(5)
+        return;
+    }
     var aDoc = docRef;
     aDoc.defaultFillColor = color;
     app.executeMenuCommand("Find Fill Color menu item");
 }
 
 
-function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt) {
+function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, exportInfo) {
+    // convert string list of josn settings back to object
+    exportInfo = exportInfo.split(',')
 
     // Timer Tom Ruark 
     // Source: Getter.jsx
@@ -368,7 +489,6 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt) {
         if (app.documents.length > 0 && !cancel) {
             var docRef = app.activeDocument;
             var artboardsNum = docRef.artboards.length;
-            var artboardName = '';
             var afile = docRef.fullName;
             var options = {};
             var destFile = '';
@@ -415,13 +535,13 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt) {
                         logoTypeExp = logoType[i].substr(3, logoType[i].length).toLowerCase().split('-').pop(); //[0];
                         expArtboards = getExpArtboards(logoTypeExp, true, checkABhasArt);
                         if (expArtboards != '') {
-                            exportFormats(destPath, mediatype, logoTypeExp, expArtboards);
+                            exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportInfo);
                         }
                     }
                 } else {
                     logoTypeExp = logoType.substr(3, logoType.length).toLowerCase().split('-').pop(); //[0];
                     expArtboards = getExpArtboards(logoTypeExp, true, checkABhasArt);
-                    exportFormats(destPath, mediatype, logoTypeExp, expArtboards);
+                    exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportInfo);
                 }
 
                 // Use subfolders by logotype    
@@ -448,7 +568,7 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt) {
                                     destPath.create();
                                 }
                                 expArtboards = getExpArtboards(logoTypeExp, true, checkABhasArt);
-                                exportFormats(destPath, mediatype, logoTypeExp, expArtboards);
+                                exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportInfo);
                             }
                         }
                     }
@@ -460,7 +580,7 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt) {
 
                     logoTypeExp = logoType.substr(3, logoType.length).toLowerCase().split('-').pop(); //[0];
                     expArtboards = getExpArtboards(logoTypeExp, true, checkABhasArt);
-                    exportFormats(destPath, mediatype, logoTypeExp, expArtboards);
+                    exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportInfo);
                 }
             }
 
@@ -573,7 +693,7 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt) {
     }
 
 
-    function exportFormats(destPath, mediatype, logotypePrefix, expArtboards) {
+    function exportFormats(destPath, mediatype, logotypePrefix, expArtboards, exportInfo) {
         lyrLogoInfo = app.activeDocument.layers.getByName(LOGO_INFO);
         lyrLogoInfo.visible = false;
 
@@ -652,11 +772,13 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt) {
         if (ai !== -1) {
             if (aiFolder != null) {
                 var options = new IllustratorSaveOptions();
-                options.compatibility = Compatibility.ILLUSTRATOR17;
-                options.flattenOutput = OutputFlattening.PRESERVEAPPEARANCE;
-                options.compressed = true;
-                options.PDFCompatibility = true;
-                options.embedICCProfile = true;
+                options.compatibility = aiCompatibility(exportInfo[0])//Compatibility.ILLUSTRATOR17;
+                // options.flattenOutput = aiFlattening()exportInfo[1]; Illustrator 8 feature // OutputFlattening.PRESERVEAPPEARANCE;
+                options.PDFCompatibility = stringToBoolean(exportInfo[1]); //true
+                options.embedLinkedFiles = stringToBoolean(exportInfo[2]); //true;
+                options.embedICCProfile = stringToBoolean(exportInfo[3]); //true;
+                options.compressed = stringToBoolean(exportInfo[4]); //true;
+
                 options.saveMultipleArtboards = true;
                 // options.artboardRange = 1+','+2+','+4; // Works
                 options.artboardRange = expArtboards.toString();
@@ -702,57 +824,53 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt) {
                     var options = new PDFSaveOptions();
                     var pdfProfileAI = "[PDF/X-4:2008]";
                     options.pDFPreset = pdfProfileAI ? checkPresets(true, pdfProfileAI) : "[High Quality Print]";
-                    options.preserveEditability = false; //false
-                    options.saveMultipleArtboards = false; //false
-                    // if(expArtboards.length)
-                    // alert(expArtboards.substring(expArtboards.length-1))
-                    // alert(expArtboards.slice(-1))
-                    // alert(expArtboards.slice(-1)==',')
+                    options.preserveEditability = stringToBoolean(exportInfo[6]); //false
+                    options.generateThumbnails = stringToBoolean(exportInfo[7]); //true;
+                    options.optimization = stringToBoolean(exportInfo[8]); //true;
+                    options.layers = stringToBoolean(exportInfo[9]); //false;
+
+                    options.saveMultipleArtboards = false;
                     if (expArtboards.slice(-1) == ',') {
                         expArtboards = expArtboards.substr(0, expArtboards.length - 1);
                     }
-                    // alert(expArtboards)
                     ABs = expArtboards.split(','); //replace(/^\s+|\s+$/gm,'')
-                    // alert(ABs)
-                    // alert(ABs.length)
                     for (var i = 0; i < ABs.length; i++) {
                         options.artboardRange = ABs[i];
-                        // alert(ABs[i])
                         ABnr = ABs[i];
                         abName = docRef.artboards[ABnr - 1].name;
-                        // alert(abName)
-                        // alert(docRef.artboards[i])
-                        // alert(docRef.artboards[ABs[i]].name;)
-                        // alert(pdfFolder+'/'+addDocName+'_'+abName)
                         fileName = File(pdfFolder + '/' + addDocName + '_' + abName)
                         docRef.saveAs(fileName, options);
                         // docRef.saveAs(fileName, options, fileNamePrefix);
                     }
                 } else if (mediaType == 'Digital') {
                     var options = new ExportForScreensPDFOptions();
+                    options.pDFPreset = pdfProfileAI ? checkPresets(true, pdfProfileAI) : "[High Quality Print]";
+                    options.preserveEditability = stringToBoolean(exportInfo[6]); //false
+                    options.generateThumbnails = stringToBoolean(exportInfo[7]); //true;
+                    options.optimization = stringToBoolean(exportInfo[8]); //true;
+                    options.layers = stringToBoolean(exportInfo[9]); //false;
                     // var options = new PDFSaveOptions();
                     // options.compatibility = PDFCompatibility.ACROBAT5;
-                    options.compatibility = PDFCompatibility.ACROBAT8;
-                    options.generateThumbnails = true;
-                    options.preserveEditability = false;
-                    options.layers = false;
-                    options.spotColors = false;
-                    options.embedColorProfile = true;
+                    // options.compatibility = PDFCompatibility.ACROBAT8;
+                    // options.preserveEditability = false;
+                    // options.generateThumbnails = true;
+                    // options.layers = false;
+                    // options.spotColors = false;
                     // options.colorProfileID = ColorProfi.IleNCLUDEDESTPROFILE;
                     // options.colorConversionID = ColorConversion.COLORCONVERSIONTODEST; 
                     // options.colorDestinationID = ColorDestination.COLORDESTINATIONWORKINGCMYK;
                     // options.pDFPreset = "[High Quality Print]";
-                    options.saveMultipleArtboards = false; //false
 
                     // options.acrobatLayers = true;
                     // options.colorBars = true;
-                    options.colorCompression = CompressionQuality.AUTOMATICJPEGHIGH;
-                    options.compressArt = true; //default
-                    options.embedICCProfile = true;
+                    // options.colorCompression = CompressionQuality.AUTOMATICJPEGHIGH;
+                    // options.compressArt = true; //default
+                    // options.embedICCProfile = true;
                     // options.enablePlainText = true;
-                    options.optimization = true;
-                    options.pageInformation = false;
+                    // options.optimization = true;
+                    // options.pageInformation = false;
                     // whatToExport.artboards = getArtboards(document,newArtboards);
+                    options.saveMultipleArtboards = false; //false
                     docRef.exportForScreens(pdfFolder, ExportForScreensType.SE_PDF, options, whatToExport, fileNamePrefix);
                 }
 
@@ -820,30 +938,18 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt) {
 
             }
         }
-
-        if (svg !== -1) {
-            if (svgFolder != null) {
-                var options = new ExportForScreensOptionsWebOptimizedSVG();
-                options.cssProperties = SVGCSSPropertyLocation.PRESENTATIONATTRIBUTES;
-                options.coordinatePrecision = 5;
-                options.fontType = SVGFontType.OUTLINEFONT;
-
-                app.activeDocument.exportForScreens(svgFolder, ExportForScreensType.SE_SVG, options, whatToExport, fileNamePrefix);
-            }
-        }
         
         if (eps !== -1) {
             if (epsFolder != null) {
-                // var options = new ExportForScreensOptionsWebOptimizedSVG();
-                // options.cssProperties = SVGCSSPropertyLocation.PRESENTATIONATTRIBUTES;
-                // options.coordinatePrecision = 5;
-                // options.fontType = SVGFontType.OUTLINEFONT;
-
-                // app.activeDocument.exportForScreens(svgFolder, ExportForScreensType.SE_SVG, options, whatToExport, fileNamePrefix);
-                //save eps
-                options = new EPSSaveOptions();
-                options.embedLinkedFiles = true;
-                options.includeDocumentThumbnails = true;
+                var options = new EPSSaveOptions();
+                options.compatibility = epsCompatibility(exportInfo[10]); // Compatibility.ILLUSTRATOR17 ; //ILLUSTRATOR24;
+                options.embedAllFonts = stringToBoolean(exportInfo[11]); // true;
+                options.embedLinkedFiles = stringToBoolean(exportInfo[12]); // true;
+                options.includeDocumentThumbnails = stringToBoolean(exportInfo[13]); // true;
+                options.preview = EPSPreview.BWTIFF;
+                options.cmykPostScript = stringToBoolean(exportInfo[14]); // true;
+                options.compatibleGradientPrinting = stringToBoolean(exportInfo[15]); // true;
+                options.postScript = epsPostscript(exportInfo[16]); // EPSPostScriptLevelEnum.LEVEL2;
                 options.saveMultipleArtboards = true;
 
                 docRef.saveAs(epsFolder, options);
@@ -858,24 +964,19 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt) {
             }
         }
 
-
-        if (png !== -1) {
-            if (pngFolder != null) {
-                var options = new ExportForScreensOptionsPNG24();
-                options.antiAliasing = AntiAliasingMethod.ARTOPTIMIZED;
-                options.transparency = true;
-                // options.scaleType = ExportForScreensScaleType.SCALEBYRESOLUTION;
-                options.scaleType = ExportForScreensScaleType.SCALEBYWIDTH;
-                options.scaleTypeValue = expResolution;
-                // Jpg options doesnt work
-                options.embedICCProfile = true;
-                options.embedColorProfile = true;
-                // options.scaleType = ExportForScreensScaleType.SCALEBYFACTOR;
-                // options.horizontalScale = expResolution;
-                // options.verticalScale = expResolution;
-                // options.scaleTypeValue = 72;
-
-                app.activeDocument.exportForScreens(pngFolder, ExportForScreensType.SE_PNG24, options, whatToExport, fileNamePrefix);
+        if (svg !== -1) {
+            if (svgFolder != null) {
+                var options = new ExportForScreensOptionsWebOptimizedSVG();
+                options.cssProperties = svgCSSproperty(exportInfo[17]); //SVGCSSPropertyLocation.STYLEELEMENTS; // STYLEATTRIBUTES  PRESENTATIONATTRIBUTES
+                options.fontType = svgFontType(exportInfo[18]); //SVGFontType.OUTLINEFONT; // SVGFONT
+                options.rasterImageLocation = svgRasterImageLocation(exportInfo[19]);//RasterImageLocation.EMBED;
+                options.svgId = svgObjectID(exportInfo[20])//SVGIdType.SVGIDUNIQUE; // SVGIDMINIMAL  SVGIDREGULAR
+                options.coordinatePrecision = stringToNumber(exportInfo[21]); //5;
+                options.svgMinify = stringToBoolean(exportInfo[22]);//false;
+                options.svgResponsive = stringToBoolean(exportInfo[23]); //false;
+                // options.fontSubsetting = SVGFontSubsetting.None;
+                // options.compressed = true;
+                app.activeDocument.exportForScreens(svgFolder, ExportForScreensType.SE_SVG, options, whatToExport, fileNamePrefix);
             }
         }
 
@@ -889,15 +990,12 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt) {
             // options.horizontalScale  = expResolution;
             // options.verticalScale    = expResolution;
             // options.qualitySetting = 0;
-
             // var options = new exportOptionsJPEG();
             var options = new ExportForScreensOptionsJPEG();
-            // options.antiAliasing = AntiAliasingMethod.ARTOPTIMIZED;
-            // options.antiAliasing = AntiAliasingMethod.None;
-            options.antiAliasing = AntiAliasingMethod.TYPEOPTIMIZED;
-            options.compressionMethod = JPEGCompressionMethodType.PROGRESSIVE;
-            options.progressiveScan = 4;
-            options.embedICCProfile = true;
+            options.compressionMethod = jpgCompressionMethod(exportInfo[24]);
+            options.progressiveScan = stringToNumber(exportInfo[25]) + 3; // compensate for 3,4,5 by adding 3 as start value
+            options.antiAliasing = jpgAntiAliasing(exportInfo[26]); // AntiAliasingMethod.TYPEOPTIMIZED;
+            options.embedICCProfile = stringToBoolean(exportInfo[27]); // true
 
             /** source: https://gist.github.com/haysclark/9d143284b0791faa90517acb32d1855e
             SCALEBYFACTOR = 0,
@@ -916,6 +1014,7 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt) {
             // options.scaleType = ExportForScreensScaleType.SCALEBYHEIGHT;
             // options.scaleType = ExportForScreensScaleType.SCALEBYFACTOR;
 
+            // JPG Options
             // scaletype causes issues with small docs
             // alert(expResolution)
             // options.scaleTypeValue = 1000;
@@ -925,10 +1024,9 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt) {
             // options.horizontalScale = expResolution;
             // options.verticalScale = expResolution;
             // options.scaleTypeValue = 72;
-            options.artBoardClipping = true;
-            options.saveMultipleArtboards = true;
-            options.artboardRange = expArtboards;
-            options.qualitySetting = 100;
+            // options.artBoardClipping = true;
+            // options.saveMultipleArtboards = true;
+            // options.qualitySetting = 100;
             // app.activeDocument.exportFile(jpgFolder, ExportForScreensType.SE_JPEG100, options, whatToExport, fileNamePrefix);
 
             // whatToExport.artboards = getArtboards(document, newArtboards);
@@ -953,11 +1051,29 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt) {
             // // aiApp.imageCapture(fileSpec, captureClip,captureOptions)
             // app.activeDocument.imageCapture(fileSpec, captureClip,captureOptions)
         }
+        if (png !== -1) {
+            if (pngFolder != null) {
+                var options = new ExportForScreensOptionsPNG24();
+                options.antiAliasing = pngAntiAliasing(exportInfo[28]); // AntiAliasingMethod.ARTOPTIMIZED;
+                options.interlaced = stringToBoolean(exportInfo[29]); // true;
+                options.transparency = stringToNumber(exportInfo[30]); // true;
+
+                options.scaleType = ExportForScreensScaleType.SCALEBYWIDTH; // ExportForScreensScaleType.SCALEBYRESOLUTION;
+                options.scaleTypeValue = expResolution;
+                // options.scaleType = ExportForScreensScaleType.SCALEBYFACTOR;
+                // options.horizontalScale = expResolution;
+                // options.verticalScale = expResolution;
+                // options.scaleTypeValue = 72;
+
+                app.activeDocument.exportForScreens(pngFolder, ExportForScreensType.SE_PNG24, options, whatToExport, fileNamePrefix);
+            }
+        }
         // }
 
         // reopenDocument(document, afile);
         lyrLogoInfo.visible = true;
     }
+
 
     function getArtboards(document, newArtboards) {
         for (var i = 0; i <= app.activeDocument.artboards.length; i++) {
@@ -1038,6 +1154,256 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt) {
 }
 
 
+///////////////////////////////////////////////////////////////////////////
+//
+// files export settings from JSON 
+//
+///////////////////////////////////////////////////////////////////////////
+
+
+function stringToBoolean(string){
+    try{
+        if (string=="true") return true
+        if (string=="false") return false
+    } catch (e) {
+        alert("stringToBoolean() error: "+e)
+    }
+}
+
+function stringToNumber(string){
+    try {
+        // alert(parseInt(string)+" "+string)
+        return parseInt(string)
+    } catch (e) {
+        alert("stringToNumber() error: "+e)
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////
+// AI SETTINGS
+///////////////////////////////////////////////////////////////////////////
+function aiCompatibility(index){
+    switch (stringToNumber(index)) {
+        case 0:
+            index = Compatibility.ILLUSTRATOR17;
+            break;
+        case 3:
+            index = Compatibility.ILLUSTRATOR16;
+            break;
+        case 4:
+            index = Compatibility.ILLUSTRATOR15;
+            break;
+        case 5:
+            index = Compatibility.ILLUSTRATOR14;
+            break;
+        case 6:
+            index = Compatibility.ILLUSTRATOR13;
+        case 7:
+            index = Compatibility.ILLUSTRATOR12;
+        case 8:
+            index = Compatibility.ILLUSTRATOR11;
+        case 9:
+            index = Compatibility.ILLUSTRATOR10;
+        case 10:
+            index = Compatibility.ILLUSTRATOR9;
+        case 11:
+            index = Compatibility.ILLUSTRATOR8;
+        default:
+            index = Compatibility.ILLUSTRATOR17;
+    }
+    return index;
+}
+// Not used, illustrator 8 feature
+function aiFlattening(index){
+    switch (stringToNumber(index)) {
+        case 0:
+            index = OutputFlattening.PRESERVEAPPEARANCE;
+            break;
+        case 1:
+            index = Compatibility.PRESERVEPATHS;
+            break;
+        default:
+            index = Compatibility.PRESERVEAPPEARANCE;
+    }
+    return index;
+}
+
+///////////////////////////////////////////////////////////////////////////
+// EPS SETTINGS
+///////////////////////////////////////////////////////////////////////////
+function epsCompatibility(index){
+    switch (stringToNumber(index)) {
+        case 0:
+            index = Compatibility.ILLUSTRATOR17;
+            break;
+        case 3:
+            index = Compatibility.ILLUSTRATOR16;
+            break;
+        case 4:
+            index = Compatibility.ILLUSTRATOR15;
+            break;
+        case 5:
+            index = Compatibility.ILLUSTRATOR14;
+            break;
+        case 6:
+            index = Compatibility.ILLUSTRATOR13;
+        case 7:
+            index = Compatibility.ILLUSTRATOR12;
+        case 8:
+            index = Compatibility.ILLUSTRATOR11;
+        case 9:
+            index = Compatibility.ILLUSTRATOR10;
+        case 10:
+            index = Compatibility.ILLUSTRATOR9;
+        case 11:
+            index = Compatibility.ILLUSTRATOR8;
+        default:
+            index = Compatibility.ILLUSTRATOR17;
+    }
+    return index;
+}
+function epsPostscript(index){
+    switch (stringToNumber(index)) {
+        case 0:
+            index = EPSPostScriptLevelEnum.LEVEL2;
+            break;
+        case 3:
+            index = EPSPostScriptLevelEnum.LEVEL3;
+            break;
+        default:
+            index = EPSPostScriptLevelEnum.LEVEL2;
+    }
+    return index;
+}
+///////////////////////////////////////////////////////////////////////////
+// SVG SETTINGS
+///////////////////////////////////////////////////////////////////////////
+function svgCSSproperty(index){
+    switch (stringToNumber(index)) {
+        case 0:
+            index = SVGCSSPropertyLocation.STYLEELEMENTS;
+            break;
+        case 1:
+            index = SVGCSSPropertyLocation.STYLEATTRIBUTES;
+            break;
+        case 2:
+            index = SVGCSSPropertyLocation.PRESENTATIONATTRIBUTES;
+            break;
+        case 3:
+            index = SVGCSSPropertyLocation.ENTITIES;
+            break;
+        default:
+            index = SVGCSSPropertyLocation.STYLEELEMENTS // STYLEATTRIBUTES  PRESENTATIONATTRIBUTES
+    }
+    return index;
+}
+
+function svgFontType(index){
+    switch (stringToNumber(index)) {
+        case 0:
+            index = SVGFontType.OUTLINEFONT; // SVGFONT;
+            break;
+        case 1:
+            index = SVGFontType.SVGFONT;
+            break;
+        default:
+            index = SVGFontType.SVGFONT;
+    }
+    return index;
+}
+
+function svgRasterImageLocation(index){
+    switch (stringToNumber(index)) {
+        case 0:
+            index = RasterImageLocation.PRESERVE;
+            break;
+        case 1:
+            index = RasterImageLocation.EMBED;
+            break;
+        case 2:
+            index = RasterImageLocation.LINK;
+            break;
+        default:
+            index = RasterImageLocation.PRESERVE;
+    }
+    return index;
+}
+
+function svgObjectID(index){
+    switch (stringToNumber(index)) {
+        case 0:
+            index = SVGIdType.SVGIDUNIQUE;
+            break;
+        case 1:
+            index = SVGIdType.SVGIDMINIMAL;
+            break;
+        case 2:
+            index = SVGIdType.SVGIDREGULAR;
+            break;
+        default:
+            index = SVGIdType.SVGIDUNIQUE; // SVGIDMINIMAL  SVGIDREGULAR
+    }
+    return index;
+}
+
+///////////////////////////////////////////////////////////////////////////
+// PNG SETTINGS
+///////////////////////////////////////////////////////////////////////////
+function pngAntiAliasing(index){
+    switch (stringToNumber(index)) {
+        case 0:
+            index = AntiAliasingMethod.ARTOPTIMIZED;
+            break;
+        case 1:
+            index = AntiAliasingMethod.TYPEOPTIMIZED;
+            break;
+        case 2:
+            index = AntiAliasingMethod.None;
+            break;
+        default:
+            index = AntiAliasingMethod.ARTOPTIMIZED;
+    }
+    return index;
+}
+
+///////////////////////////////////////////////////////////////////////////
+// JPG SETTINGS
+///////////////////////////////////////////////////////////////////////////
+
+function jpgCompressionMethod(index){
+    switch (stringToNumber(index)) {
+        case 0:
+            index = JPEGCompressionMethodType.BASELINESTANDARD;
+            break;
+        case 1:
+            index = JPEGCompressionMethodType.BASELINEOPTIMIZED;
+            break;
+        case 2:
+            index = JPEGCompressionMethodType.PROGRESSIVE;
+            break;
+        default:
+            index = JPEGCompressionMethodType.BASELINESTANDARD;
+    }
+    return index;
+}
+
+function jpgAntiAliasing(index){
+    switch (stringToNumber(index)) {
+        case 0:
+            index = AntiAliasingMethod.ARTOPTIMIZED;
+            break;
+        case 1:
+            index = AntiAliasingMethod.TYPEOPTIMIZED;
+            break;
+        case 2:
+            index = AntiAliasingMethod.None;
+            break;
+        default:
+            index = AntiAliasingMethod.ARTOPTIMIZED;
+    }
+    return index;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Function: addLogoInfo
 // Usage: add logo info per artboard describing logo type & media
@@ -1053,13 +1419,13 @@ if (!infoColorRGB.exists) {
     infoColorRGB.blue = 255;
 }
 
-function setLogoInfo(docRef, logotype, initArtboardsLength, steps) {
+function setLogoInfo(docRef, logotype, colors, initArtboardsLength, steps) {
     appendLog('setLogoInfo()', logFile);
     appendLog(initArtboardsLength, logFile);
     // alert(logotype)
     // Add logo info
     // initArtboardsLength = app.activeDocument.artboards.length;
-    var artboardsName = ['grayscale', 'black', 'white'];
+    // var artboardsNames = ['grayscale', 'black', 'white'];
     docRef.artboards.setActiveArtboardIndex(0);
     docRef.selectObjectsOnActiveArtboard();
 
@@ -1067,25 +1433,43 @@ function setLogoInfo(docRef, logotype, initArtboardsLength, steps) {
     if (steps != false){
         var ab = docRef.artboards[steps-1]; // correct with subtracting -1 for index starts at 0
     } else{
-        var ab = docRef.artboards[docRef.artboards.length - 4];
+        // var ab = docRef.artboards[docRef.artboards.length - 4];
+        // alert("docRef.artboards " +(docRef.artboards.length - (colors.length+1)))
+        // alert("docRef.artboards " +(initArtboardsLength - (colors.length)))
+        // alert("-1 "+((docRef.artboards.length - (colors.length+1))== -1))
+        if ((docRef.artboards.length - (colors.length+1))== -1){
+            var ab = docRef.artboards[0];
+        } else {
+            var ab = docRef.artboards[docRef.artboards.length - (colors.length+1)]; // Step backwards according to number of colors
+            // var ab = docRef.artboards[initArtboardsLength - colors.length+1];
+        }
     }
+    
+    // alert("steps "+steps)
+    // alert("ab "+ab)
+    // alert("ab.artboardRect[0] "+ab.artboardRect[0])
     posX = ab.artboardRect[0]; // Left
     posY = ab.artboardRect[1]; // Top
     addLogoInfo(docRef, logotype, posX - 15, posY - 8, 'right');
     addLogoInfo(docRef, "fullcolor", posX, posY + 20, 'left');
     // Loop of 3 needs work if users adds custom variations like single color or different colored versions
     // Variations like full-color + white text and full-color with black text are very common
-    for (var i = 0; i < 3; i++) {
+    // for (var i = 0; i < 3; i++) {
+    // alert("colors.length "+colors.length)
+    for (var i = 0; i < colors.length; i++) {
         if (steps != false){
             var ab = docRef.artboards[(steps+i)];
         } else{
+            // alert("initArtboardsLength + i "+(initArtboardsLength + i))
+            // alert("docRef.artboards[(initArtboardsLength + i)] "+docRef.artboards[(initArtboardsLength + i)])
             var ab = docRef.artboards[(initArtboardsLength + i)];
         }
+        // alert(colors[i])
         // changed this to 1, otherise wont work?!
         // var ab = docRef.artboards[(1 + i)];
         posX = ab.artboardRect[0]; // Left
         posY = ab.artboardRect[1]; // Top
-        addLogoInfo(docRef, artboardsName[i], posX, posY + 20, 'left');
+        addLogoInfo(docRef, colors[i], posX, posY + 20, 'left');
     }
     // Deselect all
     app.selection = null;
@@ -1506,7 +1890,7 @@ function errorEvent(errorNumber) {
 // 
 // Add margins to Artboards
 // 
-function addMarginToArtboard(marginVal, margintype, allArtboards, logotype) {
+function addMarginToArtboard(marginVal, margintype, allArtboards, logotype, colors, mediaType) {
     appendLog('addMarginsToArtboard()', logFile);
     appendLog(initArtboardsLength, logFile);
     run = false;
@@ -1554,7 +1938,14 @@ function addMarginToArtboard(marginVal, margintype, allArtboards, logotype) {
             alert('Open a document before running this script', 'Error running FitArtboardToArt.jsx');
             run = false
         }
+        
+        // colors, artboardsNames = getLogoColorList(colors, mediaType);
+         // get list of colors
+        var colorList = getLogoColorList(colors, mediaType);
+        var colors = colorList[0];
+        var artboardsNames = colorList[1];
 
+        // alert("color.lenght margin fucntion "+colors.length)
         // Update logo info around the artboards
         logotypes = getArtboardLogoTypes(docRef, true);
         // alert(logotypes)
@@ -1566,15 +1957,19 @@ function addMarginToArtboard(marginVal, margintype, allArtboards, logotype) {
             // do nothing
         }
         if (logotype == "alltypes") {
-            abLength = docRef.artboards.length / 4;
-            for (ab = 1; ab < docRef.artboards.length; ab+=4) {
+            // abLength = docRef.artboards.length / 4;
+            // for (ab = 1; ab < docRef.artboards.length; ab+=4) {
+            // alert("colors.length "+colors.length)
+            // alert("artboardsNames.length "+artboardsNames.length)
+            abLength = docRef.artboards.length / (artboardsNames.length+1);
+            for (ab = 1; ab < docRef.artboards.length; ab+=(artboardsNames.length+1)) {
                 // ab = ab == 0 ? 0 : ab+4;
                 app.selection = null;
                 docRef.artboards.setActiveArtboardIndex(ab-1); // correct -1 idnex starts at 0
-                run = setLogoInfo(docRef, logotypes[ab], ab, ab);
+                run = setLogoInfo(docRef, logotypes[ab], artboardsNames, ab, ab);
             }
         } else {
-            run = setLogoInfo(docRef, logotype, initArtboardsLength, false);
+            run = setLogoInfo(docRef, logotype, artboardsNames, initArtboardsLength, false);
         }
         return run
     }
@@ -2167,6 +2562,7 @@ function appendLog(message, file) {
 function _zeroPad(val) {
     return (val < 10) ? '0' + val : val;
 }
+
 // logFile = startLog(Folder.desktop+'/Export/Logo Packer');//app.activeDocument.path + "/")
 logFile = startLog(); // userdata folder
 var date = new Date();
@@ -2193,7 +2589,7 @@ function newBaseDoc(clientName, docType) {
             return run = "doctype"
         } else {
             var run = false;
-            var artboardsName = ['logo', 'logotype', 'logomark', 'payoff'];
+            var artboardsNames = ['logo', 'logotype', 'logomark', 'payoff'];
             var docType = docType == 'cmyk' ? 'cmyk' : 'rgb';
             var hasDoc = false;
             var initArtboardsLength = 1;
@@ -2220,8 +2616,8 @@ function newBaseDoc(clientName, docType) {
             docRef.rulerOrigin = [0, 0];
             docRef.pageOrigin = [0, 0];
 
-            docRef.artboards[initArtboardsLength - 1].name = artboardsName[0];
-            // docRef.artboards[initArtboardsLength].name = artboardsName[0];
+            docRef.artboards[initArtboardsLength - 1].name = artboardsNames[0];
+            // docRef.artboards[initArtboardsLength].name = artboardsNames[0];
 
             // Delete all unused color swatches, only first gen logos
             if (swatchesCleaned == false) {
@@ -2230,7 +2626,7 @@ function newBaseDoc(clientName, docType) {
             }
 
             // Add artboards
-            for (var i = 0; i < artboardsName.length-1; i++) {
+            for (var i = 0; i < artboardsNames.length-1; i++) {
                 // var curFirstBoard = hasDoc ? (initArtboardsLength - 1 + i) : i;
                 // var curFirstBoard = (initArtboardsLength - 1 + i);
                 var curFirstBoard = i;
@@ -2247,8 +2643,8 @@ function newBaseDoc(clientName, docType) {
                 // alert(abT+" "+abL+' '+abR+' '+abB)
 
                 docRef.artboards.add([abR + 100, abT, abR + 100 + (abR - abL), abB]);
-                // docRef.artboards[initArtboardsLength + i].name = artboardsName[i];
-                docRef.artboards[initArtboardsLength+i].name = artboardsName[initArtboardsLength+i];
+                // docRef.artboards[initArtboardsLength + i].name = artboardsNames[i];
+                docRef.artboards[initArtboardsLength+i].name = artboardsNames[initArtboardsLength+i];
 
             }
             run = true;
@@ -2256,5 +2652,23 @@ function newBaseDoc(clientName, docType) {
         return run
     } catch (e) {
         appendLog('### ERROR ' + e, logFile);
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Function: getExtensionRootPath
+// Usage: return list of file names
+// Input: folder
+// Return: list of filenames
+///////////////////////////////////////////////////////////////////////////////
+function getExtensionRootPath() {
+
+    extensionRoot = $.fileName.split('/').slice(0, -2).join('/') + '/';
+    var folderPath = extensionRoot;
+    if (!Folder(folderPath).exists) {
+        alert("There is no Root folder with that name", "Warning")
+    } else {
+        return folderPath
     }
 }
