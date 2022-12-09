@@ -238,6 +238,8 @@ $path = {
                     //     throwMessage(false, "Cancelled Cleanup");
                     } else if(run=="cancelled") {
                         throwMessage(false, "Color Group name needs to be same as client name");
+                    } else if (run=="noDoc") {
+                        throwMessage(false, "No document available");
                     } else {
                         throwMessage(false, "Something went wrong");
                     }
@@ -250,6 +252,8 @@ $path = {
                 csInterface.evalScript(`deleteUnusedPanelItems()`, function (run) {
                     if (run == "true") {
                         throwMessage(run, "All Swatches Cleared");
+                    } else if (run == "noDoc"){
+                        throwMessage(run, "No document available");
                     } else {
                         throwMessage(run, "Already Cleared Swatches");
                     }
@@ -305,7 +309,7 @@ $path = {
                 if (run == "true") {
                     throwMessage(run, "Opened destination");
                 } else {
-                    throwMessage(false, "No destination set");
+                    throwMessage(false, "Destination is not set or can't be found");
                 }
             });
         });
@@ -387,7 +391,7 @@ $path = {
             var scriptFile = csInterface.getSystemPath(SystemPath.EXTENSION) + "/settings/settings.json";
             console.log("Read Settings file: "+scriptFile)
             $.getJSON(scriptFile, function(exportInfo) {
-                console.log("inside getJSON " + exportInfo)
+                console.log("Reading Settings.json" + exportInfo)
                 // var settingsJSON = {
                 //     // ai: {
                 //     //     VersionAI: VersionAIDropdown.selection.index,

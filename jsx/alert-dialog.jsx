@@ -102,6 +102,7 @@ function scriptAlert(alertTitle, alertString1, alertString2, okBtn, cancelBtn, o
             okButton.text = okStr;
             okButton.alignment = ["right", "top"];
             okButton.graphics.font = "dialog:13";
+            okButton.active = true;
 
         okButton.onClick = function(){
             scriptAlertResult = true;

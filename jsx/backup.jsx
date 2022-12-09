@@ -184,7 +184,7 @@ function exportFiles() {
 			options.includeDocumentThumbnails = true;
 			options.saveMultipleArtboards = false;
 
-			destFile = new File(afile.parent.fsName + '/' + document.name.split('.')[0] + ".epf");
+			destFile = new File(afile.parent.fsName + '/' + document.name.split('.')[0] + ".eps");
 			document.saveAs(destFile, options)
 
 			reopenDocument(document, afile);

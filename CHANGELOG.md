@@ -2,6 +2,21 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.5.9] - 2022-12-09
+### Added
+- Allow custmo alert dialog to show different icons
+- Extra warnings when something goes wrong running functions. Some lacked proper feedback to user
+
+### Fixed
+- Export EPS export wrong artboard range. all artboards were exported to all logo variation folders
+- Not showing error when destination folder could not be opened or was not found
+- Cancel clear destination folder would still delete/clear the folder
+
+### Others
+- Reorganised custom alert dialog, moved to hostscript for easier access
+- Cleanup code & leftovers
+
+
 ## [0.5.8] - 2022-12-08
 ### Fixed
 - Issue when conversion to Grayscale due to new added PMS. colors were much lighter
