@@ -2,7 +2,7 @@
 <ExtensionManifest Version="6.0" ExtensionBundleId="com.doingdesign.logopacker" ExtensionBundleVersion="1.0.0" ExtensionBundleName="Logo Packer"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<ExtensionList>
-		<Extension Id="com.doingdesign.logopacker" Version="1.0.0" />
+		<Extension Id="com.doingdesign.logopacker" Version="1.2.0" />
 	</ExtensionList>
 	<ExecutionEnvironment>
 		<HostList>
@@ -42,7 +42,7 @@
 							<Width>250</Width>
 						</MinSize>
 						<MaxSize>
-							<Height>950</Height>
+							<Height>850</Height>
 							<Width>500</Width>
 						</MaxSize>
 

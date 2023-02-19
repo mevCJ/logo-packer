@@ -289,11 +289,13 @@ function createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRa
 
         //paste and group
         app.paste();
+        //force group item to fix bugs
+        app.executeMenuCommand('group');
         
         item = docRef.selection[0];
 
         // Only group if not alreadt a group
-        if (item.typename != "GroupItem") app.executeMenuCommand('group');
+        // if (item.typename != "GroupItem") app.executeMenuCommand('group');
 
         // Give groupname Client name and logotype as name, Looks clean in layers :)
         item.name = clientName+"-"+logotype;
@@ -380,7 +382,6 @@ function createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRa
         logotype = logotype;
         run = setLogoInfo(docRef, logotype, artboardsNames, initArtboardsLength, false);
     }
-    // alert(run)
     return run
 }
 
