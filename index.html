@@ -15,7 +15,12 @@
         <div id="messages" class="hidden"></div>
         <div style="padding: 0.5rem; padding-top: 0.25rem" id="content">
             <div id="project" class="project flex flex-row flex-between">
-                <h1 class="hostFont">Generate Logo</h1>
+                <h1 class="hostFont">Project</h1>
+                <div class="iconSettings">
+                    <div id="setDestFolder" class="icon icon-btn folder"></div>
+                    <div id="openDestFolder" class="icon icon-btn openDestFolder disabled"></div>
+                    <div id="clearDestFolder" class="icon icon-btn clearDestFolder disabled"></div>
+                </div>
             </div>
             <!-- <div class="row radioButtons">
                 <div class="col">
@@ -61,6 +66,36 @@
                     <label for="digital">Digital</label>
                 </div>
             </div>
+            <div class="row radioButtons" id="colors">
+                <div class="col">
+                    <label for="colors">Colors:&nbsp;</label>
+                </div>
+                <div class="col col-column">
+                    <div>
+                        <input type="checkbox" class="hostButton" name="colors" value="fullcolor" checked/>
+                        <label for="fullcolor">Fullcolor</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" class="hostButton" name="colors" value="pms" />
+                        <label for="pms">PMS</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" class="hostButton" name="colors" value="grayscale" checked/>
+                        <label for="grayscale">Grayscale<label>
+                    </div>
+                </div>
+                <div class="col col-column">
+                    
+                    <div>
+                        <input type="checkbox" class="hostButton" name="colors" value="black" checked/>
+                        <label for="black">Black</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" class="hostButton" name="colors" value="white" checked/>
+                        <label for="white">White</label>
+                    </div>
+                </div>
+            </div>
             <div class="row radioButtons" id="separator">
                 <div class="col">
                     <label for="separator">Separator:&nbsp;</label>
@@ -83,6 +118,7 @@
             <div class="genButtons">
                 <button id="generate_btn" class="hostButton">Generate logos</button>
                 <!-- <button id="digital_btn" class="hostButton btn50">Digital Logos</button> -->
+                <button id="export_btn" class="hostButton disabled">Export files</button>
             </div>
             <div id="settings">
                 <div class="settings flex flex-row flex-between">
@@ -107,18 +143,13 @@
                     <div class="col">
                         <label>Destination:&nbsp;</label>
                     </div>
-                    <div class="col full-width flex" style="align-items: center">
+                    <div class="col full-width">
                         <input id="expPath" name="exportpath" placeholder="Export path..." />
-                        <div class="iconSettings" style="margin-left: .5rem">
-                            <div id="setDestFolder" class="icon icon-btn folder"></div>
-                            <div id="openDestFolder" class="icon icon-btn openDestFolder disabled"></div>
-                            <div id="clearDestFolder" class="icon icon-btn clearDestFolder disabled"></div>
-                        </div>
                     </div>
                 </div>
                 <div class="row radioButtons" id="formats">
                     <div class="col">
-                        <label for="formats">Formats:&nbsp;</label>
+                        <label for="formats">Formats:&nbsp;</label><div id="settingsIcon_btn" class="icon icon-btn settingsIcon"></div>
                     </div>
                     <div class="col col-column">
                         <div>
@@ -133,6 +164,10 @@
                             <input type="checkbox" class="hostButton" name="formats" value="svg" />
                             <label for="svg">Svg</label>
                         </div>
+                        <div>
+                            <input type="checkbox" class="hostButton" name="formats" value="eps" />
+                            <label for="eps">Eps</label>
+                        </div>
                     </div>
                     <div class="col col-column">
                         <div>
@@ -145,13 +180,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="genButtons">
-                    <button id="export_btn" class="hostButton disabled">Export files</button>
-                </div>
             </div>
-
-
-            
             <div id="extras">
                 <div style="display: flex">
                     <h1 class="hostFont">Extras</h1>
@@ -215,23 +244,29 @@
                         </div>
                         <div style="margin-bottom: 0.5rem; line-height: 0;">&nbsp;</div>
                         <select name="type" id="margintype" style="width: auto;">
-                            <option value="select">Select</option>
+                            <!-- <option value="select">Select</option> -->
+                            <option value="px">px</option>
                             <option value="mm">mm</option>
                             <option value="cm">cm</option>
                             <option value="in">in</option>
                             <option value="pt">pt</option>
-                            <option value="px">px</option>
                             <option value="pc">pc</option>
                         </select>
                     </div>
                 </div>
-                <div class="row radioButtons">
+                <div class="row radioButtons" id="allartboards">
                     <div class="col">
                         <label for="type">&nbsp;</label>
                     </div>
                     <div class="col full-width">
-                        <button id="addmargins_btn" class="hostButton">Add Extra Margin</button>
+                        <div>
+                            <input type="checkbox" class="hostButton" name="allartboards" value="all" checked/>
+                            <label for="all">All Artboards</label>
+                        </div>
                     </div>
+                    <!-- <div class="col full-width">
+                        <button id="addmargins_btn" class="hostButton">Add Extra Margin</button>
+                    </div> -->
                 </div>
                 <hr class="solid">
                 <!-- <span style="line-height: .5; display:block;" >&nbsp;</span> -->

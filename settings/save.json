@@ -1,26 +1,35 @@
 {
     "generation": {
-        "client": "surf",
-        "type": "alltypes",
-        "mediatype": "Digital",
+        "client": "square",
+        "type": "logo",
+        "mediatype": "Print",
+        "colors": {
+            "fullcolor": true,
+            "pms": true,
+            "grayscale": false,
+            "black": false,
+            "white": false
+        },
         "separator": {
             "dash": true,
             "underscore": false
         }
     },
     "export": {
-        "destfolder": "~/Desktop/Export/Logo%20Packer/surfscool",
+        "destfolder": "~/Desktop/Export/Logo%20Packer/Square",
         "formats": {
-            "ai": false,
-            "pdf": false,
-            "svg": true,
+            "ai": true,
+            "pdf": true,
+            "svg": false,
+            "eps": true,
             "jpg": true,
-            "png": true
+            "png": false
         }
     },
     "extras": {
         "autoresize": true,
         "subfolders": true,
-        "checkABhasArt": true
+        "checkABhasArt": true,
+        "allartboards": true
     }
 }

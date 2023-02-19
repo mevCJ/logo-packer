@@ -100,7 +100,7 @@ body.open #dropIcon {
 
 #content > *:not(#settings){
     position: relative;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.7rem;
 }
 #extras > div {
     position: relative;
@@ -198,8 +198,8 @@ input[type="checkbox"] {
     margin: 0px;
     margin-right: 4px;
     padding: 2px;
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     border-style: solid;
 }
 input:checked {
@@ -210,6 +210,9 @@ input[type="radio"] {
 }
 input[type="checkbox"] {
     border-radius: 0.15rem;
+}
+input[type="checkbox"][disabled] {
+    filter: invert(25%);
 }
 input + label {
     display: inline-block;
@@ -242,7 +245,6 @@ input::placeholder {
 input:hover,
 select:hover {
     box-shadow: 0 0 1px 1px rgba(var(--blueRGB), 1);
-    background-color: rgba(var(--blueRGB), .5);
 }
 
 option {
@@ -358,8 +360,8 @@ select {
     border-top-left-radius: 0px;
 }
 
-.radioButtons > *,
-.row > .col label {
+.radioButtons > * {
+/* .row > .col label { */
     margin-right: 8px;
 }
 
@@ -574,6 +576,7 @@ select {
     -webkit-mask-image: url(../icons/helpcenter.svg);
     mask-image: url(../icons/helpcenter.svg);
 }
+.settingsIcon,
 #extras h1:before {
     -webkit-mask-image: url(../icons/settings.svg);
     mask-image: url(../icons/settings.svg);
@@ -622,7 +625,7 @@ select {
     -ms-flex-wrap: wrap;
     flex-wrap: wrap;
     flex-flow: unset;
-    align-items: center;
+    align-items: start;
     vertical-align: top;
 }
 
@@ -649,7 +652,7 @@ select {
     max-width: 75px !important;
 }
 .row .col:nth-of-type(2) {
-    max-width: 30%;
+    max-width: 33%;
 }
 .col-column {
     flex-direction: column;

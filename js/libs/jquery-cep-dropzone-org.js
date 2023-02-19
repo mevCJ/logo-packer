@@ -192,7 +192,8 @@
                     // var logoType = $("#logotype").val();
 
                     getValues();
-                    csInterface.evalScript(`generateLogoVariation('${clientName}','${logoType}','${mediaType}','${sepaRator}','${forMats}','${autoResize}')`, function (run) {
+                    
+                    csInterface.evalScript(`generateLogoVariation('${clientName}','${logoType}','${colors}','${mediaType}','${sepaRator}','${forMats}','${autoResize}', '${$path.extension}')`, function (run) {
                         outputRun(run);
                     });
 

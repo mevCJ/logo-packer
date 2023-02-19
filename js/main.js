@@ -28,19 +28,28 @@ $path = {
     console.log(SystemPath.EXTENSION)
     function loadJSX(pPath) {
         var scriptPath = csInterface.getSystemPath(SystemPath.EXTENSION) + pPath;
-        csInterface.evalScript('evalFile("' + scriptPath + '")');
+        // console.log("Run script "+scriptPath)
+        csInterface.evalScript('$.evalFile("' + scriptPath + '")');
+
+        // var exportJSX = csInterface.getSystemPath(SystemPath.EXTENSION) + "/jsx/export.jsx";
+        // var script = '$.evalFile("' + exportJSX + '");';
+        // csInterface.evalScript(script);
     }
+    window.clientName = $("#clientName").val();
+    window.logoType = $("#logotype").val();
+    window.colors = [];
     window.mediaType = "";
     window.forMats = [];
     window.sepaRator = "";
-    window.clientName = $("#clientName").val();
-    window.logoType = $("#logotype").val();
     window.marginVal = $("#margins").val();
     window.marginType = $("#margintype").val();
+    window.allArtboards = $("input[name='allartboards']:checked").val();
     window.baseDocType = $("#baseDocType").val();
     window.autoResize = "";
     window.subFolders = "";
     window.checkABhasArt = "";
+    window.settingsJSON = [];
+    // window.exportInfo = [];
     /*
         https://stackoverflow.com/questions/4335069/calling-a-javascript-function-from-another-js-file
         GLobal scope function
@@ -67,7 +76,7 @@ $path = {
         var messages = $("#messages");
         var content = $("#content");
         content.addClass("blur");
-        // console.log(run)
+        console.log("throwMessage "+run)
         if (run == "true") {
             messages.addClass("visible").removeClass("hidden");
             messages.html(message);
@@ -86,11 +95,14 @@ $path = {
     };
     window.outputRun = function (run) {
         console.log("starting generation")
+        console.log("run " + run)
         // console.log(run)
         if (run == "selection") {
             throwMessage(false, "Nothing selected");
         } else if (run == "clientname") {
             throwMessage(false, "No client name set");
+        } else if (run == "colors") {
+            throwMessage(false, "No color outputs set");
         } else if (run == "logotype") {
             throwMessage(false, "No logo type set");
         } else if (run == "mediatype") {
@@ -114,7 +126,8 @@ $path = {
         $("#generate_btn").click(function () {
             // mediaType=''; // reset so we dont get double folders
             getValues();
-            csInterface.evalScript(`generateLogoVariation('${clientName}','${logoType}','${mediaType}','${sepaRator}','${forMats}','${autoResize}')`, function (run) {
+            console.log("$path.extension "+$path.extension)
+            csInterface.evalScript(`generateLogoVariation('${clientName}','${logoType}','${colors}','${mediaType}','${sepaRator}','${forMats}','${autoResize}', '${$path.extension}')`, function (run) {
                 outputRun(run);
             });
         });
@@ -134,12 +147,26 @@ $path = {
         // });
         
         $("#export_btn").click(function () {
+            // console.log("load JSON from json.js" + setting.loadExportSettings());
+            // var exportInfo = setting.loadExportSettings();
+            // console.log(exportInfo)
+            // console.log(exportInfo.svg.minimizeSVG)
+            
+            // does not work :)
+            // var exportInfo = setting.loadExportSettings(); 
+            // var exportInfo = JSON.stringify(setting.loadExportSettings()); 
+            // var exportInfo = loadSettingsJSON();
+            // console.log("exportInfo "+loadSettingsJSON())
+            // console.log("exportFiles call "+exportInfo)
+            // console.log(exportInfo.svg.minimizeSVG)
+            loadSettingsJSON();
             exportingFiles(true);
             getValues();
             // compensate slower CS versions 
             // panel wont show export animation otherwise
             setTimeout(function () {
-                csInterface.evalScript(`exportFiles('${mediaType}','${logoType}','${forMats}','${subFolders}','${checkABhasArt}')`, function (run) {
+                csInterface.evalScript(`exportFiles('${mediaType}','${logoType}','${forMats}','${subFolders}','${checkABhasArt}', '${settingsJSON}')`, function (run) {
+                    console.log("ExportFiles var run "+ run)
                     if (run == "true") {
                         throwMessage(run, "Export done");
                     } else if(run=="formats") {
@@ -175,10 +202,22 @@ $path = {
                 });
             },100);
         });
-        $("#addmargins_btn").click(function () {
+        // $("#addmargins_btn").click(function () {
+        //     getMarginValues();
+        //     setTimeout(function () {
+        //         csInterface.evalScript(`addMarginToArtboard('${marginVal}','${marginType}','${logoType}','${colors}')`, function (run) {
+        //             if (run == "true") {
+        //                 throwMessage(run, "Added Margins");
+        //             } else {
+        //                 throwMessage(run, "Failed to add margins");
+        //             }
+        //         });
+        //     },100);
+        // });
+        $("#margins").on("change", function () {
             getMarginValues();
             setTimeout(function () {
-                csInterface.evalScript(`addMarginToArtboard('${marginVal}','${marginType}')`, function (run) {
+                csInterface.evalScript(`addMarginToArtboard('${marginVal}','${marginType}','${allArtboards}','${logoType}','${colors}','${mediaType}')`, function (run) {
                     if (run == "true") {
                         throwMessage(run, "Added Margins");
                     } else {
@@ -199,6 +238,8 @@ $path = {
                     //     throwMessage(false, "Cancelled Cleanup");
                     } else if(run=="cancelled") {
                         throwMessage(false, "Color Group name needs to be same as client name");
+                    } else if (run=="noDoc") {
+                        throwMessage(false, "No document available");
                     } else {
                         throwMessage(false, "Something went wrong");
                     }
@@ -211,6 +252,8 @@ $path = {
                 csInterface.evalScript(`deleteUnusedPanelItems()`, function (run) {
                     if (run == "true") {
                         throwMessage(run, "All Swatches Cleared");
+                    } else if (run == "noDoc"){
+                        throwMessage(run, "No document available");
                     } else {
                         throwMessage(run, "Already Cleared Swatches");
                     }
@@ -222,6 +265,13 @@ $path = {
             console.log("Getting Margin values");
             marginVal = $("#margins").val();
             marginType = $("#margintype").val();
+            logoType = $("#logotype").val();
+            colors = [];
+            $("input:checkbox[name=colors]:checked").each(function () {
+                colors.push($(this).val());
+            });
+            mediaType = $("input[name='media']:checked").val();
+            allArtboards = $("input[name='allartboards']:checked").val();
         };
         
         window.getBaseDocType = function () {
@@ -259,7 +309,7 @@ $path = {
                 if (run == "true") {
                     throwMessage(run, "Opened destination");
                 } else {
-                    throwMessage(false, "No destination set");
+                    throwMessage(false, "Destination is not set or can't be found");
                 }
             });
         });
@@ -278,6 +328,10 @@ $path = {
             console.log("Getting values");
             clientName = $("#clientName").val();
             logoType = $("#logotype").val();
+            colors = [];
+            $("input:checkbox[name=colors]:checked").each(function () {
+                colors.push($(this).val());
+            });
             mediaType = $("input[name='media']:checked").val();
             sepaRator = $("input[name='separator']:checked").val();
             forMats = [];
@@ -289,9 +343,151 @@ $path = {
             checkABhasArt = $("input:checkbox[name='checkABhasArt']:checked").val();
         };
         
-        $("input[type='radio']").click(function () {
-            mediaType = mediaType == "" ? $("input[name='media']:checked").val() : "";
+        $("input[type='radio']").on("change", function () {
+            getValues();
+            exportSettingsToNone();
         });
+        $("input[type='checkbox']").on("change", function () {
+            getValues();
+            exportSettingsToNone();
+        });
+        function exportSettingsToNone(){
+            var pngValue = $("input:checkbox[value=\"png\"]");
+            var pngLabel = $("label[for=\"png\"]");
+            var svgValue = $("input:checkbox[value=\"svg\"]");
+            var svgLabel = $("label[for=\"svg\"]");
+            if (mediaType == "Print"){
+                // console.log($("input:checkbox[value=\"png\"]:checked").val())
+                pngValue.prop("disabled",true);
+                pngValue.addClass("disabled");
+                pngLabel.addClass("disabled");
+                svgValue.addClass("disabled");
+                svgValue.prop("disabled",true);
+                svgLabel.addClass("disabled");
+                if (($("input:checkbox[value=\"png\"]:checked").val() == 'png') || ($("input:checkbox[value=\"svg\"]:checked").val() == 'svg')){
+                    pngValue.prop("checked", false)
+                    svgValue.prop("checked", false)
+                }
+            } else {
+                // $("input:checkbox[value=\"png\"]").prop("checked", false)
+                pngValue.prop("disabled",false);
+                pngValue.removeClass("disabled");
+                pngLabel.removeClass("disabled");
+                svgValue.prop("disabled",false);
+                svgValue.removeClass("disabled");
+                svgLabel.removeClass("disabled");
+            }
+        }
+        
+        ///////////////////////////////////////////////////////////////////////////////
+        // Function: loadSettingsJSON
+        // Usage: return settings read from settings.json
+        // Input: filepath
+        // Return: list of parsed json settings
+        ///////////////////////////////////////////////////////////////////////////////
+        function loadSettingsJSON() {
+            // var settingsFilePath = extensionRoot + settingsFile;
+            
+            var scriptFile = csInterface.getSystemPath(SystemPath.EXTENSION) + "/settings/settings.json";
+            console.log("Read Settings file: "+scriptFile)
+            $.getJSON(scriptFile, function(exportInfo) {
+                console.log("Reading Settings.json" + exportInfo)
+                // var settingsJSON = {
+                //     // ai: {
+                //     //     VersionAI: VersionAIDropdown.selection.index,
+                //     //     compatiblepdfAI: compatibelPDFAICheckbox.value,
+                //     //     includeLinkedAI: includeLinkedAICheckbox.value,
+                //     //     embedICCAI: embedICCProfilesAICheckbox.value,
+                //     //     includeCmykinRGBEPS: includeCmykinRGBEPSCheckbox.value,
+                //     //     usecompressionAI: useCompressionAICheckbox.value,
+                //     // },
+                //     // pdf: {
+                //     //     adobepresetPDF: pdfPresetsPDFDropdown.selection.index,
+                //     //     preserveEditabilityPDF: preserveEditingPDFCheckbox.value,
+                //     //     embedPageThumbnailsPDF: embedPageThumbnailsPDFCheckbox.value,
+                //     //     optimizeviewPDF: optimizeFastWebPDFCheckbox.value,
+                //     //     createlayersPDF: createAcrobatLayerPDFCheckbox.value,
+                //     // },
+                //     // eps: {
+                //     //     VersionEPS: VersionEPSDropdown.selection.index,
+                //     //     embedFontsEPS: embedFontsEPSCheckbox.value,
+                //     //     includeLinkedEPS: includeLinkedEPSCheckbox.value,
+                //     //     includeThumbsEPS: includeThumbsEPSCheckbox.value,
+                //     //     includeCmykinRGBEPS: includeCmykinRGBEPSCheckbox.value,
+                //     //     compatiblePrintingEPS: compatiblePrintingEPSCHeckbox.value,
+                //     //     adobeposttscriptEPS: adobePostscriptEPSDropdown.selection.index,
+                //     // },
+                //     svg: {
+                //         StylingSVG: exportInfo.svg.StylingSVG,
+                //         FontSVG: exportInfo.svg.FontSVG,
+                //         imagesSVG: exportInfo.svg.imagesSVG,
+                //         decimalSVG: exportInfo.svg.decimalSVG,
+                //         minimizeSVG: exportInfo.svg.minimizeSVG,
+                //         responsiveSVG: exportInfo.svg.responsiveSVG,
+                //     },
+                //     // jpg: {
+                //     //     compressionmethodJPG: compressionPresetsJPGDropdown.selection.index,
+                //     //     antialiasingJPG: antialiasingJPGDropdown.selection.index,
+                //     //     embedICCJPG: embedICCProfilesJPGCheckbox.value,
+                //     // },
+                //     // png: {
+                //     //     antialiasingPNG: antialiasingPNGDropdown.selection.index,
+                //     //     interlacedPNG: interlacedPNGCheckbox.value,
+                //     //     backgroundColorPNG: backgroundcolorPNGDropdown.selection.index,
+                //     // },
+                //     // activeTab: fileFormatsPanel_nav.selection.index,
+                // }
+
+
+                settingsJSON = [
+                    exportInfo.ai.VersionAI,
+                    exportInfo.ai.compatiblepdfAI,
+                    exportInfo.ai.includeLinkedAI,
+                    exportInfo.ai.embedICCAI,
+                    exportInfo.ai.usecompressionAI,
+                    exportInfo.pdf.adobepresetPDF,
+                    exportInfo.pdf.preserveEditabilityPDF,
+                    exportInfo.pdf.embedPageThumbnailsPDF,
+                    exportInfo.pdf.optimizeviewPDF,
+                    exportInfo.pdf.createlayersPDF,
+                    exportInfo.eps.VersionEPS,
+                    exportInfo.eps.embedFontsEPS,
+                    exportInfo.eps.includeLinkedEPS,
+                    exportInfo.eps.includeThumbsEPS,
+                    exportInfo.eps.includeCmykinRGBEPS,
+                    exportInfo.eps.compatiblePrintingEPS,
+                    exportInfo.eps.adobeposttscriptEPS,
+                    exportInfo.svg.StylingSVG,
+                    exportInfo.svg.FontSVG,
+                    exportInfo.svg.imagesSVG,
+                    exportInfo.svg.objectidSVG,
+                    exportInfo.svg.decimalSVG,
+                    exportInfo.svg.minimizeSVG,
+                    exportInfo.svg.responsiveSVG,
+                    exportInfo.jpg.compressionmethodJPG,
+                    exportInfo.jpg.progressivescansJPG,
+                    exportInfo.jpg.antialiasingJPG,
+                    exportInfo.jpg.embedICCJPG,
+                    exportInfo.png.antialiasingPNG,
+                    exportInfo.png.interlacedPNG,
+                    exportInfo.png.backgroundColorPNG
+                ]
+                return settingsJSON
+            });
+            // console.log(exportInfo.svg)
+            // return exportInfo
+            // var script = '$.evalFile("' + settingsFile + '");';
+
+            // load file with JSX
+            // source: https://community.adobe.com/t5/photoshop-ecosystem-discussions/open-json-file-and-parse-it-extendscript/m-p/8599620
+            // var scriptFile = File(scriptFile);
+            // scriptFile.open('r');
+            // var d = scriptFile.read();
+            // scriptFile.close();
+            // var d = JSON.parse(d);
+            // alert(settingsFile)
+            // return d
+        }
         
         $("input[type='radio']").click(function () {
             sepaRator = sepaRator == "" ? $("input[name='separator']:checked").val() : "";
@@ -323,6 +519,13 @@ $path = {
         });
         $("#exportJSON_btn").click(function () {
             setting.export();
+        });
+        $("#settingsIcon_btn").click(function () {
+            console.log("CLICK BTN");
+            loadJSX('/jsx/settings-dialog.jsx');
+            // var settings = getSettingsFilepath();
+            // var settings = $path.extension + '/settings/settings.json';
+            // console.log(readFile(settings, !0));
         });
 
         /////////////////////////////////////////////////////////////////////////////////////////
