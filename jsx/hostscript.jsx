@@ -1672,7 +1672,7 @@ function getRulerUnits() {
 // Function: minimalSize
 // Usage: width, height as input returns scaled object 
 // Input: String
-// Return: scaled object to minimal widht and height
+// Return: scaled object to minimal width and height
 // Source: Wundes Scripts setAllTheThings
 ///////////////////////////////////////////////////////////////////////////////   
 function minimalSize(v) {
@@ -1741,7 +1741,7 @@ function resizeLogo(item, autoResize) {
     // resize(docRef.selection[x], (100+_scaleW));
     // alert(board.name+" design is to small for export, minimal req. 70 x 70px "+ docRef.selection[x].width+" "+docRef.selection[x].height)
     if (autoResize != "autoresize") {
-        // scaleItems = confirm("For this workflow, logo's need to have a minimal of 70px widht or height. Do you want to upscale it?");
+        // scaleItems = confirm("For this workflow, logo's need to have a minimal of 70px width or height. Do you want to upscale it?");
         var title = "Logo size warning";
         var msg1 = "For this workflow, logo's need to have a minimal width or height of 70px. Do you want it to be to upscaled?";
         var msg2 = false;
