@@ -48,6 +48,21 @@ Open the extension in Window > Extensions > Logo Packer and follow the instructi
 ## Exporting Files
 ![export-files-demo](https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/export-files.gif?raw=true)
 
+<details>
+  <summary>More functions</summary>
+  
+  ## Margin & padding
+  ![export-files-demo](https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/margin-padding.gif?raw=true)
+
+  ## Export format settings
+  ![export-files-demo](https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/export-format-settings.gif?raw=true)
+
+  ## Save all types (beta)
+  ![export-files-demo](https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/save-all-types.gif?raw=true)
+
+</details>
+
+
 :tv: [Video Demo](https://youtu.be/8cH3x6DNdsM)
 
 # Donate / Support
