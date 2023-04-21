@@ -398,7 +398,7 @@ function fillColor(obj, color, extensionRoot) {
     }
     if (color == 'pms') {
         // Cant find other method for this
-        $.evalFile(new File(extensionRoot+'/jsx/cmyktopms.jsx'));
+        $.evalFile(new File(extensionRoot+'/jsx/cmyktopms.jsxbin'));
         return;
     }
     var aDoc = docRef;

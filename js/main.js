@@ -95,7 +95,7 @@ $path = {
     };
     window.outputRun = function (run) {
         console.log("starting generation")
-        console.log("run " + run)
+        // console.log("run " + run)
         // console.log(run)
         if (run == "selection") {
             throwMessage(false, "Nothing selected");
