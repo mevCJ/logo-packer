@@ -119,17 +119,20 @@ $path = {
         themeManager.init();
         monitorCheck(); // check monitor resolution add extra CSS accordingly
         // loadJSX('/jsx/main.jsx');
-        var exportJSX = csInterface.getSystemPath(SystemPath.EXTENSION) + "/jsx/export.jsx";
-        var script = '$.evalFile("' + exportJSX + '");';
-        csInterface.evalScript(script);
+        // var exportJSX = csInterface.getSystemPath(SystemPath.EXTENSION) + "/jsx/export.jsx";
+        // var script = '$.evalFile("' + exportJSX + '");';
+        // csInterface.evalScript(script);
 
         $("#generate_btn").click(function () {
             // mediaType=''; // reset so we dont get double folders
             getValues();
+            loadSettingsJSON();
             console.log("$path.extension "+$path.extension)
-            csInterface.evalScript(`generateLogoVariation('${clientName}','${logoType}','${colors}','${mediaType}','${sepaRator}','${forMats}','${autoResize}', '${$path.extension}')`, function (run) {
-                outputRun(run);
-            });
+            setTimeout(function () {
+                csInterface.evalScript(`generateLogoVariation('${clientName}','${logoType}','${colors}','${mediaType}','${sepaRator}','${forMats}','${autoResize}', '${$path.extension}', '${settingsJSON}')`, function (run) {
+                    outputRun(run);
+                });
+            },150);
         });
         // $("#digital_btn").click(function () {
         //     getValues();
@@ -145,7 +148,14 @@ $path = {
         //         }
         //     });
         // });
-        
+        $("#logotype").on("change", function () {
+            getValues();
+            if (logoType=="alltypes") {
+                $("#dropzone").addClass("hidden");
+            } else {
+                $("#dropzone").removeClass("hidden");
+            }
+        });
         $("#export_btn").click(function () {
             // console.log("load JSON from json.js" + setting.loadExportSettings());
             // var exportInfo = setting.loadExportSettings();
@@ -165,7 +175,7 @@ $path = {
             // compensate slower CS versions 
             // panel wont show export animation otherwise
             setTimeout(function () {
-                csInterface.evalScript(`exportFiles('${mediaType}','${logoType}','${forMats}','${subFolders}','${checkABhasArt}', '${settingsJSON}')`, function (run) {
+                csInterface.evalScript(`exportFiles('${mediaType}','${logoType}','${forMats}','${subFolders}','${checkABhasArt}', '${settingsJSON}','${sepaRator}')`, function (run) {
                     console.log("ExportFiles var run "+ run)
                     if (run == "true") {
                         throwMessage(run, "Export done");
@@ -215,6 +225,7 @@ $path = {
         //     },100);
         // });
         $("#margins").on("change", function () {
+        // $("#margins").on("submit", function () {
             getMarginValues();
             setTimeout(function () {
                 csInterface.evalScript(`addMarginToArtboard('${marginVal}','${marginType}','${allArtboards}','${logoType}','${colors}','${mediaType}')`, function (run) {
@@ -351,33 +362,46 @@ $path = {
             getValues();
             exportSettingsToNone();
         });
-        function exportSettingsToNone(){
-            var pngValue = $("input:checkbox[value=\"png\"]");
-            var pngLabel = $("label[for=\"png\"]");
-            var svgValue = $("input:checkbox[value=\"svg\"]");
-            var svgLabel = $("label[for=\"svg\"]");
-            if (mediaType == "Print"){
-                // console.log($("input:checkbox[value=\"png\"]:checked").val())
-                pngValue.prop("disabled",true);
-                pngValue.addClass("disabled");
-                pngLabel.addClass("disabled");
-                svgValue.addClass("disabled");
-                svgValue.prop("disabled",true);
-                svgLabel.addClass("disabled");
-                if (($("input:checkbox[value=\"png\"]:checked").val() == 'png') || ($("input:checkbox[value=\"svg\"]:checked").val() == 'svg')){
-                    pngValue.prop("checked", false)
-                    svgValue.prop("checked", false)
+        // function exportSettingsToNone(){
+            window.exportSettingsToNone = function() {
+                // console.log("Set export formats to none depending on print type")
+                var pngValue = $("input:checkbox[value=\"png\"]");
+                var pngLabel = $("label[for=\"png\"]");
+                var svgValue = $("input:checkbox[value=\"svg\"]");
+                var svgLabel = $("label[for=\"svg\"]");
+                if (mediaType == "Print"){
+                    // console.log($("input:checkbox[value=\"png\"]:checked").val())
+                    pngValue.prop("disabled",true);
+                    pngValue.addClass("disabled");
+                    pngLabel.addClass("disabled");
+                    svgValue.addClass("disabled");
+                    svgValue.prop("disabled",true);
+                    svgLabel.addClass("disabled");
+                    if (($("input:checkbox[value=\"png\"]:checked").val() == 'png') || ($("input:checkbox[value=\"svg\"]:checked").val() == 'svg')){
+                        pngValue.prop("checked", false)
+                        svgValue.prop("checked", false)
+                    }
+                } else {
+                    // $("input:checkbox[value=\"png\"]").prop("checked", false)
+                    pngValue.prop("disabled",false);
+                    pngValue.removeClass("disabled");
+                    pngLabel.removeClass("disabled");
+                    svgValue.prop("disabled",false);
+                    svgValue.removeClass("disabled");
+                    svgLabel.removeClass("disabled");
                 }
-            } else {
-                // $("input:checkbox[value=\"png\"]").prop("checked", false)
-                pngValue.prop("disabled",false);
-                pngValue.removeClass("disabled");
-                pngLabel.removeClass("disabled");
-                svgValue.prop("disabled",false);
-                svgValue.removeClass("disabled");
-                svgLabel.removeClass("disabled");
-            }
         }
+        $("#toolTips").click(function () {
+            if (($("input:checkbox[value=\"toolTips\"]:checked").val()=='toolTips')) {
+                $( document ).tooltip({shadow:true, show: {delay: 1000,duration: 0}}); //track: true
+                $( document ).tooltip("enable");
+                $( document ).click(function() {
+                    $('.ui-tooltip').remove();
+                });
+            } else {
+                $( document ).tooltip("disable");
+            }
+        });
         
         ///////////////////////////////////////////////////////////////////////////////
         // Function: loadSettingsJSON
@@ -438,7 +462,9 @@ $path = {
                 //     // activeTab: fileFormatsPanel_nav.selection.index,
                 // }
 
+                
 
+                // }
                 settingsJSON = [
                     exportInfo.ai.VersionAI,
                     exportInfo.ai.compatiblepdfAI,
@@ -470,7 +496,11 @@ $path = {
                     exportInfo.jpg.embedICCJPG,
                     exportInfo.png.antialiasingPNG,
                     exportInfo.png.interlacedPNG,
-                    exportInfo.png.backgroundColorPNG
+                    exportInfo.png.backgroundColorPNG,
+                    exportInfo.scale.customScale,
+                    exportInfo.scale.scaleSizes,
+                    exportInfo.scale.scaleType,
+                    exportInfo.scale.suffix,
                 ]
                 return settingsJSON
             });

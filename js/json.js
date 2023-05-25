@@ -172,6 +172,8 @@ var setting = {
                         throwMessage(false, "No destination set");
                     }
                 }),
+                getValues(),
+                exportSettingsToNone(),
                 // t.export.destfolder = "" == false ? $("#setDestFolder").trigger("click") : "",
                 (setting.loaded = !0),
                 setting

@@ -2,13 +2,13 @@
     "generation": {
         "client": "square",
         "type": "logo",
-        "mediatype": "Print",
+        "mediatype": "Digital",
         "colors": {
             "fullcolor": true,
             "pms": true,
             "grayscale": false,
-            "black": false,
-            "white": false
+            "black": true,
+            "white": true
         },
         "separator": {
             "dash": true,
@@ -18,12 +18,12 @@
     "export": {
         "destfolder": "~/Desktop/Export/Logo%20Packer/Square",
         "formats": {
-            "ai": true,
-            "pdf": true,
+            "ai": false,
+            "pdf": false,
             "svg": false,
-            "eps": true,
+            "eps": false,
             "jpg": true,
-            "png": false
+            "png": true
         }
     },
     "extras": {

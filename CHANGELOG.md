@@ -2,6 +2,28 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.6.1] - 2023-05-22
+### Fixed
+- Auto resizer needs to check image export scale size better. When scale is to big and logo is to small, export wont work
+  > it takes largest export size and uses 10% + 100 pixel. Works in most cases up to 4k
+- AutoResizer sizes logo based on export size settings. Large export settings need larger base size logo, therefor autoresizer checks what setting is used.
+- AutoMargin had issues when alltype logo creatin was used.
+- Alltypes creation logo had issues with check and returning errors on not set values like clientname etc etc
+- Issue with adding margins in pixels, got wrong conversion value
+
+### Added
+- Export sizes for PNG and JPG
+- Added show / hide to DropZone when set to alltypes, doesnt work when using that
+- Tooltips
+
+## [0.6.0] - 2023-05-17
+### Fixed
+- Exporting JPG and PNG would add sub folder is option was on in ExportForScreens
+- Hardcoded size for PNG as well, WIP need to add mulitple export sizes
+- Automargin would not update when same value was added, WIP need regex oonly numberical input
+- Automargin would reset to artboard 1 when using single input
+- PNG export would not pickup transparency, black or white background. WIP perhaps add normal exportoptions so we have more options
+
 ## [0.5.9] - 2022-12-09
 ### Added
 - Allow custmo alert dialog to show different icons
@@ -15,7 +37,6 @@ All notable changes to this project will be documented in this file.
 ### Others
 - Reorganised custom alert dialog, moved to hostscript for easier access
 - Cleanup code & leftovers
-
 
 ## [0.5.8] - 2022-12-08
 ### Fixed

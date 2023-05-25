@@ -1,7 +1,4 @@
 # What is Logo Packer?
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 Logo Packer is an open-sourced Adobe Illustrator extensions that allows you to generate your logo in multiple variations and export them for your clients in minutes.
 
@@ -14,9 +11,6 @@ Logo Packer is an open-sourced Adobe Illustrator extensions that allows you to g
 [Click Here](https://mevcj.github.io/logo-packer/) to Github Pages
 
 # Installation
-## Install from Adobe Exchange (Recommended)
-👉 <a href="https://exchange.adobe.com/creativecloud.details.106003.html"><button name="button">Download on Adobe Exchange</button></a>
-
 ## Installing manually
 Download the files on [Github](https://github.com/mevCJ/logo-packer) and place the files into the CEP extension folder. 
 
@@ -45,6 +39,9 @@ In the terminal, type: defaults write com.adobe.CSXS.10 PlayerDebugMode 1 (The p
 
 
 
+## Download from Adobe Exchange
+<i>To be added</i>
+
 # How to use
 Open the extension in Window > Extensions > Logo Packer and follow the instructions given.
 
@@ -66,23 +63,3 @@ Your support is greatly appreciated! If you'd lke to support the developer and t
 ---------
 <i>Licensed Under MIT</i>
 
-
-## Contributors ✨
-
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tr>
-    <td align="center"><a href="https://github.com/schroef"><img src="https://avatars.githubusercontent.com/u/6923008?v=4?s=100" width="100px;" alt=""/><br /><sub><b>schroef</b></sub></a><br /><a href="https://github.com/mevCJ/logo-packer/commits?author=schroef" title="Code">💻</a></td>
-  </tr>
-</table>
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
