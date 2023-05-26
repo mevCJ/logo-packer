@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.6.2] - 2023-05-26
+### Added
+- check when loading JSON it also checks dropzone & tooltips
+- tooltips settings to JSON export setting file
+
 ## [0.6.1] - 2023-05-22
 ### Fixed
 - Auto resizer needs to check image export scale size better. When scale is to big and logo is to small, export wont work

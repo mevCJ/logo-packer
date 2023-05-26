@@ -89,6 +89,7 @@ var setting = {
             subfolders: true,
             checkABhasArt: true,
             allartboards: true,
+            tooltips: false,
         },
     },
     loaded: !1,
@@ -148,6 +149,7 @@ var setting = {
                 $("#subFolders input[value=subfolders]").prop("checked", t.extras.subfolders),
                 $("#checkABhasArt input[value=checkABhasArt]").prop("checked", t.extras.checkABhasArt),
                 $("#allartboards input[value=allartboards]").prop("checked", t.extras.allartboards),
+                $("#toolTipsMain input[value=toolTips]").prop("checked", t.extras.tooltips),
                 // destFolder = t.export.destfolder,
                 CS.evalScript(`setDestFolderFromJson('${t.export.destfolder}')`, function (run) {
                     // console.log(run.split(",")[0]);
@@ -174,6 +176,8 @@ var setting = {
                 }),
                 getValues(),
                 exportSettingsToNone(),
+                checkDropzone(),
+                checkTooltips(),
                 // t.export.destfolder = "" == false ? $("#setDestFolder").trigger("click") : "",
                 (setting.loaded = !0),
                 setting
@@ -224,6 +228,7 @@ var setting = {
                     subfolders: $("input[name='subfolders']").is(':checked'),
                     checkABhasArt: $("input[name='checkABhasArt']").is(':checked'),
                     allartboards: $("input[name='allartboards']").is(':checked'),
+                    tooltips: $("input[name='toolTips']").is(':checked'),
                 },
             };
         } catch (e) {

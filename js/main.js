@@ -149,13 +149,16 @@ $path = {
         //     });
         // });
         $("#logotype").on("change", function () {
+            checkDropzone();
+        });
+        window.checkDropzone = function (){
             getValues();
             if (logoType=="alltypes") {
                 $("#dropzone").addClass("hidden");
             } else {
                 $("#dropzone").removeClass("hidden");
             }
-        });
+        }
         $("#export_btn").click(function () {
             // console.log("load JSON from json.js" + setting.loadExportSettings());
             // var exportInfo = setting.loadExportSettings();
@@ -363,35 +366,35 @@ $path = {
             exportSettingsToNone();
         });
         // function exportSettingsToNone(){
-            window.exportSettingsToNone = function() {
-                // console.log("Set export formats to none depending on print type")
-                var pngValue = $("input:checkbox[value=\"png\"]");
-                var pngLabel = $("label[for=\"png\"]");
-                var svgValue = $("input:checkbox[value=\"svg\"]");
-                var svgLabel = $("label[for=\"svg\"]");
-                if (mediaType == "Print"){
-                    // console.log($("input:checkbox[value=\"png\"]:checked").val())
-                    pngValue.prop("disabled",true);
-                    pngValue.addClass("disabled");
-                    pngLabel.addClass("disabled");
-                    svgValue.addClass("disabled");
-                    svgValue.prop("disabled",true);
-                    svgLabel.addClass("disabled");
-                    if (($("input:checkbox[value=\"png\"]:checked").val() == 'png') || ($("input:checkbox[value=\"svg\"]:checked").val() == 'svg')){
-                        pngValue.prop("checked", false)
-                        svgValue.prop("checked", false)
-                    }
-                } else {
-                    // $("input:checkbox[value=\"png\"]").prop("checked", false)
-                    pngValue.prop("disabled",false);
-                    pngValue.removeClass("disabled");
-                    pngLabel.removeClass("disabled");
-                    svgValue.prop("disabled",false);
-                    svgValue.removeClass("disabled");
-                    svgLabel.removeClass("disabled");
+        window.exportSettingsToNone = function() {
+            // console.log("Set export formats to none depending on print type")
+            var pngValue = $("input:checkbox[value=\"png\"]");
+            var pngLabel = $("label[for=\"png\"]");
+            var svgValue = $("input:checkbox[value=\"svg\"]");
+            var svgLabel = $("label[for=\"svg\"]");
+            if (mediaType == "Print"){
+                // console.log($("input:checkbox[value=\"png\"]:checked").val())
+                pngValue.prop("disabled",true);
+                pngValue.addClass("disabled");
+                pngLabel.addClass("disabled");
+                svgValue.addClass("disabled");
+                svgValue.prop("disabled",true);
+                svgLabel.addClass("disabled");
+                if (($("input:checkbox[value=\"png\"]:checked").val() == 'png') || ($("input:checkbox[value=\"svg\"]:checked").val() == 'svg')){
+                    pngValue.prop("checked", false)
+                    svgValue.prop("checked", false)
                 }
+            } else {
+                // $("input:checkbox[value=\"png\"]").prop("checked", false)
+                pngValue.prop("disabled",false);
+                pngValue.removeClass("disabled");
+                pngLabel.removeClass("disabled");
+                svgValue.prop("disabled",false);
+                svgValue.removeClass("disabled");
+                svgLabel.removeClass("disabled");
+            }
         }
-        $("#toolTips").click(function () {
+        window.checkTooltips = function(){
             if (($("input:checkbox[value=\"toolTips\"]:checked").val()=='toolTips')) {
                 $( document ).tooltip({shadow:true, show: {delay: 1000,duration: 0}}); //track: true
                 $( document ).tooltip("enable");
@@ -401,8 +404,10 @@ $path = {
             } else {
                 $( document ).tooltip("disable");
             }
+        }
+        $("#toolTips").click(function () {
+            checkTooltips();
         });
-        
         ///////////////////////////////////////////////////////////////////////////////
         // Function: loadSettingsJSON
         // Usage: return settings read from settings.json

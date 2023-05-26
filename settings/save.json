@@ -1,8 +1,8 @@
 {
     "generation": {
-        "client": "square",
+        "client": "Heineken",
         "type": "logo",
-        "mediatype": "Digital",
+        "mediatype": "Print",
         "colors": {
             "fullcolor": true,
             "pms": true,
@@ -16,20 +16,21 @@
         }
     },
     "export": {
-        "destfolder": "~/Desktop/Export/Logo%20Packer/Square",
+        "destfolder": "~/Desktop/Export/Logo%20Packer/Heineken",
         "formats": {
-            "ai": false,
+            "ai": true,
             "pdf": false,
             "svg": false,
             "eps": false,
             "jpg": true,
-            "png": true
+            "png": false
         }
     },
     "extras": {
         "autoresize": true,
         "subfolders": true,
         "checkABhasArt": true,
-        "allartboards": true
+        "allartboards": false,
+        "tooltips": true
     }
 }
