@@ -495,7 +495,7 @@ function RGB2CMYK(RGB) {
         sc.g = RGB.g;
         sc.b =  RGB.b;
         // app.foregroundColor = sc
-        app.activeDocument.defaultFillColor = sc
+        // app.activeDocument.defaultFillColor = sc
         // alert(app.foregroundColor.c)
         sourceSpace = space;
         colorComponents = RGB.r,RGB.g,RGB.b;
@@ -552,7 +552,7 @@ function CMYK2RGB(CMYK) {
         sc.yellow =  CMYK.yellow;
         sc.black =  CMYK.black;
 
-        app.activeDocument.defaultFillColor = sc
+        // app.activeDocument.defaultFillColor = sc
         sourceSpace = space;
         var returnColors = app.convertSampleColor(ImageColorSpace[sourceSpace], [CMYK.cyan,CMYK.magenta,CMYK.yellow, CMYK.black], ImageColorSpace[targetSpace(sourceSpace)], ColorConvertPurpose.defaultpurpose);//previewpurpose);
         sc.red= returnColors[0];

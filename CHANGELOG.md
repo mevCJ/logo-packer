@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - DragNDrop has setTimeout so we can get the JSON data in > caused issues > would only work from 2nd drop
 - When no inverted color was set, generation would continue, now it stops
 - custom alert dialog would return wrong Boolean if was shown earlier.
+- Color Preferences custom black would change color of a selected object as well, taken this function out.
 
 ### Added
 - Custom black print and digital is not stored in colorsettings and works with logo generation
