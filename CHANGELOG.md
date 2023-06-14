@@ -1,6 +1,64 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.3.2] - 2023-06-06
+### Fixed
+- PMS convertion would add huge list of PMS colors, i added another clean 
+- Colorsettings dialog would show error with RGB dialog > CMYKtoRGB was written for CMYK space only, added acception so we can show newBrush color correctly
+- DragNDrop was missing new added settings so would not generate > set load JSON files to window. function
+- DragNDrop has setTimeout so we can get the JSON data in > caused issues > would only work from 2nd drop
+- When no inverted color was set, generation would continue, now it stops
+- custom alert dialog would return wrong Boolean if was shown earlier.
+
+### Added
+- Custom black print and digital is not stored in colorsettings and works with logo generation
+- Extra check when inverted color cant be found
+- Cpnvert all alert windows to the custom alert window
+
+### Changed
+- All alerts use the custom alert window
+
+## [1.3.1.3] - 2023-06-05
+### Fixed
+- Added a warning when inverted color cant be found
+
+### Changed
+- Autoresize for export jpg was using 40cm wide logo, thats a bit big for the other file types. Reduced to 20cm
+  > Why does exportforscreen doesnt need such big base file?
+  
+## [1.3.1.3] - 2023-06-02
+### Fixed
+- Alltypes export placement issue due new copy of method used in fillCOlor function
+- Logo preview layer issue when alltypes was used, was added per logo type creation. Now is done at very end of logo generation
+- Reset now reset everything correctly, it wouldnt reset color types correctly
+
+## [1.3.1.3] - 2023-05-31
+### Fixed
+- Invertlogo type had issues coloring white parts
+- Issue with OMS conversion and tint. Would set it to 0 if there was no tint in some cases. Caused by starting of of false, which return 0 in tint.
+- If sourceprofile was untagged, it would show empty. Now shows untagged
+- Inverted logo white in JPG also needs to be removed, white is not visible in jpg
+- For digital disable PMS creation
+- Remove white and inverted didnt work when different scale size are added
+- When switching between print and digital, options like PMS, JPG and PNG will be turned on and off depending on the media type chosen.
+
+### Added
+- invertlogo works implemented in panel
+- Inverted logo type is also saved in settings
+
+### Changed
+- Moved reset, export,import setting to top of panel.
+
+## [1.3.1.2] - 2023-05-26
+### Fixed
+- PMS conversion with grayscale colors
+- PMS conversion stopped on path with no color
+
+### Added
+- white & pms in JPG is removed
+- custom grayscale conervsion wiuth colorbalance
+- Invert color logo type
+- Thre is a dark preview layer added so we see the white colors now
 
 ## [0.6.2] - 2023-05-26
 ### Added

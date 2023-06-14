@@ -1,11 +1,18 @@
 {
     "generation": {
-        "client": "Heineken",
-        "type": "logo",
+        "client": "PagaDirect",
+        "type": "alltypes",
         "mediatype": "Print",
         "colors": {
             "fullcolor": true,
-            "pms": true,
+            "pms": false,
+            "inverted": {
+                "inverted": true,
+                "invertedName": false,
+                "invertedType": "SpotColor",
+                "invertedColor": "PMS 285 u cmyk",
+                "invertedPreview": "rgb(93, 128, 190)"
+            },
             "grayscale": false,
             "black": true,
             "white": true
@@ -16,9 +23,9 @@
         }
     },
     "export": {
-        "destfolder": "~/Desktop/Export/Logo%20Packer/Heineken",
+        "destfolder": "~/Desktop/Export/Logo%20Packer/PagaDirect",
         "formats": {
-            "ai": true,
+            "ai": false,
             "pdf": false,
             "svg": false,
             "eps": false,
@@ -30,7 +37,7 @@
         "autoresize": true,
         "subfolders": true,
         "checkABhasArt": true,
-        "allartboards": false,
-        "tooltips": true
+        "allartboards": true,
+        "tooltips": false
     }
 }

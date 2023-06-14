@@ -51,21 +51,6 @@ Open the extension in Window > Extensions > Logo Packer and follow the instructi
 ## Exporting Files
 ![export-files-demo](https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/export-files.gif?raw=true)
 
-<details>
-  <summary>More functions</summary>
-  
-  ## Margin & padding
-  ![export-files-demo](https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/margin-padding.gif?raw=true)
-
-  ## Export format settings
-  ![export-files-demo](https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/export-format-settings.gif?raw=true)
-
-  ## Save all types (beta)
-  ![export-files-demo](https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/save-all-types.gif?raw=true)
-
-</details>
-
-
 :tv: [Video Demo](https://youtu.be/8cH3x6DNdsM)
 
 # Donate / Support
@@ -73,7 +58,7 @@ Your support is greatly appreciated! If you'd lke to support the developer and t
 
 <a href="https://www.buymeacoffee.com/doingdesign"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a pizza&emoji=🍕&slug=doingdesign&button_colour=5F7FFF&font_colour=ffffff&font_family=Poppins&outline_colour=000000&coffee_colour=FFDD00"></a>
 
-...or follow me on Instagram for more tools and logo inspiration [@doing.this](https://www.instagram.com/)
+...or follow me on Instagram for more tools and logo inspiration [@doing.this](https://www.instagram.com/doing.this)
 
 ---------
 <i>Licensed Under MIT</i>

@@ -150,12 +150,14 @@ body.openExtras #extras {
     display: block;
     background: var(--blue1);
 }
-.active {
+.active
+.hostButton .active {
     opacity: 1;
     background-color: var(--blue1) !important;
     background-color: rgb(var(--blueRGB)) !important;
 }
-.disabled {
+.disabled, 
+.hostButton .disabled {
     opacity: 0.25 !important;
     pointer-events: none !important;
 }
@@ -580,6 +582,7 @@ select {
 #extras h1:before {
     -webkit-mask-image: url(../icons/settings.svg);
     mask-image: url(../icons/settings.svg);
+    -webkit-mask-position-y: 1px;
 }
 /* END ICONS */
 
@@ -634,6 +637,7 @@ select {
     display: flex;
     flex-direction: row;
     align-items: flex-end;
+    padding-top: 2;
 }
 .col {
     display: flex;
@@ -662,4 +666,16 @@ select {
 /* .col-column label { */
 label {
     padding-top: 2px;
+}
+
+.invertedPreview {
+    margin-left: 6px;
+    border-radius: 6;
+    height: 12px;
+    width: 12px;
+    padding: 0 !important;
+    background: none;
+    border: 1px solid var(--darkbg);
+    cursor: pointer;
+    align-self: flex-end;
 }

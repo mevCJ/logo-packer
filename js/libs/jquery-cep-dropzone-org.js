@@ -190,13 +190,16 @@
                     // var sepaRator = "";
                     // var clientName = $("#clientName").val();
                     // var logoType = $("#logotype").val();
-
+                    ExportSettingsJSON();
+                    ColorSettingsJSON();
+                    console.log("colorsettings dropzon js" + colorsettingsJSON)
                     getValues();
-                    
-                    csInterface.evalScript(`generateLogoVariation('${clientName}','${logoType}','${colors}','${mediaType}','${sepaRator}','${forMats}','${autoResize}', '${$path.extension}')`, function (run) {
-                        outputRun(run);
-                    });
-
+                    setTimeout(function () {
+                        csInterface.evalScript(`generateLogoVariation('${clientName}','${logoType}','${colors}','${inverted}','${mediaType}','${sepaRator}','${forMats}','${autoResize}', '${$path.extension}', '${exportsettingsJSON}', '${colorsettingsJSON}')`, function (run) {
+                            outputRun(run);
+                        });
+                    }, 150);
+                        
                     if (onSuccess instanceof Function) {
                         // console.info("Dropped Succesfully!");
                         onSuccess.apply(this, [event, svg]);

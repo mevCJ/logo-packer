@@ -11,6 +11,7 @@ var panelMargins = 16;
 
 
 var extensionRoot = getExtensionRootPath();
+// alert(extensionRoot)
 $.evalFile(new File(extensionRoot + '/js/json2.js'));
 var settingsFile = 'settings/settings.json';
 var exportInfo = new Object();
@@ -671,29 +672,6 @@ function showDialog(exportInfo, extensionRoot) {
         optionsScaleTab.margins = 0; 
 
 
-    // FILEFORMATSPANEL
-    // ================
-    fileFormatsPanel_tabs = [optionsAITab, optionsPDFTab, optionsEPSTab, optionsSVGTab, optionsJPGTab, optionsPNGTab, optionsScaleTab];
-
-    for (var i = 0; i < fileFormatsPanel_tabs.length; i++) {
-        fileFormatsPanel_tabs[i].alignment = ["fill", "fill"];
-        fileFormatsPanel_tabs[i].visible = false;
-    }
-
-    fileFormatsPanel_nav.onChange = showTab_fileFormatsPanel;
-
-    function showTab_fileFormatsPanel() {
-        if (fileFormatsPanel_nav.selection !== null) {
-            for (var i = fileFormatsPanel_tabs.length - 1; i >= 0; i--) {
-                fileFormatsPanel_tabs[i].visible = false;
-            }
-            fileFormatsPanel_tabs[fileFormatsPanel_nav.selection.index].visible = true;
-        }
-    }
-
-    fileFormatsPanel_nav.selection = exportInfo.activeTab;
-    showTab_fileFormatsPanel()
-
     // SCALEOPTIONSPANEL
     // =================
     var scaleOptionsPanel = optionsScaleTab.add("panel", undefined, undefined, {name: "scaleOptionsPanel"}); 
@@ -750,6 +728,7 @@ function showDialog(exportInfo, extensionRoot) {
         scaleSizesInput.preferredSize.width = 150; 
         scaleSizesInput.text = exportInfo.scale.scaleSizes; 
         scaleSizesInput.helpTip = "Select or specify the scale of the exported image. Values need to be devided by a dash ie '-''. Scale by width, height, resolution or scale. Width and Height are pixels, scale is percentage."; 
+    
     // SCALETYPEGROUP1
     // ===============
     // var scaleTypeGroup1 = group1.add("group", undefined, {name: "scaleTypeGroup1"}); 
@@ -776,7 +755,81 @@ function showDialog(exportInfo, extensionRoot) {
         suffixInput.preferredSize.width = 100; 
         suffixInput.text = exportInfo.scale.suffix; 
         suffixInput.helpTip = "Text added at the end of the file name."; 
-        
+
+    
+    // // OPTIONSOPTIONSTAB
+    // // ===============
+    // var optionsOptionsTab = fileFormatsPanel_innerwrap.add("group", undefined, {name: "optionsOptionsTab"}); 
+    //     optionsOptionsTab.text = "Options"; 
+    //     optionsOptionsTab.orientation = "column"; 
+    //     optionsOptionsTab.alignChildren = ["fill","top"]; 
+    //     optionsOptionsTab.spacing = 10; 
+    //     optionsOptionsTab.margins = 0; 
+
+    
+    // OPTIONSOPTIONSPANEL
+    // =================
+    // var optionsOptionsPanel = optionsOptionsTab.add("panel", undefined, undefined, {name: "optionsOptionsPanel"}); 
+    //     optionsOptionsPanel.text = "Options"; 
+    //     optionsOptionsPanel.orientation = "column"; 
+    //     optionsOptionsPanel.alignChildren = ["left","top"]; 
+    //     optionsOptionsPanel.spacing = panelSpacing; 
+    //     optionsOptionsPanel.margins = panelMargins;
+
+    // var customGrayCheckbox = optionsOptionsPanel.add("checkbox", undefined, undefined, {name: "customGrayCheckbox"}); 
+    //     customGrayCheckbox.text = "Custom Gray"; 
+    //     customGrayCheckbox.value = exportInfo.scale.customGray; 
+    //     customGrayCheckbox.helpTip = "Lets user adjust the gray logo version at the end of generation. Some users want darker gray version vs default conversion outcome."; 
+
+
+    // // CUSTOMGRAYGROUP
+    // // ==============
+    // var customgrayGroup = optionsOptionsPanel.add("group", undefined, {name: "customgrayGroup"}); 
+    //     customgrayGroup.orientation = "column"; 
+    //     customgrayGroup.alignChildren = ["left","center"]; 
+    //     customgrayGroup.spacing = 5; 
+    //     customgrayGroup.margins = 0; 
+    //     customgrayGroup.enabled = false; 
+
+    // // LABELOPTIONSGROUP
+    // // ===============
+    // var labelCustomgrayGroup = customgrayGroup.add("group", undefined, {name: "labelCustomgrayGroup"}); 
+    //     labelCustomgrayGroup.orientation = "row"; 
+    //     labelCustomgrayGroup.alignChildren = ["left","center"]; 
+    //     labelCustomgrayGroup.spacing = 0; 
+    //     labelCustomgrayGroup.margins = 0; 
+
+    // var customgrayLabel = labelCustomgrayGroup.add("statictext", undefined, undefined, {name: "customgrayLabel"}); 
+    //     customgrayLabel.text = "Custom Gray"; 
+    //     customgrayLabel.preferredSize.width = 120; 
+
+    // var customGrayCheckbox = scaleOptionsPanel.add("checkbox", undefined, undefined, {name: "customScaleCheckbox"}); 
+    //     customGrayCheckbox.text = "Custom Scale"; 
+    //     customGrayCheckbox.value = exportInfo.scale.customScale; 
+    //     customGrayCheckbox.helpTip = "When left off, exported image dimensions is 1000 pixels wide."; 
+
+    // FILEFORMATSPANEL
+    // ================
+    fileFormatsPanel_tabs = [optionsAITab, optionsPDFTab, optionsEPSTab, optionsSVGTab, optionsJPGTab, optionsPNGTab, optionsScaleTab];
+
+    for (var i = 0; i < fileFormatsPanel_tabs.length; i++) {
+        fileFormatsPanel_tabs[i].alignment = ["fill", "fill"];
+        fileFormatsPanel_tabs[i].visible = false;
+    }
+
+    fileFormatsPanel_nav.onChange = showTab_fileFormatsPanel;
+
+    function showTab_fileFormatsPanel() {
+        if (fileFormatsPanel_nav.selection !== null) {
+            for (var i = fileFormatsPanel_tabs.length - 1; i >= 0; i--) {
+                fileFormatsPanel_tabs[i].visible = false;
+            }
+            fileFormatsPanel_tabs[fileFormatsPanel_nav.selection.index].visible = true;
+        }
+    }
+
+    fileFormatsPanel_nav.selection = exportInfo.activeTab;
+    showTab_fileFormatsPanel()
 
     // DIALOGBTNS
     // ==========
@@ -805,6 +858,7 @@ function showDialog(exportInfo, extensionRoot) {
     // dialog code
     ok.onClick = function(exportInfo) {
         var settings = getSettings(exportInfo);
+        // alert(settings)
         var saveJson = saveJsonPresetDoc(settings, settingsFile);
         if (saveJson) {
             settingsExport.close(runButtonID);
