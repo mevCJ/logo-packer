@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [1.3.2] - 2023-06-06
+## [1.3.2] - 2023-06-14
 ### Fixed
 - PMS convertion would add huge list of PMS colors, i added another clean 
 - Colorsettings dialog would show error with RGB dialog > CMYKtoRGB was written for CMYK space only, added acception so we can show newBrush color correctly
