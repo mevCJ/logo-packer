@@ -57,7 +57,7 @@ Open the extension in Window > Extensions > Logo Packer and follow the instructi
 <details>
   <summary>More functions</summary>
   
-  ## Inverted logot ype
+  ## Inverted logo type
   ![inverted-logo-type-demo](https://raw.githubusercontent.com/wiki/schroef/logo-packer/inverted-logo-color-v132.gif?raw=true)
 
   ## Export sizes JPG & PNG
