@@ -8,13 +8,17 @@ All notable changes to this project will be documented in this file.
 - DragNDrop was missing new added settings so would not generate > set load JSON files to window. function
 - DragNDrop has setTimeout so we can get the JSON data in > caused issues > would only work from 2nd drop
 - When no inverted color was set, generation would continue, now it stops
-- custom alert dialog would return wrong Boolean if was shown earlier.
+- Custom alert dialog would return wrong Boolean if was shown earlier.
 - Color Preferences custom black would change color of a selected object as well, taken this function out.
+- Opening log file from flyout menu on Windows didnt work > on windows we need commonFile folder
+- Moved logging function top hostscript to make sure all functions can use it > logging issue on Windows
 
 ### Added
 - Custom black print and digital is not stored in colorsettings and works with logo generation
 - Extra check when inverted color cant be found
-- Cpnvert all alert windows to the custom alert window
+- Convert all alert windows to the custom alert window
+- Version number to flyout menu, easier to know for users what version it is when posting issue report
+- Expanded logging info
 
 ### Changed
 - All alerts use the custom alert window

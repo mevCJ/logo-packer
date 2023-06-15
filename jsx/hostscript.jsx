@@ -71,6 +71,91 @@ var deletedPanelItems = false;
 var clearedItemsDocs = [''];
 var extensionRoot = '';
 
+
+
+
+///////////////////////////////////////////////////
+// Get OS
+// fromt "_LastLogEntry.jsx"
+///////////////////////////////////////////////////
+isWindows = function() {
+  return $.os.match(/windows/i);
+};
+isMac = function() {
+  return !isWindows();
+};
+
+
+///////////////////////////////////////////////////
+// Object: Logger
+// Usage: Logs all outputs feed
+// Input: Text file
+// Return: Date - Time - Data be marked for log
+// Usage: appendLog('Logitem.' + logitem, logFile);
+// Autohor: Mike Voropaev, 2019.
+// Source: https://www.youtube.com/channel/UCbX5bb9yeLw8V9emYE-fOXw
+///////////////////////////////////////////////////
+function startLog() {
+    // logpath = getSystemPath(SystemPath.EXTENSION);
+    if(isMac()) var userData = Folder.userData;
+    if(!isMac()) var userData = Folder.commonFiles;
+    var myDocuments = Folder.myDocuments;
+    var extension = Folder.extension;
+    var commonFiles = Folder.commonFiles;
+    var application = Folder.application;
+
+    if (!userData || !userData.exists) {
+        userData = Folder("~");
+    }
+    // var logopackerFolder = new Folder(userData + "/Adobe/CEP/Extensions/logo-packer-main");
+    var logopackerFolder = Folder(userData + "/Adobe/CEP/Extensions/logo-packer-main");
+    if (useLogging) {
+        // Windows cant write to hidden files, not sure why
+        logFile = File(logopackerFolder + '/logo-packer.log');
+        logFile.encoding = 'UTF8';
+        // Remove > we keep log small
+        // if (logFile.exists)
+        // 	logFile.remove();
+
+        logFile.open('w'); // W overwrites - A appends
+        // appendLog("extension "+extension, logFile);
+        // appendLog("myDocuments "+myDocuments, logFile);
+        // appendLog("commonFiles "+commonFiles, logFile);
+        // appendLog("application "+application, logFile);
+        appendLog("", logFile);
+        appendLog('____________________________', logFile);
+        appendLog(logFile, logFile);
+        // appendLog(logpath, logFile);
+        return logFile
+    }
+}
+
+function appendLog(message, fileToLog) {
+    // alert(message+"\n"+fileToLog)
+    // alert(message)
+    // alert(fileToLog.exists)
+    // alert(useLogging)
+    if (useLogging) {
+        logFile.open('A');
+        var time = new Date();
+        fileToLog.write(('0' + time.getHours()).slice(-2) + ':' + ('0' + time.getMinutes()).slice(-2) + ':' + ('0' + time.getSeconds()).slice(-2));
+        fileToLog.write('  |  ' + message);
+        fileToLog.writeln('');
+        fileToLog.close();
+    }
+}
+
+function _zeroPad(val) {
+    return (val < 10) ? '0' + val : val;
+}
+
+// logFile = startLog(Folder.desktop+'/Export/Logo Packer');//app.activeDocument.path + "/")
+var logFile = startLog(); // userdata folder
+var date = new Date();
+appendLog('New log: ' + _zeroPad(date.getDate(), 2) + '-' + _zeroPad(date.getMonth() + 1, 2) + '-' + date.getFullYear(), logFile);
+appendLog("", logFile);
+
+
 function getColorProfile(activeDocument){
     return activeDocument.colorProfileName;
 }
@@ -208,6 +293,7 @@ function createTemplateLayer(docRef){
     }
 }
 function generateLogoVariation(clientName, logotype, colors, inverted, mediaType, sepaRator, forMats, autoResize, extensionRoot, exportSettings, colorSettings) {
+    appendLog('\n\ngenerateLogoVariation()', logFile);
     docRef = app.activeDocument;
     logotypes = getArtboardLogoTypes(docRef, false);
     clearedItemsDocs = ['']; // clear list of doc with cleared swatches
@@ -260,6 +346,7 @@ function generateLogoVariation(clientName, logotype, colors, inverted, mediaType
 }
 
 function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportSettings, colorSettings) {
+    appendLog("createLogoTypes()", logFile)
     logotype = logotype;
     // var run = false;
     separator = sepaRator;
@@ -367,7 +454,9 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
         docRef.rasterEffectSettings.resolution = rasterEffectSettings;
 
         docRef.artboards[initArtboardsLength - 1].name = logotype + separator + 'fullcolor' + separator + mediatype
-
+        
+        appendLog("Create fullcolor logo", logFile)
+        
         // Delete all unused color swatches, only first gen logos
         // Cleans doc of all items; swatches, brushes, styles etc etc
         if (swatchesCleaned == false) deleteUnusedPanelItems();
@@ -398,10 +487,7 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
             // works by more then 1
             // var prevArtboard = docRef.artboards[initArtboardsLength - (colors.length +1)]
             var prevArtboard = docRef.artboards[initArtboardsLength - colors.length]
-            
-            
-            
-            
+
             var initialObjHeight = Math.abs(prevArtboard.artboardRect[1] - prevArtboard.artboardRect[3]);
 
             //move copied items to previouse item's position
@@ -430,8 +516,9 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
         if (colors.length == 0) docRef.fitArtboardToSelectedArt(0);    
 
         
-        // Add grayscale, black & white version
+        // Add pms, inverted, grayscale, black & white version
         for (var i = 0; i < colors.length; i++) {
+            appendLog("Create "+ artboardsNames[i]+" logo", logFile)
             var firstObj = app.selection[0];
             // var orgObj = app.selection[0];
         
@@ -502,8 +589,11 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
 
             // Make color logo versions
             fillColor(firstObj, colors[i],inverted, extensionRoot, exportSettings);
-            // Stop creation if result = false > user input
-            if (scriptAlertResult==false) return run = "canceled";
+            // only check for Inverted
+            if(colors[i]=='inverted'){
+                // Stop creation if result = false > user input
+                if (scriptAlertResult==false) return run = "canceled";
+            }
 
             //reset to first object so we can color correct > changed due to grayscale and inverted versions
             // docRef.artboards.setActiveArtboardIndex(0);
@@ -526,6 +616,9 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
 
 // change object colors
 function fillColor(obj, color, inverted, extensionRoot, exportSettings) {
+    appendLog("fillColor()", logFile);
+    appendLog("color "+color, logFile);
+
     var docRef = app.activeDocument;
     docRef.layers[0].hasSelectedArtwork = false;
     docRef.artboards.setActiveArtboardIndex(docRef.artboards.length - 1);
@@ -621,7 +714,6 @@ function fillColor(obj, color, inverted, extensionRoot, exportSettings) {
         app.executeMenuCommand("deselectall");
         docRef.selectObjectsOnActiveArtboard();
         inverseLogo();
-        // $.evalFile(new File(extensionRoot+'/jsx/invertlogoType.jsx'));
         app.executeMenuCommand("showAll");
         docRef.selectObjectsOnActiveArtboard();
         app.executeMenuCommand("group");
@@ -1769,7 +1861,7 @@ if (!infoColorRGB.exists) {
 
 function setLogoInfo(docRef, logotype, colors, initArtboardsLength, steps) {
     appendLog('setLogoInfo()', logFile);
-    appendLog(initArtboardsLength, logFile);
+    appendLog("initArtboardsLength "+initArtboardsLength, logFile);
     // Add logo info
     // initArtboardsLength = app.activeDocument.artboards.length;
     // var artboardsNames = ['grayscale', 'black', 'white'];
@@ -1972,7 +2064,6 @@ function clearDestFolder() {
 // Return: opens folder location in OS
 ///////////////////////////////////////////////////////////////////////////////   
 function openDestFolder() {
-    // setDest = Folder("c:/users/romboutversluijs/desktop/export/logo packer/surfscool");
     run = false;
     setDest = Folder(setDest);
     if (setDest.exists) {
@@ -1989,14 +2080,23 @@ function openDestFolder() {
 // Return: opens folder location in OS
 ///////////////////////////////////////////////////////////////////////////////   
 function openLog() {
-    // setDest = Folder("c:/users/romboutversluijs/desktop/export/logo packer/surfscool");
-    logFile = Folder(logFile);
-    if (logFile.exists) {
-        //https://extendscript.docsforadobe.dev/file-system-access/folder-object.html?highlight=open%20folder
-        logFile.execute();
-        run = true;
+    try {
+        logFile = File(logFile);
+        if (logFile.exists) {
+            //https://extendscript.docsforadobe.dev/file-system-access/folder-object.html?highlight=open%20folder
+            logFile.execute();
+            run = true;
+        }
+        return run
+    } catch(e) {
+        var title = "Warning!";
+        var msg1 = "Can't open log file.";
+        var msg2 = false;
+        var okButton = "OK";
+        var okStr = "OK";
+        var cancelStr = "";
+        scriptAlert(title, msg1, msg2, true, true, okStr, cancelStr, warningIcon64);
     }
-    return run
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2302,7 +2402,7 @@ function errorEvent(errorNumber) {
 ///////////////////////////////////////////////////////////////////////////////
 function addMarginToArtboard(marginVal, margintype, allArtboards, logotype, colors, mediaType, colorSettings) {
     appendLog('addMarginsToArtboard()', logFile);
-    appendLog(initArtboardsLength, logFile);
+    appendLog("artboardLength "+initArtboardsLength, logFile);
     run = false;
     if (margins == "") {
         run = "margins";
@@ -2965,48 +3065,6 @@ function Timer() {
 }
 
 
-///////////////////////////////////////////////////
-// Object: Logger
-// Usage: Logs all outputs feed
-// Input: Text file
-// Return: Date - Time - Data be marked for log
-// Usage: appendLog('Logitem.' + logitem, logFile);
-// Autohor: Mike Voropaev, 2019.
-// Source: https://www.youtube.com/channel/UCbX5bb9yeLw8V9emYE-fOXw
-///////////////////////////////////////////////////
-function startLog(targetPath) {
-    // logpath = getSystemPath(SystemPath.EXTENSION);
-    var userData = Folder.userData;
-    var myDocuments = Folder.myDocuments;
-    var extension = Folder.extension;
-    var commonFiles = Folder.commonFiles;
-    var application = Folder.application;
-    if (!userData || !userData.exists) {
-        userData = Folder("~");
-    }
-    var logopackerFolder = new Folder(userData + "/Adobe/CEP/Extensions/logo-packer-main");
-
-    if (useLogging) {
-        var logFile = File(logopackerFolder + '/.logo-packer.log');
-        logFile.encoding = 'UTF8';
-        // Remove > we keep log small
-        // if (logFile.exists)
-        // 	logFile.remove();
-
-        logFile.open('w'); // W overwrites - A appends
-
-        // appendLog("extension "+extension, logFile);
-        // appendLog("myDocuments "+myDocuments, logFile);
-        // appendLog("commonFiles "+commonFiles, logFile);
-        // appendLog("application "+application, logFile);
-        appendLog("", logFile);
-        appendLog('____________________________', logFile);
-        appendLog(logFile, logFile);
-        // appendLog(logpath, logFile);
-        return logFile
-    }
-}
-
 function loadTextFile(relPath) {
     var script = new File($.fileName);
     var textFile = new File(script.path + '/' + relPath);
@@ -3016,27 +3074,6 @@ function loadTextFile(relPath) {
 
     return str.split('\n');
 }
-
-function appendLog(message, file) {
-
-    if (useLogging) {
-        var time = new Date();
-        file.write(('0' + time.getHours()).slice(-2) + ':' + ('0' + time.getMinutes()).slice(-2) + ':' + ('0' + time.getSeconds()).slice(-2));
-        file.write('  |  ' + message);
-        file.writeln('');
-    }
-}
-
-function _zeroPad(val) {
-    return (val < 10) ? '0' + val : val;
-}
-
-// logFile = startLog(Folder.desktop+'/Export/Logo Packer');//app.activeDocument.path + "/")
-logFile = startLog(); // userdata folder
-var date = new Date();
-appendLog('New log: ' + _zeroPad(date.getDate(), 2) + '-' + _zeroPad(date.getMonth() + 1, 2) + '-' + date.getFullYear(), logFile);
-appendLog("", logFile);
-
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -3048,7 +3085,7 @@ appendLog("", logFile);
 //
 ///////////////////////////////////////////////////////////////////////////////
 function newBaseDoc(clientName, docType) {
-    appendLog('Add Basedoc*()', logFile);
+    appendLog('Add Basedoc()', logFile);
     appendLog(docType, logFile);
     try {
         if (clientName == "") {

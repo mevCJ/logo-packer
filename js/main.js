@@ -733,7 +733,8 @@ $path = {
         var menuXML =
             // <MenuItem Id="debugPanel" Label="Debug" Enabled="true" Checkable="true" Checked="false"/> \
             '<Menu> \
-            <MenuItem Id="info" Label="Panel info page" Enabled="true" Checked="false"/> \
+            <MenuItem Label="Logo Packer v1.3.2" Enabled="true" Checked="false"/> \
+            <MenuItem Id="info" Label="Goto info web page" Enabled="true" Checked="false"/> \
             <MenuItem Label="---" /> \
             <MenuItem Id="github" Label="View on Github" Enabled="true" Checked="false"/> \
             <MenuItem Id="githubIssue" Label="Report Issue" Enabled="true" Checked="false"/> \
