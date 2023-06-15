@@ -293,7 +293,11 @@ function createTemplateLayer(docRef){
     }
 }
 function generateLogoVariation(clientName, logotype, colors, inverted, mediaType, sepaRator, forMats, autoResize, extensionRoot, exportSettings, colorSettings) {
-    appendLog('\n\ngenerateLogoVariation()', logFile);
+    appendLog('', logFile);
+    appendLog('', logFile);
+    appendLog('generateLogoVariation()', logFile);
+    appendLog(clientName+' \n\t\t\t '+logotype+' \n\t\t\t '+colors+' \n\t\t\t '+inverted+' \n\t\t\t '+mediaType+' \n\t\t\t '+sepaRator+' \n\t\t\t '+forMats+' \n\t\t\t '+autoResize+' \n\t\t\t '+extensionRoot+' \n\t\t\t '+exportSettings+' \n\t\t\t '+colorSettings, logFile);
+
     docRef = app.activeDocument;
     logotypes = getArtboardLogoTypes(docRef, false);
     clearedItemsDocs = ['']; // clear list of doc with cleared swatches
@@ -347,19 +351,24 @@ function generateLogoVariation(clientName, logotype, colors, inverted, mediaType
 
 function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportSettings, colorSettings) {
     appendLog("createLogoTypes()", logFile)
+
     logotype = logotype;
-    // var run = false;
     separator = sepaRator;
+    for (col=0; col < colors.length; col++){
+        if (colors[col]=='inverted'){
+            if (inverted == ",,") {
+                return run = "inverted"
+            } else if (inverted[2].split('-') == "") {
+                return run = "invertedColor"
+            } 
+        }
+    }
     if (app.selection.length == 0) {
         return run = "selection"
     } else if (clientName == "") {
         return run = "clientname"
     } else if (colors == "") {
         return run = "colors"
-    } else if (inverted == ",,") {
-        return run = "inverted"
-    } else if (inverted[2].split('-') == "") {
-        return run = "invertedColor"
     } else if (logotype == "select" || logotype == "") {
         return run = "logotype"
     } else if (mediaType == "undefined" || mediaType == "") {
@@ -379,17 +388,12 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
         var colorList = getLogoColorList(colors, mediaType, colorSettings);
         var colors = colorList[0];
         var artboardsNames = colorList[1];
-        
-        
-        
 
         // Filter function 
         // Source https://stackoverflow.com/a/20690490
         // let forDeletion = ["black". "white"]
         // colors = colors.filter(item => !forDeletion.includes(item))
-        
 
-        
         var mediatype = mediaType == 'Print' ? 'cmyk' : 'rgb';
         var rasterEffectSettings = mediaType == 'Print' ? '300' : '72'
         // var mediaTypeFolder = mediaType;
@@ -509,13 +513,11 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
                     }
                 }
             }
-
         }
         
         // Fix for when single color is used
         if (colors.length == 0) docRef.fitArtboardToSelectedArt(0);    
 
-        
         // Add pms, inverted, grayscale, black & white version
         for (var i = 0; i < colors.length; i++) {
             appendLog("Create "+ artboardsNames[i]+" logo", logFile)
@@ -560,7 +562,6 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
             // correct wrong offset from duplicate original logo > needs work
             docRef.artboards.setActiveArtboardIndex(curFirstBoard+1);
             app.executeMenuCommand('selectallinartboard');
-            
 
             // Center logo back on artboard > causes issue on WIndows illustrator 
             // var board = docRef.artboards[docRef.artboards.getActiveArtboardIndex()];
@@ -617,7 +618,7 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
 // change object colors
 function fillColor(obj, color, inverted, extensionRoot, exportSettings) {
     appendLog("fillColor()", logFile);
-    appendLog("color "+color, logFile);
+    appendLog("Color "+color, logFile);
 
     var docRef = app.activeDocument;
     docRef.layers[0].hasSelectedArtwork = false;
@@ -729,6 +730,9 @@ function fillColor(obj, color, inverted, extensionRoot, exportSettings) {
 
 
 function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, exportSettings, separator) {
+    appendLog('exportFiles()', logFile);
+    appendLog(mediaType+' \n\t\t\t '+logotype+' \n\t\t\t '+forMats+' \n\t\t\t '+subFolders+' \n\t\t\t '+checkABhasArt+' \n\t\t\t '+exportSettings+' \n\t\t\t '+separator, logFile);
+
     // convert string list of josn settings back to object
     exportSettings = exportSettings.split(',')
 
@@ -738,8 +742,6 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
         var totalTime = new Timer();
     }
 
-    appendLog('Starting Export ', logFile);
-    
     var run = false;
     var cancel = false;
 
@@ -1860,8 +1862,11 @@ if (!infoColorRGB.exists) {
 }
 
 function setLogoInfo(docRef, logotype, colors, initArtboardsLength, steps) {
+    appendLog('', logFile);
     appendLog('setLogoInfo()', logFile);
+    appendLog(docRef+' \n\t\t\t '+logotype+' \n\t\t\t '+colors+' \n\t\t\t '+initArtboardsLength+' \n\t\t\t '+steps, logFile);
     appendLog("initArtboardsLength "+initArtboardsLength, logFile);
+
     // Add logo info
     // initArtboardsLength = app.activeDocument.artboards.length;
     // var artboardsNames = ['grayscale', 'black', 'white'];
@@ -1926,6 +1931,9 @@ function setLogoInfo(docRef, logotype, colors, initArtboardsLength, steps) {
 }
 
 function addLogoInfo(docRef, layerName, posX, posY, justDir) {
+    appendLog('setLogoInfo()', logFile);
+    appendLog(layerName+' \n\t\t\t '+posX+' \n\t\t\t '+posY+' \n\t\t\t '+justDir, logFile);
+
     // find existing layers or add new one
     var x = convertToPoints(posX);
     var y = convertToPoints(posY);
@@ -1963,6 +1971,8 @@ function addLogoInfo(docRef, layerName, posX, posY, justDir) {
 // Source: https://community.adobe.com/t5/photoshop/photoshop-javascript-open-files-in-all-subfolders/m-p/5162230
 ///////////////////////////////////////////////////////////////////////////////   
 function scanSubFolders(setDest, mask) {
+    appendLog('scanSubFolders()',logFile);
+
     var sFolders = [];
     var allFiles = [];
     sFolders[0] = setDest;
@@ -1986,19 +1996,22 @@ function scanSubFolders(setDest, mask) {
 }
 
 function setDestFolder() {
+    appendLog('setDestFolder()', logFile);
+
     run = false;
     // setDest = [];
     setDest = Folder.selectDialog();
-    
-    
     if (setDest) {
         // setDest = [setDest];
         run = true;
+        appendLog(setDest, logFile);
     }
     return [run, setDest]
 }
 
 function setDestFolderFromJson(setDestFromJson) {
+    appendLog('setDestFolderFromJson()',logFile);
+
     run = false;
     if (setDest) {
         // setDest = Object(setDest);
@@ -2013,6 +2026,7 @@ function setDestFolderFromJson(setDestFromJson) {
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI
         // setDest = decodeURI(setDest);
         run = true;
+        appendLog(setDest,logFile);
     }
     return [run, setDest]
 }
@@ -2024,6 +2038,8 @@ function setDestFolderFromJson(setDestFromJson) {
 // Return: cleans destination folder of all sub folders and files
 ///////////////////////////////////////////////////////////////////////////////   
 function clearDestFolder() {
+    appendLog('clearDestFolder()',logFile);
+
     setDest = Folder(setDest);
     // Find temp files windows, need to be deleted as well
     filter_files = /\.(jpg|psd|png|svg|ai|pdf|eps|DS_STORE)$/i;
@@ -2052,6 +2068,7 @@ function clearDestFolder() {
                 var delFolder = Folder(delFolders[1][l - 1]);
                 delFolder.remove();
             }
+            appendLog(clearFolder, logFile);
             return true
         }
     }
@@ -2064,12 +2081,15 @@ function clearDestFolder() {
 // Return: opens folder location in OS
 ///////////////////////////////////////////////////////////////////////////////   
 function openDestFolder() {
+    appendLog('openDestFolder()',logFile);
+
     run = false;
     setDest = Folder(setDest);
     if (setDest.exists) {
         //https://extendscript.docsforadobe.dev/file-system-access/folder-object.html?highlight=open%20folder
         setDest.execute();
         run = true;
+        appendLog('setDest',logFile);
     }
     return run
 }
@@ -2080,9 +2100,12 @@ function openDestFolder() {
 // Return: opens folder location in OS
 ///////////////////////////////////////////////////////////////////////////////   
 function openLog() {
+    appendLog('openLog()',logFile);
+
     try {
         logFile = File(logFile);
         if (logFile.exists) {
+            appendLog('logFile',logFile);
             //https://extendscript.docsforadobe.dev/file-system-access/folder-object.html?highlight=open%20folder
             logFile.execute();
             run = true;
@@ -2107,7 +2130,6 @@ function openLog() {
 // Source: Specify CEP panel
 ///////////////////////////////////////////////////////////////////////////////   
 function convertToPoints(value) {
-    
     switch (app.activeDocument.rulerUnits) {
         case RulerUnits.Picas:
             value = new UnitValue(value, "pc").as("pt");
@@ -2241,6 +2263,9 @@ var toPixels = function(v) {
 // item = docRef.selection[x];
 ///////////////////////////////////////////////////////////////////////////////
 function resizeLogo(item, autoResize, exportSettings, scaleMethod) {
+    appendLog('resizeLogo()',logFile);
+    appendLog(item+' \n\t\t\t '+autoResize+' \n\t\t\t '+exportSettings+' \n\t\t\t '+scaleMethod, logFile);
+
     var docRef = app.activeDocument;
     var board = docRef.artboards[docRef.artboards.getActiveArtboardIndex()];
     var right = board.artboardRect[2];
@@ -2336,6 +2361,8 @@ function resizeLogo(item, autoResize, exportSettings, scaleMethod) {
 // http://556.sub.jp/scriptclip/highlight/135
 ///////////////////////////////////////////////////////////////////////////////
 function resizeArtboard(sel) {
+    appendLog('resizeArtboard()',logFile);
+    appendLog(sel,logFile);
 
     var boundssel = 1; // 0: geometricBounds, 1: visibleBounds
     var modesel = 0; // 0: Fit active artboat, 1: Make a new artboard.
@@ -2401,8 +2428,11 @@ function errorEvent(errorNumber) {
 // 
 ///////////////////////////////////////////////////////////////////////////////
 function addMarginToArtboard(marginVal, margintype, allArtboards, logotype, colors, mediaType, colorSettings) {
+    appendLog('', logFile);
     appendLog('addMarginsToArtboard()', logFile);
+    appendLog(marginVal+' \n\t\t\t '+margintype+' \n\t\t\t '+allArtboards+' \n\t\t\t '+logotype+' \n\t\t\t '+colors+' \n\t\t\t '+mediaType+' \n\t\t\t '+colorSettings, logFile);
     appendLog("artboardLength "+initArtboardsLength, logFile);
+
     run = false;
     if (margins == "") {
         run = "margins";
@@ -2501,6 +2531,9 @@ function addMarginToArtboard(marginVal, margintype, allArtboards, logotype, colo
 //
 ///////////////////////////////////////////////////////////////////////////////
 function addMargins(docRef, activeAB, margins, margintype, count) {
+    appendLog('addMargins()',logFile);
+    appendLog(docRef+' \n\t\t\t '+activeAB+' \n\t\t\t '+margins+' \n\t\t\t '+margintype+' \n\t\t\t '+count, logFile);
+
     var abBounds = activeAB.artboardRect; // get bounds [left, top, right, bottom]
     // var selObjBounds = docRef.pageItems[i].visibleBounds;
     docRef.selectObjectsOnActiveArtboard();
@@ -2535,6 +2568,8 @@ function addMargins(docRef, activeAB, margins, margintype, count) {
 //
 ///////////////////////////////////////////////////////////////////////////////
 function deleteUnusedPanelItems() {
+    appendLog('deleteUnusedPanelItems()', logFile);
+
     swatchesCleaned = false;
     try {
         docName = app.activeDocument.name;
@@ -2561,6 +2596,8 @@ function deleteUnusedPanelItems() {
 //
 ///////////////////////////////////////////////////////////////////////////////
 function deleteUnusedSwatches() {
+    appendLog('deleteUnusedSwatches()', logFile);
+
     try {
         var docRef = app.activeDocument;
         var items = docRef.pageItems,
@@ -2626,6 +2663,10 @@ function deleteUnusedSwatches() {
 //
 ///////////////////////////////////////////////////////////////////////////////
 function cleanupLogos(clientName) {
+    appendLog('', logFile);
+    appendLog('cleanupLogos()', logFile);
+    appendLog(clientName, logFile);
+
     var colorgroup = "";
     try {
         docRef = app.activeDocument;
@@ -2731,8 +2772,7 @@ function cleanLogoItem(docRef, clientName) {
 
     var activeAB = docRef.artboards[docRef.artboards.getActiveArtboardIndex()];
     // check if selection is group > if not results are bad
-    
-    
+
     // if(!app.activeDocument.selection[0].typename == "GroupItem")alert("Please make group of logo "+activeAB.name)return
 
     app.executeMenuCommand("group");
@@ -2960,6 +3000,8 @@ function act_ExitIsolateMode() {
 //
 ///////////////////////////////////////////////////////////////////////////////
 function deleteEmptyLayers() {
+    appendLog('deleteEmptyLayers', logFile);
+
     try {
         var idoc = app.activeDocument;
     } catch (e) {
@@ -2983,6 +3025,9 @@ function deleteEmptyLayers() {
 
 // return empty layers, except the ones that have sublayers with objects
 function getEmptyLayers(container, arr) {
+    appendLog('getEmptyLayers', logFile);
+    appendLog(container+' \n\t\t\t\s'+arr, logFile);
+
     var layers = container.layers;
 
     for (var k = 0; k < layers.length; k++) {
@@ -3087,6 +3132,7 @@ function loadTextFile(relPath) {
 function newBaseDoc(clientName, docType) {
     appendLog('Add Basedoc()', logFile);
     appendLog(docType, logFile);
+
     try {
         if (clientName == "") {
             return run = "clientname"
@@ -3172,6 +3218,8 @@ function newBaseDoc(clientName, docType) {
 //
 ///////////////////////////////////////////////////////////////////////////////
 function getExtensionRootPath() {
+    appendLog('getExtensionRootPath', logFile);
+
     extensionRoot = $.fileName.split('/').slice(0, -2).join('/') + '/';
     var folderPath = extensionRoot;
     if (!Folder(folderPath).exists) {
@@ -3307,6 +3355,8 @@ if (activeDocument.documentColorSpace == "DocumentColorSpace.RGB"){
 }
 
 function getColorNameValue(){
+    appendLog("getColorNameValue", logFile);
+
     var selectedPath = app.activeDocument.selection;
     if (selectedPath.length > 0 ) {
         var item = selectedPath[0];
@@ -3331,6 +3381,9 @@ function getColorNameValue(){
     * @returns {Object} -  {fillColors: Array<Color>, strokeColors: Array<Color>}
     */
     function getBasicColorsFromItem(item) {
+        appendLog("getBasicColorsFromItem", logFile);
+        appendLog(item, logFile);
+
         if (item == undefined)
             throw Error('getItemColor: No item supplied.');
         var noColor = "[NoColor]",
@@ -3578,6 +3631,8 @@ function grayToRGB(color){
 // Find inverse color and lock it
 // Fill all paths and fill with white
 function inverseLogo(){
+    appendLog('inverseLogo()', logFile);
+
     var mediaType = "Print";
     var black = mediaType == 'Print' ? new CMYKColor() : new RGBColor();
     var white = mediaType == 'Print' ? new CMYKColor() : new RGBColor();

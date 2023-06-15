@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - Color Preferences custom black would change color of a selected object as well, taken this function out.
 - Opening log file from flyout menu on Windows didnt work > on windows we need commonFile folder
 - Moved logging function top hostscript to make sure all functions can use it > logging issue on Windows
+- Hotfix when inverted is not set, would gave an error no invert color was set
 
 ### Added
 - Custom black print and digital is not stored in colorsettings and works with logo generation
