@@ -294,7 +294,6 @@ function createTemplateLayer(docRef){
 }
 function generateLogoVariation(clientName, logotype, colors, inverted, mediaType, sepaRator, forMats, autoResize, extensionRoot, exportSettings, colorSettings) {
     appendLog('', logFile);
-    appendLog('', logFile);
     appendLog('generateLogoVariation()', logFile);
     appendLog(clientName+' \n\t\t\t '+logotype+' \n\t\t\t '+colors+' \n\t\t\t '+inverted+' \n\t\t\t '+mediaType+' \n\t\t\t '+sepaRator+' \n\t\t\t '+forMats+' \n\t\t\t '+autoResize+' \n\t\t\t '+extensionRoot+' \n\t\t\t '+exportSettings+' \n\t\t\t '+colorSettings, logFile);
 
@@ -460,7 +459,7 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
         docRef.artboards[initArtboardsLength - 1].name = logotype + separator + 'fullcolor' + separator + mediatype
         
         appendLog("Create fullcolor logo", logFile)
-        
+
         // Delete all unused color swatches, only first gen logos
         // Cleans doc of all items; swatches, brushes, styles etc etc
         if (swatchesCleaned == false) deleteUnusedPanelItems();
@@ -471,6 +470,9 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
         app.executeMenuCommand('group');
 
         item = docRef.selection[0];
+
+        // WIP > check if logo is in PMS colors
+        // checkColorsForPMS(docRef);
 
         // Only group if not alreadt a group
         if (item.typename != "GroupItem") app.executeMenuCommand('group');
@@ -589,9 +591,10 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
             // app.executeMenuCommand("Horizontal Align Center");
 
             // Make color logo versions
-            fillColor(firstObj, colors[i],inverted, extensionRoot, exportSettings);
+            run = fillColor(firstObj, colors[i],inverted, extensionRoot, exportSettings);
+            // alert("scriptAlertResult "+scriptAlertResult)
             // only check for Inverted
-            if(colors[i]=='inverted'){
+            if(colors[i]=='inverted' && run ==false){
                 // Stop creation if result = false > user input
                 if (scriptAlertResult==false) return run = "canceled";
             }
@@ -660,6 +663,7 @@ function fillColor(obj, color, inverted, extensionRoot, exportSettings) {
             var cancelStr = "No";
             scriptAlert(title, msg1, msg2, true, true, okStr, cancelStr, warningIcon64);
             return scriptAlertResult;
+            run = false;
         }
         if (inverted[1]=="RGBColor"){
             rgbValues = inverted[2].split('-');//docRef.swatches.getByName(inverted[2]).fillColor.color;
@@ -690,6 +694,7 @@ function fillColor(obj, color, inverted, extensionRoot, exportSettings) {
                 var cancelStr = "No";
                 scriptAlert(title, msg1, msg2, true, true, okStr, cancelStr, warningIcon64);
                 return scriptAlertResult;
+                run = false;
                 // pass
             }
             getColor = docRef.swatches.getByName(inverted[2]).color;
@@ -3718,4 +3723,194 @@ function inverseLogo(){
             }
         }
     };
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Function: selectItemsOnLayer
+// Usage: return path color spot color
+// Input: activeLayer
+// Return: True or False
+// Source: https://community.adobe.com/t5/illustrator-discussions/script-for-select-sequentially-all-paths-compound-paths-by-position-at-layer/m-p/11483356#M246927
+//
+///////////////////////////////////////////////////////////////////////////////
+function selectItemsOnLayer() {
+    var doc = app.activeDocument;
+    app.selection = null;
+    var selectedLayer = doc.activeLayer;
+    var _pageItems = selectedLayer.pageItems
+    for (var i = 0; i < _pageItems.length; i++) {
+        if (_pageItems[i].typename == 'PathItem' || _pageItems[i].typename == 'CompoundPathItem') {
+            try {
+                var item = _pageItems.getByName((i+1));
+                item.selected = true;
+            } catch (e) {
+                try {
+                    var item = _pageItems.getByName((i+1));
+                    item.selected = true;
+                } catch (e) {
+
+                }
+            }
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Function: checkColorsForPMS
+// Usage: return path color spot color
+// Input: activeLayer
+// Return: True or False
+// Source: https://community.adobe.com/t5/illustrator-discussions/script-for-select-sequentially-all-paths-compound-paths-by-position-at-layer/m-p/11483356#M246927
+//
+///////////////////////////////////////////////////////////////////////////////
+// function checkColorsForPMS(item) {
+//     var doc = app.activeDocument;
+//     app.selection = null;
+//     var selectedLayer = doc.activeLayer;
+//     var _pageItems = selectedLayer.pageItems;
+//     for (var i = 0; i < _pageItems.length; i++) {
+//         alert(_pageItems[i].typename)
+//         if (_pageItems[i].typename == 'PathItem' || _pageItems[i].typename == 'CompoundPathItem') {
+//             try {
+//                 var item = _pageItems.getByName((i+1));
+//                 item.selected = true;
+//                 pms = searchForPMS(item);
+//                 alert(pms)
+//             } catch (e) {
+//                 try {
+//                     var item = _pageItems.getByName((i+1));
+//                     item.selected = true;
+//                     pms = searchForPMS(item);
+//                 } catch (e) {
+//                     alert(e)
+//                 }
+//             }
+//         }
+//         else if (item.constructor.name == 'GroupItem') {
+//             // add colors from grouped items
+//             for (var i = 0; i < item.pageItems.length; i++) {
+//                 checkColorsForPMS(item.pageItems[i]);
+//             }
+//         }
+//     }
+//     // alert(pms)
+// }
+function checkColorsForPMS() {
+    var fillColorList = new Array();
+    for (var i = 0; i < app.activeDocument.selection.length; i++) {
+        var item = app.activeDocument.selection[i];
+        alert(getFillColor(item, fillColorList))
+    }
+}
+
+
+function getFillColor(item, fillColorList){
+    // var pmsColors = undefined;
+    // alert(item.typename)
+    // alert(docRef.name)
+    // alert(app.activeDocument.name)
+    if (item.typename == 'PathItem'){
+        var PathItemFill = item.fillColor;
+        try {
+            // pms = searchForPMS(item);
+            if (PathItemFill.typename != 'SpotColor') {
+                fillColorList.push(false);
+            }
+            if (PathItemFill.typename == 'SpotColor') {
+                // https://community.adobe.com/t5/illustrator-discussions/illustrator-script-to-get-the-path-item-used-fill-color-name/m-p/11537495#M249407
+                var selectedSwatches = app.activeDocument.swatches.getSelected();
+                // alert(selectedSwatches)
+                alert(selectedSwatches[0].color.typename)
+                alert(selectedSwatches[0].color.spot.color.typename)
+                alert(selectedSwatches[0].color.spot.spotKind)
+                alert(selectedSwatches[0].color.spot.color.spotKind)
+                // swatchColor = docRef.swatches.getByName(PathItemFill.name);
+                // fillColorList.push(swatchColor.color.spot.color.spotKind);
+            }
+        } catch (e) {
+            // alert(e)
+            // alert(e)
+            // alert(item.name)
+            // return false
+            // try {
+            //     pms = searchForPMS(item);
+            // } catch (e) {
+            //     item.name
+            //     item.selected = true;
+            //     alert(e)
+            //     return false
+            // }
+        }
+    }
+    if (item.typename == 'CompoundPathItem') {
+        var compoundPathItemFill = item.pathItems[0].fillColor;
+        try {
+            // pms = searchForPMS(item);
+            if (compoundPathItemFill.typename != 'SpotColor') {
+                fillColorList.push(false);
+            }
+            if (compoundPathItemFill.typename == 'SpotColor') {
+                // https://community.adobe.com/t5/illustrator-discussions/illustrator-script-to-get-the-path-item-used-fill-color-name/m-p/11537495#M249407
+                var selectedSwatches = app.activeDocument.swatches.getSelected();
+                alert(selectedSwatches[0].color.spot.color.spotKind)
+                // alert(selectedSwatches[0].spotKind)
+                // alert(selectedSwatches)
+                // alert(selectedSwatches[0].name)
+                // spot = docRef.swatches.getByName(compoundPathItemFill.name).spot.color;
+                // fillColorList.push(spot.spotKind);
+            }
+        } catch (e) {
+            // alert(e)
+            // alert(item.name)
+            // return false
+            // try {
+            //     pms = searchForPMS(item);
+            // } catch (e) {
+            //     item.name
+            //     item.selected = true;
+            //     alert(e)
+            //     return false
+            // }
+        }
+    }
+    else if (item.constructor.name == 'GroupItem') {
+        app.activeDocument.selection = null;
+        // add colors from grouped items
+        for (var i = 0; i < item.pageItems.length; i++) {
+            item.pageItems[i].selected = true
+            getFillColor(item.pageItems[i], fillColorList);
+        }
+    }
+    // alert("pmsColors "+pmsColors)
+    // alert(fillColorList)
+    return fillColorList
+}
+
+
+function searchForPMS(colorItem){
+    colorItem = colorItem.fillColor;
+    var fil = colorItem.typename;
+    if(colorItem.typename == "SpotColor"){
+        fil = colorItem.spot.color;
+        tint = colorItem.tint;
+        if (app.activeDocument.documentColorSpace == DocumentColorSpace.CMYK){
+            fil = colorItem.spot.color;
+            inpt = fil.cyan+", "+fil.magenta+", "+fil.yellow+", "+fil.black;
+        } else{
+            fil = colorItem.spot.color;
+            inpt = fil.red+", "+fil.green+", "+fil.blue;
+            
+            // 2022-12-29
+            // use CMYK for RGB better outcome
+            var col = new RGBColor;
+                col.r = fil.red;
+                col.g = fil.green;
+                col.b = fil.blue;
+            // alert("RGB2CMYK "+RGB2CMYK(col))
+            inpt = RGB2CMYK(col).C+", "+RGB2CMYK(col).M+", "+RGB2CMYK(col).Y+", "+RGB2CMYK(col).K;
+        }
+    }
+    return fil
 }

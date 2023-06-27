@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.3.2.1] - 2023-06-27
+### Fixed
+- Fixed canceletaion when inverted logo type used, but no dialog shpowed, it would still cancel logo generation
+
 ## [1.3.2] - 2023-06-14
 ### Fixed
 - PMS convertion would add huge list of PMS colors, i added another clean 
