@@ -1,6 +1,101 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.3.2.1] - 2023-06-27
+### Fixed
+- Fixed canceletaion when inverted logo type used, but no dialog shpowed, it would still cancel logo generation
+
+## [1.3.2] - 2023-06-14
+### Fixed
+- PMS convertion would add huge list of PMS colors, i added another clean 
+- Colorsettings dialog would show error with RGB dialog > CMYKtoRGB was written for CMYK space only, added acception so we can show newBrush color correctly
+- DragNDrop was missing new added settings so would not generate > set load JSON files to window. function
+- DragNDrop has setTimeout so we can get the JSON data in > caused issues > would only work from 2nd drop
+- When no inverted color was set, generation would continue, now it stops
+- Custom alert dialog would return wrong Boolean if was shown earlier.
+- Color Preferences custom black would change color of a selected object as well, taken this function out.
+- Opening log file from flyout menu on Windows didnt work > on windows we need commonFile folder
+- Moved logging function top hostscript to make sure all functions can use it > logging issue on Windows
+- Hotfix when inverted is not set, would gave an error no invert color was set
+
+### Added
+- Custom black print and digital is not stored in colorsettings and works with logo generation
+- Extra check when inverted color cant be found
+- Convert all alert windows to the custom alert window
+- Version number to flyout menu, easier to know for users what version it is when posting issue report
+- Expanded logging info
+
+### Changed
+- All alerts use the custom alert window
+
+## [1.3.1.3] - 2023-06-05
+### Fixed
+- Added a warning when inverted color cant be found
+
+### Changed
+- Autoresize for export jpg was using 40cm wide logo, thats a bit big for the other file types. Reduced to 20cm
+  > Why does exportforscreen doesnt need such big base file?
+  
+## [1.3.1.3] - 2023-06-02
+### Fixed
+- Alltypes export placement issue due new copy of method used in fillCOlor function
+- Logo preview layer issue when alltypes was used, was added per logo type creation. Now is done at very end of logo generation
+- Reset now reset everything correctly, it wouldnt reset color types correctly
+
+## [1.3.1.3] - 2023-05-31
+### Fixed
+- Invertlogo type had issues coloring white parts
+- Issue with OMS conversion and tint. Would set it to 0 if there was no tint in some cases. Caused by starting of of false, which return 0 in tint.
+- If sourceprofile was untagged, it would show empty. Now shows untagged
+- Inverted logo white in JPG also needs to be removed, white is not visible in jpg
+- For digital disable PMS creation
+- Remove white and inverted didnt work when different scale size are added
+- When switching between print and digital, options like PMS, JPG and PNG will be turned on and off depending on the media type chosen.
+
+### Added
+- invertlogo works implemented in panel
+- Inverted logo type is also saved in settings
+
+### Changed
+- Moved reset, export,import setting to top of panel.
+
+## [1.3.1.2] - 2023-05-26
+### Fixed
+- PMS conversion with grayscale colors
+- PMS conversion stopped on path with no color
+
+### Added
+- white & pms in JPG is removed
+- custom grayscale conervsion wiuth colorbalance
+- Invert color logo type
+- Thre is a dark preview layer added so we see the white colors now
+
+## [0.6.2] - 2023-05-26
+### Added
+- check when loading JSON it also checks dropzone & tooltips
+- tooltips settings to JSON export setting file
+
+## [0.6.1] - 2023-05-22
+### Fixed
+- Auto resizer needs to check image export scale size better. When scale is to big and logo is to small, export wont work
+  > it takes largest export size and uses 10% + 100 pixel. Works in most cases up to 4k
+- AutoResizer sizes logo based on export size settings. Large export settings need larger base size logo, therefor autoresizer checks what setting is used.
+- AutoMargin had issues when alltype logo creatin was used.
+- Alltypes creation logo had issues with check and returning errors on not set values like clientname etc etc
+- Issue with adding margins in pixels, got wrong conversion value
+
+### Added
+- Export sizes for PNG and JPG
+- Added show / hide to DropZone when set to alltypes, doesnt work when using that
+- Tooltips
+
+## [0.6.0] - 2023-05-17
+### Fixed
+- Exporting JPG and PNG would add sub folder is option was on in ExportForScreens
+- Hardcoded size for PNG as well, WIP need to add mulitple export sizes
+- Automargin would not update when same value was added, WIP need regex oonly numberical input
+- Automargin would reset to artboard 1 when using single input
+- PNG export would not pickup transparency, black or white background. WIP perhaps add normal exportoptions so we have more options
 
 ## [0.5.9] - 2022-12-09
 ### Added
@@ -15,7 +110,6 @@ All notable changes to this project will be documented in this file.
 ### Others
 - Reorganised custom alert dialog, moved to hostscript for easier access
 - Cleanup code & leftovers
-
 
 ## [0.5.8] - 2022-12-08
 ### Fixed

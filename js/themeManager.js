@@ -98,6 +98,7 @@ var themeManager = (function () {
         addRule(styleId, ".hostFont", "font-family:" + appSkinInfo.baseFontFamily);
         addRule(styleId, ".hostFont", "color:" + "#" + fontColor);
         
+        addRule(styleId, ".hostButton.active", "background-color:" + "var(--blue1)");
         addRule(styleId, ".hostButton", "background-color:" + "#" + darkBgdColor);
         addRule(styleId, ".hostButton:hover", "background-color:" + "#" + bgdColor);
         addRule(styleId, ".hostButton:active", "background-color:" + "#" + darkBgdColor);

@@ -11,6 +11,7 @@ var panelMargins = 16;
 
 
 var extensionRoot = getExtensionRootPath();
+// alert(extensionRoot)
 $.evalFile(new File(extensionRoot + '/js/json2.js'));
 var settingsFile = 'settings/settings.json';
 var exportInfo = new Object();
@@ -32,7 +33,7 @@ function showDialog(exportInfo, extensionRoot) {
         name: "fileFormatsPanel"
     });
     fileFormatsPanel.alignChildren = ["left", "fill"];
-    var fileFormatsPanel_nav = fileFormatsPanel.add("listbox", undefined, ['AI','PDF', 'EPS', 'SVG', 'JPG', 'PNG']);
+    var fileFormatsPanel_nav = fileFormatsPanel.add("listbox", undefined, ['AI','PDF', 'EPS', 'SVG', 'JPG', 'PNG', 'Scale']);
     fileFormatsPanel_nav.preferredSize.width = 75
     var fileFormatsPanel_innerwrap = fileFormatsPanel.add("group")
     fileFormatsPanel_innerwrap.alignment = ["fill", "fill"];
@@ -579,28 +580,6 @@ function showDialog(exportInfo, extensionRoot) {
     optionsPNGTab.spacing = 10;
     optionsPNGTab.margins = 0;
 
-    // FILEFORMATSPANEL
-    // ================
-    fileFormatsPanel_tabs = [optionsAITab, optionsPDFTab, optionsEPSTab, optionsSVGTab, optionsJPGTab, optionsPNGTab];
-
-    for (var i = 0; i < fileFormatsPanel_tabs.length; i++) {
-        fileFormatsPanel_tabs[i].alignment = ["fill", "fill"];
-        fileFormatsPanel_tabs[i].visible = false;
-    }
-
-    fileFormatsPanel_nav.onChange = showTab_fileFormatsPanel;
-
-    function showTab_fileFormatsPanel() {
-        if (fileFormatsPanel_nav.selection !== null) {
-            for (var i = fileFormatsPanel_tabs.length - 1; i >= 0; i--) {
-                fileFormatsPanel_tabs[i].visible = false;
-            }
-            fileFormatsPanel_tabs[fileFormatsPanel_nav.selection.index].visible = true;
-        }
-    }
-
-    fileFormatsPanel_nav.selection = exportInfo.activeTab;
-    showTab_fileFormatsPanel()
 
     // PNGOPTIONSPANEL
     // ===============
@@ -681,6 +660,177 @@ function showDialog(exportInfo, extensionRoot) {
     });
     backgroundcolorPNGDropdown.selection = exportInfo.png.backgroundColorPNG;
 
+
+
+    // OPTIONSSCALETAB
+    // ===============
+    var optionsScaleTab = fileFormatsPanel_innerwrap.add("group", undefined, {name: "optionsScaleTab"}); 
+        optionsScaleTab.text = "Scale"; 
+        optionsScaleTab.orientation = "column"; 
+        optionsScaleTab.alignChildren = ["fill","top"]; 
+        optionsScaleTab.spacing = 10; 
+        optionsScaleTab.margins = 0; 
+
+
+    // SCALEOPTIONSPANEL
+    // =================
+    var scaleOptionsPanel = optionsScaleTab.add("panel", undefined, undefined, {name: "scaleOptionsPanel"}); 
+        scaleOptionsPanel.text = "Options"; 
+        scaleOptionsPanel.orientation = "column"; 
+        scaleOptionsPanel.alignChildren = ["left","top"]; 
+        scaleOptionsPanel.spacing = panelSpacing; 
+        scaleOptionsPanel.margins = panelMargins;
+
+    var customScaleCheckbox = scaleOptionsPanel.add("checkbox", undefined, undefined, {name: "customScaleCheckbox"}); 
+        customScaleCheckbox.text = "Custom Scale"; 
+        customScaleCheckbox.value = exportInfo.scale.customScale; 
+        customScaleCheckbox.helpTip = "When left off, exported image dimensions is 1000 pixels wide."; 
+
+
+    // SCALETYPEGROUP
+    // ==============
+    var scaleTypeGroup = scaleOptionsPanel.add("group", undefined, {name: "scaleTypeGroup"}); 
+        scaleTypeGroup.orientation = "column"; 
+        scaleTypeGroup.alignChildren = ["left","center"]; 
+        scaleTypeGroup.spacing = 5; 
+        scaleTypeGroup.margins = 0; 
+        scaleTypeGroup.enabled = false; 
+
+    // LABELSCALEGROUP
+    // ===============
+    var labelScaleGroup = scaleTypeGroup.add("group", undefined, {name: "labelScaleGroup"}); 
+        labelScaleGroup.orientation = "row"; 
+        labelScaleGroup.alignChildren = ["left","center"]; 
+        labelScaleGroup.spacing = 0; 
+        labelScaleGroup.margins = 0; 
+
+    var scaleSizeLabel = labelScaleGroup.add("statictext", undefined, undefined, {name: "scaleSizeLabel"}); 
+        scaleSizeLabel.text = "Scale"; 
+        scaleSizeLabel.preferredSize.width = 120; 
+
+    var spacer = labelScaleGroup.add("statictext", undefined, undefined, {name: "spacer"}); 
+        spacer.text = " "; 
+        spacer.preferredSize.width = 120; 
+
+    var SuffixLabel = labelScaleGroup.add("statictext", undefined, undefined, {name: "SuffixLabel"}); 
+        SuffixLabel.text = "Suffix"; 
+        SuffixLabel.preferredSize.width = 70; 
+
+    // GROUP1
+    // ======
+    var group1 = scaleTypeGroup.add("group", undefined, {name: "group1"}); 
+        group1.orientation = "row"; 
+        group1.alignChildren = ["left","center"]; 
+        group1.spacing = 0; 
+        group1.margins = 0; 
+
+    var scaleSizesInput = group1.add('edittext {properties: {name: "scaleSizesInput"}}'); 
+        scaleSizesInput.preferredSize.width = 150; 
+        scaleSizesInput.text = exportInfo.scale.scaleSizes; 
+        scaleSizesInput.helpTip = "Select or specify the scale of the exported image. Values need to be devided by a dash ie '-''. Scale by width, height, resolution or scale. Width and Height are pixels, scale is percentage."; 
+    
+    // SCALETYPEGROUP1
+    // ===============
+    // var scaleTypeGroup1 = group1.add("group", undefined, {name: "scaleTypeGroup1"}); 
+    //     scaleTypeGroup1.orientation = "row"; 
+    //     scaleTypeGroup1.alignChildren = ["left","center"]; 
+    //     scaleTypeGroup1.spacing = 10; 
+    //     scaleTypeGroup1.margins = 0; 
+
+    var scaleTypeDropdown_array = ["Width","Height", "Resolution", "Factor"]; 
+    var scaleTypeDropdown = group1.add("dropdownlist", undefined, undefined, {name: "scaleTypeDropdown", items: scaleTypeDropdown_array}); 
+        scaleTypeDropdown.selection = 0; 
+        scaleTypeDropdown.preferredSize.width = 80; 
+        scaleTypeDropdown.selection = exportInfo.scale.scaleType;
+        scaleTypeDropdown.helpTip = "Select or specify the scale of the exported image. Values need to be separated by a dash ie '-'. Scale by width, height, resolution or scale. Width and Height are pixels, scale is percentage."; 
+
+    // GROUP1
+    // ======
+    var spacer1 = group1.add("statictext", undefined, undefined, {name: "spacer1"}); 
+        spacer1.text = " "; 
+        spacer1.preferredSize.width = 10; 
+
+    var suffixInput = group1.add('edittext {properties: {name: "suffixInput"}}'); 
+        // suffixInput.text = "Suffix"; 
+        suffixInput.preferredSize.width = 100; 
+        suffixInput.text = exportInfo.scale.suffix; 
+        suffixInput.helpTip = "Text added at the end of the file name."; 
+
+    
+    // // OPTIONSOPTIONSTAB
+    // // ===============
+    // var optionsOptionsTab = fileFormatsPanel_innerwrap.add("group", undefined, {name: "optionsOptionsTab"}); 
+    //     optionsOptionsTab.text = "Options"; 
+    //     optionsOptionsTab.orientation = "column"; 
+    //     optionsOptionsTab.alignChildren = ["fill","top"]; 
+    //     optionsOptionsTab.spacing = 10; 
+    //     optionsOptionsTab.margins = 0; 
+
+    
+    // OPTIONSOPTIONSPANEL
+    // =================
+    // var optionsOptionsPanel = optionsOptionsTab.add("panel", undefined, undefined, {name: "optionsOptionsPanel"}); 
+    //     optionsOptionsPanel.text = "Options"; 
+    //     optionsOptionsPanel.orientation = "column"; 
+    //     optionsOptionsPanel.alignChildren = ["left","top"]; 
+    //     optionsOptionsPanel.spacing = panelSpacing; 
+    //     optionsOptionsPanel.margins = panelMargins;
+
+    // var customGrayCheckbox = optionsOptionsPanel.add("checkbox", undefined, undefined, {name: "customGrayCheckbox"}); 
+    //     customGrayCheckbox.text = "Custom Gray"; 
+    //     customGrayCheckbox.value = exportInfo.scale.customGray; 
+    //     customGrayCheckbox.helpTip = "Lets user adjust the gray logo version at the end of generation. Some users want darker gray version vs default conversion outcome."; 
+
+
+    // // CUSTOMGRAYGROUP
+    // // ==============
+    // var customgrayGroup = optionsOptionsPanel.add("group", undefined, {name: "customgrayGroup"}); 
+    //     customgrayGroup.orientation = "column"; 
+    //     customgrayGroup.alignChildren = ["left","center"]; 
+    //     customgrayGroup.spacing = 5; 
+    //     customgrayGroup.margins = 0; 
+    //     customgrayGroup.enabled = false; 
+
+    // // LABELOPTIONSGROUP
+    // // ===============
+    // var labelCustomgrayGroup = customgrayGroup.add("group", undefined, {name: "labelCustomgrayGroup"}); 
+    //     labelCustomgrayGroup.orientation = "row"; 
+    //     labelCustomgrayGroup.alignChildren = ["left","center"]; 
+    //     labelCustomgrayGroup.spacing = 0; 
+    //     labelCustomgrayGroup.margins = 0; 
+
+    // var customgrayLabel = labelCustomgrayGroup.add("statictext", undefined, undefined, {name: "customgrayLabel"}); 
+    //     customgrayLabel.text = "Custom Gray"; 
+    //     customgrayLabel.preferredSize.width = 120; 
+
+    // var customGrayCheckbox = scaleOptionsPanel.add("checkbox", undefined, undefined, {name: "customScaleCheckbox"}); 
+    //     customGrayCheckbox.text = "Custom Scale"; 
+    //     customGrayCheckbox.value = exportInfo.scale.customScale; 
+    //     customGrayCheckbox.helpTip = "When left off, exported image dimensions is 1000 pixels wide."; 
+
+    // FILEFORMATSPANEL
+    // ================
+    fileFormatsPanel_tabs = [optionsAITab, optionsPDFTab, optionsEPSTab, optionsSVGTab, optionsJPGTab, optionsPNGTab, optionsScaleTab];
+
+    for (var i = 0; i < fileFormatsPanel_tabs.length; i++) {
+        fileFormatsPanel_tabs[i].alignment = ["fill", "fill"];
+        fileFormatsPanel_tabs[i].visible = false;
+    }
+
+    fileFormatsPanel_nav.onChange = showTab_fileFormatsPanel;
+
+    function showTab_fileFormatsPanel() {
+        if (fileFormatsPanel_nav.selection !== null) {
+            for (var i = fileFormatsPanel_tabs.length - 1; i >= 0; i--) {
+                fileFormatsPanel_tabs[i].visible = false;
+            }
+            fileFormatsPanel_tabs[fileFormatsPanel_nav.selection.index].visible = true;
+        }
+    }
+
+    fileFormatsPanel_nav.selection = exportInfo.activeTab;
+    showTab_fileFormatsPanel()
+
     // DIALOGBTNS
     // ==========
     var dialogBtns = settingsExport.add("group", undefined, {
@@ -708,6 +858,7 @@ function showDialog(exportInfo, extensionRoot) {
     // dialog code
     ok.onClick = function(exportInfo) {
         var settings = getSettings(exportInfo);
+        // alert(settings)
         var saveJson = saveJsonPresetDoc(settings, settingsFile);
         if (saveJson) {
             settingsExport.close(runButtonID);
@@ -767,6 +918,27 @@ function showDialog(exportInfo, extensionRoot) {
     compressionPresetsJPGDropdown.onChange = function(){
         showDD_progressivescansJPG()
     }
+
+    function customScalingCheck(){
+        // alert(customScaleCheckbox.value)
+        if (customScaleCheckbox.value == true) {
+            scaleTypeGroup.enabled = true;
+        } else {
+            scaleTypeGroup.enabled = false;
+        }
+    }
+    customScaleCheckbox.onClick = function() {
+        customScalingCheck()
+    }
+    customScalingCheck()
+
+    scaleTypeDropdown.onChange = function(){
+        var selIndex = scaleTypeDropdown.selection.index;
+        if (selIndex == 0) suffixInput.text = 'w';
+        if (selIndex == 1) suffixInput.text = 'h';
+        if (selIndex == 2) suffixInput.text = 'dpi';
+        if (selIndex == 3) suffixInput.text = '@x';
+    }
     // in case we double clicked the file
     // app.bringToFront();
     settingsExport.show();
@@ -792,6 +964,19 @@ function showDialog(exportInfo, extensionRoot) {
     }
 
     function getSettings(exportInfo) {
+        // alert(exportInfo.scale.customScale)
+        // alert(customScaleCheckbox.value)
+        if (customScaleCheckbox.value==false){
+                var customScaleCb = false;
+                var scaleSizesInpt = "1000";
+                var scaleTypeDd = 0;
+                var suffixInpt = "";
+        } else {
+                var customScaleCb = customScaleCheckbox.value;
+                var scaleSizesInpt = scaleSizesInput.text;
+                var scaleTypeDd = scaleTypeDropdown.selection.index;
+                var suffixInpt = suffixInput.text;
+        }
         // alert(exportInfo)
         exportInfo = {
             ai: {
@@ -836,6 +1021,16 @@ function showDialog(exportInfo, extensionRoot) {
                 antialiasingPNG: antialiasingPNGDropdown.selection.index,
                 interlacedPNG: interlacedPNGCheckbox.value,
                 backgroundColorPNG: backgroundcolorPNGDropdown.selection.index,
+            },
+             scale: {
+                // customScale: customScaleCheckbox.value,
+                // scaleSizes: scaleSizesInput.text,
+                // scaleType: scaleTypeDropdown.selection.index,
+                // suffix: suffixInput.text,
+                customScale: customScaleCb,
+                scaleSizes: scaleSizesInpt,
+                scaleType: scaleTypeDd,
+                suffix: suffixInpt,
             },
             activeTab: fileFormatsPanel_nav.selection.index,
         }

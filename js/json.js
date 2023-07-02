@@ -1,3 +1,6 @@
+// Source Gridder CEP
+// app.js
+
 function readFile(t, o) {
     try {
         var e = cep.fs.readFile(t).data;
@@ -68,12 +71,23 @@ console.log("Ext path "+$path.extension);
 // console.log("Ext path "+$path.extSettings);
 // moved to mainjs
 // (window.jQuery = require(PATH.normalize($path.extension + "/js/libs/jquery-3.4.1.min.js").gsep())), (window.$ = window.jQuery);
+var previousVersion= "1.0.2";
 var setting = {
     data: {
         generation: {
             client: "",
             type: "select",
-            colors: { fullcolor: true, pms: false, grayscale: false, black: true, white: true },
+            colors: { 
+                fullcolor: true, 
+                pms: false, 
+                inverted: {
+                    inverted: false,
+                    invertedName: false,
+                    invertedType: "",
+                    invertedColor: "",
+                    invertedPreview: ""
+                },
+                grayscale: false, black: true, white: true },
             media: "",
             separator: {
                 dash: false,
@@ -89,6 +103,7 @@ var setting = {
             subfolders: true,
             checkABhasArt: true,
             allartboards: true,
+            tooltips: false,
         },
     },
     loaded: !1,
@@ -97,7 +112,7 @@ var setting = {
     // saveset: $path.extSettings + "save.json",
     path: $path.extSettings + "user.json",
     saveset: $path.extSettings + "save.json",
-    // root: { path: $path.extSettings + "root.json", data: { oldVersion: previousVersion } },
+    root: { path: $path.extSettings + "root.json", data: { oldVersion: previousVersion } },
     create: function () {
         return makeDir($path.extSettings) || saveFile(setting.path, setting.data, !0), setting;
         // return fs.existsSync($path.extSettings) || makeDir($path.extSettings), fs.existsSync(setting.path) || saveFile(setting.path, setting.data, !0), fs.existsSync(setting.root.path) || saveFile(setting.root.path, setting.root.data, !0), setting;
@@ -114,6 +129,24 @@ var setting = {
         // console.log(setting.get());
         // return saveFile(setting.path, setting.get(), !0), setting;
     },
+    merge: function (t) {
+        // try {
+            console.log(t);
+            return (
+                t
+                    // ? setting["save" + t.slice(0, 1).toUpperCase() + t.slice(1).toLowerCase()](function (e) {
+                    ? setting["save"](function (e) {
+                          return e ? $.extend(!0, {}, setting[t].data, e) : setting[t.toLowerCase()].data;
+                      })
+                    : setting.save(function (e) {
+                          return e ? $.extend(!0, {}, setting.data, e) : setting.data;
+                      }),
+                setting
+            );
+        // } catch (e) {
+        //     $console.systemLog.write("varialbles.js => setting.merge()", e);
+        // }
+    },
     load: function (e,b,o) {
         // Dirty clear for checkbox > need to fix error
         $('input').each(function () {
@@ -122,6 +155,7 @@ var setting = {
         try {
             // setting.merge("root");
             // var t = setting.merge().get();
+            // console.log(t)
             if (b) var t = e;
             if (!b) var t = setting.data; // Reset to default values
             // if (!b) var t = setting.get();
@@ -131,6 +165,11 @@ var setting = {
                 $("input[value='"+ t.generation.mediatype+"']").prop("checked", true),
                 $("#colors input[value=fullcolor]").prop("checked", t.generation.colors.fullcolor),
                 $("#colors input[value=pms]").prop("checked", t.generation.colors.pms),
+                $("#colors input[value=inverted]").prop("checked", t.generation.colors.inverted.inverted),
+                $("#colors input[name=invertedName]").val(t.generation.colors.inverted.invertedName),
+                $("#colors input[name=invertedType]").attr('value',t.generation.colors.inverted.invertedType),
+                $("#invertedColor").attr('value', t.generation.colors.inverted.invertedColor),
+                $("#setInverted").css("background", t.generation.colors.inverted.invertedPreview),
                 $("#colors input[value=grayscale]").prop("checked", t.generation.colors.grayscale),
                 $("#colors input[value=black]").prop("checked", t.generation.colors.black),
                 $("#colors input[value=white]").prop("checked", t.generation.colors.white),
@@ -148,6 +187,7 @@ var setting = {
                 $("#subFolders input[value=subfolders]").prop("checked", t.extras.subfolders),
                 $("#checkABhasArt input[value=checkABhasArt]").prop("checked", t.extras.checkABhasArt),
                 $("#allartboards input[value=allartboards]").prop("checked", t.extras.allartboards),
+                $("#toolTipsMain input[value=toolTips]").prop("checked", t.extras.tooltips),
                 // destFolder = t.export.destfolder,
                 CS.evalScript(`setDestFolderFromJson('${t.export.destfolder}')`, function (run) {
                     // console.log(run.split(",")[0]);
@@ -172,6 +212,10 @@ var setting = {
                         throwMessage(false, "No destination set");
                     }
                 }),
+                getValues(),
+                exportSettingsToNone(),
+                checkDropzone(),
+                checkTooltips(),
                 // t.export.destfolder = "" == false ? $("#setDestFolder").trigger("click") : "",
                 (setting.loaded = !0),
                 setting
@@ -194,8 +238,15 @@ var setting = {
                     type: $("#logotype").val(),
                     mediatype: $("input[name='media']:checked").val(),
                     colors: {
-                        fullcolor:$("input[value='fullcolor']").is(':checked'),
-                        pms:$("input[value='pms']").is(':checked'),
+                        fullcolor: $("input[value='fullcolor']").is(':checked'),
+                        pms: $("input[value='pms']").is(':checked'),
+                        inverted: {
+                            inverted: $("input[value='inverted']").is(':checked'),
+                            invertedName: $("input[name='invertedName']").is(':checked'),
+                            invertedType: $("input[name='invertedType']").val(),
+                            invertedColor: $("#invertedColor").val(),
+                            invertedPreview: $("#setInverted").css("background-color")
+                        },
                         grayscale:$("input[value='grayscale']").is(':checked'),
                         black:$("input[value='black']").is(':checked'),
                         white:$("input[value='white']").is(':checked'),
@@ -222,6 +273,7 @@ var setting = {
                     subfolders: $("input[name='subfolders']").is(':checked'),
                     checkABhasArt: $("input[name='checkABhasArt']").is(':checked'),
                     allartboards: $("input[name='allartboards']").is(':checked'),
+                    tooltips: $("input[name='toolTips']").is(':checked'),
                 },
             };
         } catch (e) {

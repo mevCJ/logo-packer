@@ -7,7 +7,7 @@ Logo Packer is an open-sourced Adobe Illustrator extensions that allows you to g
 
 :hourglass: Helps you to spend more time on perfecting your logo instead of creating final files for your client
 
-:black_nib: Generates CMYK, black, white and colored version of your logo with a click
+:black_nib: Generates CMYK, PMS, Inverted, Grayscale, black, white and colored version of your logo with a click
 
 :open_file_folder: Organize your files in structured and named directories.
 
@@ -57,6 +57,15 @@ Open the extension in Window > Extensions > Logo Packer and follow the instructi
 <details>
   <summary>More functions</summary>
   
+  ## Inverted logo type
+  ![inverted-logo-type-demo](https://raw.githubusercontent.com/wiki/schroef/logo-packer/inverted-logo-color-v132.gif?raw=true)
+
+  ## Export sizes JPG & PNG
+  ![export-sizes-demo](https://raw.githubusercontent.com/wiki/schroef/logo-packer/export-szes-jpg-png-v131.gif?raw=true)
+  
+  ## Custom Black for Print & Digital
+  ![custom-black-demo](https://raw.githubusercontent.com/wiki/schroef/logo-packer/custom-black-color-options-v132.gif?raw=true)
+
   ## Margin & padding
   ![export-files-demo](https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/margin-padding.gif?raw=true)
 
@@ -76,7 +85,7 @@ Your support is greatly appreciated! If you'd lke to support the developer and t
 
 <a href="https://www.buymeacoffee.com/doingdesign"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a pizza&emoji=🍕&slug=doingdesign&button_colour=5F7FFF&font_colour=ffffff&font_family=Poppins&outline_colour=000000&coffee_colour=FFDD00"></a>
 
-...or follow me on Instagram for more tools and logo inspiration [@doing.this](https://www.instagram.com/)
+...or follow me on Instagram for more tools and logo inspiration [@doing.this](https://www.instagram.com/doing.this)
 
 ---------
 <i>Licensed Under MIT</i>

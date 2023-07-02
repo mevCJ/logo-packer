@@ -1,14 +1,21 @@
 {
     "generation": {
-        "client": "square",
-        "type": "logo",
+        "client": "PagaDirect",
+        "type": "alltypes",
         "mediatype": "Print",
         "colors": {
             "fullcolor": true,
-            "pms": true,
+            "pms": false,
+            "inverted": {
+                "inverted": true,
+                "invertedName": false,
+                "invertedType": "SpotColor",
+                "invertedColor": "PMS 285 u cmyk",
+                "invertedPreview": "rgb(93, 128, 190)"
+            },
             "grayscale": false,
-            "black": false,
-            "white": false
+            "black": true,
+            "white": true
         },
         "separator": {
             "dash": true,
@@ -16,12 +23,12 @@
         }
     },
     "export": {
-        "destfolder": "~/Desktop/Export/Logo%20Packer/Square",
+        "destfolder": "~/Desktop/Export/Logo%20Packer/PagaDirect",
         "formats": {
-            "ai": true,
-            "pdf": true,
+            "ai": false,
+            "pdf": false,
             "svg": false,
-            "eps": true,
+            "eps": false,
             "jpg": true,
             "png": false
         }
@@ -30,6 +37,7 @@
         "autoresize": true,
         "subfolders": true,
         "checkABhasArt": true,
-        "allartboards": true
+        "allartboards": true,
+        "tooltips": false
     }
 }

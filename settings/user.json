@@ -2,6 +2,20 @@
     "generation": {
         "client": "",
         "type": "select",
+        "colors": {
+            "fullcolor": true,
+            "pms": false,
+            "inverted": {
+                "inverted": false,
+                "invertedName": false,
+                "invertedType": "",
+                "invertedColor": "",
+                "invertedPreview": ""
+            },
+            "grayscale": false,
+            "black": true,
+            "white": true
+        },
         "media": "",
         "separator": {
             "dash": false,
@@ -18,5 +32,12 @@
             "jpg": false,
             "png": false
         }
+    },
+    "extras": {
+        "autoresize": true,
+        "subfolders": true,
+        "checkABhasArt": true,
+        "allartboards": true,
+        "tooltips": false
     }
 }

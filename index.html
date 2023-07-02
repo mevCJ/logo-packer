@@ -2,6 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8" />
+        <link rel="stylesheet" href="css/jquery-ui.css"></link>
         <link rel="stylesheet" href="css/boilerplate.css" />
         <link id="hostStyle" rel="stylesheet" href="css/styles.css" />
         <title>Logo Packer</title>
@@ -16,6 +17,23 @@
         <div style="padding: 0.5rem; padding-top: 0.25rem" id="content">
             <div id="project" class="project flex flex-row flex-between">
                 <h1 class="hostFont">Project</h1>
+                <!-- <div class="iconSettings">
+                    <div id="setDestFolder" class="icon icon-btn folder"></div>
+                    <div id="openDestFolder" class="icon icon-btn openDestFolder disabled"></div>
+                    <div id="clearDestFolder" class="icon icon-btn clearDestFolder disabled"></div>
+                </div> -->
+                <div class="iconSettings"><!-- title="Options to reset all resets. export settings to JSON and import JSON settings." -->
+                    <label >Settings:&nbsp;</label>
+                    <!-- <button id="resetJSON_btn" class="hostButton">reset JSON</button>
+                        <button id="saveJSON_btn" class="hostButton">Save JSON</button>
+                        <button id="loadJSON_btn" class="hostButton">Load JSON</button>
+                        <button id="importJSON_btn" class="hostButton">Import JSON</button> -->
+                        <!-- <div id="loadJSON_btn" class="icon icon-btn folder-open"></div> -->
+                    <div id="resetJSON_btn" class="icon icon-btn reload" title="Reset the export settings to defaults."></div>
+                    <!-- <div id="saveJSON_btn" class="icon icon-btn save"></div> -->
+                    <div id="importJSON_btn" class="icon icon-btn import" title="Import a prior saved settings file containing all settings."></div>
+                    <div id="exportJSON_btn" class="icon icon-btn export" title="Export settings file in JSON format, containing all settings."></div>
+                </div>
             </div>
             <!-- <div class="row radioButtons">
                 <div class="col">
@@ -30,7 +48,7 @@
                     <label>Client:&nbsp;</label>
                 </div>
                 <div class="col full-width">
-                    <input id="clientName" name="clientname" placeholder="Untitled..." />
+                    <input id="clientName" name="clientname" placeholder="Untitled..." title="Set clientname or project name"/>
                 </div>
             </div>
             <div class="row radioButtons">
@@ -38,13 +56,13 @@
                     <label for="type">Type:&nbsp;</label>
                 </div>
                 <div class="col">
-                    <select name="type" id="logotype">
+                    <select name="type" id="logotype" title="Choose logo type for creation">
                         <option value="select">Select...</option>
+                        <option value="alltypes">All Types</option>
                         <option value="logo">Logo</option>
                         <option value="logotype">Logotype</option>
                         <option value="logomark">Logomark</option>
                         <option value="payoff">Payoff</option>
-                        <option value="alltypes">All Types</option>
                     </select>
                 </div>
             </div>
@@ -53,19 +71,19 @@
                     <label for="mediatype">Media:&nbsp;</label>
                 </div>
                 <div class="col">
-                    <input type="radio" class="hostButton" name="media" value="Print" />
+                    <input type="radio" class="hostButton" name="media" value="Print" title="Docuemnt color space will be set to CMYK"/>
                     <label for="print">Print</label>
                 </div>
                 <div class="col">
-                    <input type="radio" class="hostButton" name="media" value="Digital" />
+                    <input type="radio" class="hostButton" name="media" value="Digital" title="Docuemnt color space will be set to RGB"/>
                     <label for="digital">Digital</label>
                 </div>
             </div>
             <div class="row radioButtons" id="colors">
                 <div class="col">
-                    <label for="colors">Colors:&nbsp;</label>
+                    <label for="colors">Colors:&nbsp;</label><div id="colorSettingsIcon_btn" class="icon icon-btn settingsIcon" title="Edit extra settings for clolor variations generation. Like Custom Gray, Custom Black Print and Custom Black Digital."></div>
                 </div>
-                <div class="col col-column">
+                <div class="col col-column" title="Pick the color variants needed. After creation, you can add custom colors or variations.">
                     <div>
                         <input type="checkbox" class="hostButton" name="colors" value="fullcolor" checked/>
                         <label for="fullcolor">Fullcolor</label>
@@ -75,8 +93,17 @@
                         <label for="pms">PMS</label>
                     </div>
                     <div>
-                        <input type="checkbox" class="hostButton" name="colors" value="grayscale" checked/>
-                        <label for="grayscale">Grayscale<label>
+                        <input type="checkbox" class="hostButton" name="colors" value="inverted"/>
+                        <label for="inverted">Inverted</label>
+                        <input type="checkbox" class="hidden" name="invertedName" placeholder=""/>
+                        <input name="invertedType" class="hidden"placeholder="" value/>
+                        <input id="invertedColor" class="hidden" placeholder="" value/> 
+                        <div id="setInverted" class="invertedPreview" style="background-color: transparent;"></div> 
+                        <!-- value="C=0 M=100 Y=100 K=0"  /> -->
+                    </div>
+                    <div>
+                        <input type="checkbox" class="hostButton" name="colors" value="grayscale"/>
+                        <label for="grayscale">Grayscale</label>
                     </div>
                 </div>
                 <div class="col col-column">
@@ -91,7 +118,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row radioButtons" id="separator">
+            <div class="row radioButtons" id="separator" title="Sets the separator in the filename to dash or underscore.">
                 <div class="col">
                     <label for="separator">Separator:&nbsp;</label>
                 </div>
@@ -104,54 +131,44 @@
                     <label for="underscore">Underscore</label>
                 </div>
             </div>
-            <div class="cep-dropzone">
+            <div class="cep-dropzone" id="dropzone" title="Start generating logo types by dragging the selection onto the box.">
                 <div id="dropIcon" class="dropIcon"></div>
             </div>
             <!-- <div class="flex flex-row">
                 <div id="svgHolder" class="svgHolder"></div>
             </div> -->
-            <div class="genButtons">
+            <div class="genButtons" title="This will generate the chosen logotype or generates all logo types if all types is chosen. A new document will be made with all the variations, from this document the user can choose the exoprt formats seen below.">
                 <button id="generate_btn" class="hostButton">Generate logos</button>
+                <!-- <button id="digital_btn" class="hostButton btn50">Digital Logos</button> -->
+                <!-- <button id="export_btn" class="hostButton disabled">Export files</button> -->
             </div>
-
-
             <div id="settings">
                 <div class="settings flex flex-row flex-between">
                     <h1 class="hostFont">Export Settings</h1>
-                    <div class="iconSettings">
-                        <!-- <button id="resetJSON_btn" class="hostButton">reset JSON</button>
-                            <button id="saveJSON_btn" class="hostButton">Save JSON</button>
-                            <button id="loadJSON_btn" class="hostButton">Load JSON</button>
-                            <button id="importJSON_btn" class="hostButton">Import JSON</button> -->
-                            <!-- <div id="loadJSON_btn" class="icon icon-btn folder-open"></div> -->
-                        <div id="resetJSON_btn" class="icon icon-btn reload"></div>
-                        <!-- <div id="saveJSON_btn" class="icon icon-btn save"></div> -->
-                        <div id="importJSON_btn" class="icon icon-btn import"></div>
-                        <div id="exportJSON_btn" class="icon icon-btn export"></div>
-                    </div>
+                    
                     <!-- <div class="iconSettings">
                         <div id="openDestFolder" class="icon icon-btn openDestFolder"></div>
                         <div id="clearDestFolder" class="icon icon-btn clearDestFolder"></div>
                     </div> -->
                 </div>
-                <div class="row radioButtons flex">
+                <div class="row radioButtons flex"><!--style="align-items: flex-start !important;">--> 
                     <div class="col">
                         <label>Destination:&nbsp;</label>
                     </div>
-                    <div class="col full-width flex" style="align-items: center">
-                        <input id="expPath" name="exportpath" placeholder="Export path..." />
-                        <div class="iconSettings" style="margin-left: .5rem">
-                            <div id="setDestFolder" class="icon icon-btn folder"></div>
-                            <div id="openDestFolder" class="icon icon-btn openDestFolder disabled"></div>
-                            <div id="clearDestFolder" class="icon icon-btn clearDestFolder disabled"></div>
+                    <div class="col full-width"> <!--style="flex-wrap: wrap;">-->
+                        <input id="expPath" name="exportpath" placeholder="Export path..." title="Export destination path to where all formats will be saved to."/>
+                        <div class="iconSettings" style="margin-left: 0.5rem;">
+                            <div id="setDestFolder" class="icon icon-btn folder" title="Set the export destination path."></div>
+                            <div id="openDestFolder" class="icon icon-btn openDestFolder disabled" title="Open the destination path, easy way of viewing all exported file formats."></div>
+                            <div id="clearDestFolder" class="icon icon-btn clearDestFolder disabled" title="Deletes all the files and folder set in the destination path."></div>
                         </div>
                     </div>
                 </div>
                 <div class="row radioButtons" id="formats">
                     <div class="col">
-                        <label for="formats">Formats:&nbsp;</label><div id="settingsIcon_btn" class="icon icon-btn settingsIcon"></div>
+                        <label for="formats">Formats:&nbsp;</label><div id="settingsIcon_btn" class="icon icon-btn settingsIcon" title="Change settings for export file formats. You can also set the export format scale sizes."></div>
                     </div>
-                    <div class="col col-column">
+                    <div class="col col-column" title="Export formats for the created logo(s) type(s).">
                         <div>
                             <input type="checkbox" class="hostButton" name="formats" value="ai" />
                             <label for="ai">Ai</label>
@@ -180,9 +197,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="genButtons">
-                    <button id="export_btn" class="hostButton disabled">Export files</button>
-                </div>
+            </div>
+            <div class="genButtons" title="This will export all logo type variations in the chosen file formats. In the settings you can adjust each file type and its settings. In the scale tab you add possible logo scale variations as well. This will export JPG and PNG files in the added sizes using the chosen scale method.">
+                <!-- <button id="generate_btn" class="hostButton">Generate logos</button> -->
+                <!-- <button id="digital_btn" class="hostButton btn50">Digital Logos</button> -->
+                <button id="export_btn" class="hostButton disabled">Export files</button>
             </div>
             <div id="extras">
                 <div style="display: flex">
@@ -195,7 +214,7 @@
                         <label for="">Auto resize:&nbsp;</label>
                     </div>
                     <div class="col full-width">
-                        <input type="checkbox"  class="hostButton" name="autoresize" value="autoresize"  checked/>
+                        <input type="checkbox"  class="hostButton" name="autoresize" value="autoresize"  checked title="Automatically resizes logo so we dont get errors on export. Certain export sizes need a propersize logo otherwise it returns an error on export."/>
                         <label for="">Adjust logo</label>
                     </div>
                 </div>
@@ -204,7 +223,7 @@
                         <label for="folders">Folders:&nbsp;</label>
                     </div>
                     <div class="col full-width">
-                        <input type="checkbox"  class="hostButton" name="subfolders" value="subfolders" checked/>
+                        <input type="checkbox"  class="hostButton" name="subfolders" value="subfolders" checked title="Adds subfolders by using logo type. ie logo, logotype, logomark, payoff."/>
                         <label for="">Folders by type</label>
                     </div>
                 </div>
@@ -213,14 +232,23 @@
                         <label for="checkABhasArt">Artboards:&nbsp;</label>
                     </div>
                     <div class="col full-width">
-                        <input type="checkbox"  class="hostButton" name="checkABhasArt" value="checkABhasArt" checked  title="Slows the eport process down a bit"/>
+                        <input type="checkbox"  class="hostButton" name="checkABhasArt" value="checkABhasArt" checked  title="Checks if artboards is empty, empty artboards will be skipped. It slows export process down a tiny bit."/>
                         <label for="">Don't export empty</label>
+                    </div>
+                </div>
+                <div class="row radioButtons" id="toolTipsMain">
+                    <div class="col">
+                        <label for="">Tooltips:&nbsp;</label>
+                    </div>
+                    <div class="col full-width">
+                        <input type="checkbox"  class="hostButton" name="toolTips" value="toolTips" id="toolTips" title="Show or hide tooltips"/>
+                        <label for="">Show short description</label>
                     </div>
                 </div>
                 <hr class="solid">
                 <!-- <span style="line-height: 0;" >&nbsp;</span> -->
                 <!-- NEW BASE DOC -->
-                <div class="row radioButtons">
+                <div class="row radioButtons" title="Makes staring base file where you place in the logos to start generating logo types. This document will be used to created the logo variations from.">
                     <div class="col">
                         <label for="type">Base Doc:&nbsp;</label>
                     </div>
@@ -237,7 +265,7 @@
                 </div>
                 <span style="line-height: .5; display:block;" >&nbsp;</span>
                 <!-- MARGINS -->
-                <div class="row radioButtons">
+                <div class="row radioButtons" title="Allows the user to add margins to all artboards or a single artboard. Everything will be done automatically and based on the margin unit the user sets. Note that when using big margins, artboards will start to overlap. This still needs to be fixed.">
                     <div class="col">
                         <label for="type">Margins:&nbsp;</label>
                     </div>
@@ -274,7 +302,7 @@
                 <hr class="solid">
                 <!-- <span style="line-height: .5; display:block;" >&nbsp;</span> -->
                 <!-- CLEANUP LOGO & SWATCHES -->
-                <div class="row radioButtons">
+                <div class="row radioButtons" title="This is basically an action which will outline and expand all the shapes. It will also clean the document of none used colors and deletes empty paths and lines.">
                     <div class="col">
                         <label for="type">Cleanup:</label>
                     </div>
@@ -282,7 +310,7 @@
                         <button id="cleanupLogo_btn" class="hostButton">Cleanup Logo</button>
                     </div>
                 </div>
-                <div class="row radioButtons">
+                <div class="row radioButtons" title="Will clean the document of all unused swatches.">
                     <div class="col">
                         <label for="type">&nbsp;</label>
                     </div>
@@ -312,6 +340,8 @@
         <script src="js/monitorCheck.js"></script>
         <script src="js/main.js"></script>
         <script src="js/json.js"></script>
+        <script src="js/libs/jquery-ui.js"></script>
+        
         <!-- <script src="js/libs/jquery-3.4.1.min.js"></script> -->
         <!-- <script src="js/libs/jquery-2.0.2.min.js"></script> -->
         <!-- <script src="js/libs/paste.js"></script> -->
@@ -340,5 +370,30 @@
                 // });
             });
         </script>
+        <!-- <script>
+            $( function() {
+              $( document ).tooltip({shadow: true}); //track: true
+              $( document ).click(function() {
+                $('.ui-tooltip').remove();
+              });
+            } );
+        //     $("#toolTips").click(function () {
+        //     if (($("input:checkbox[value=\"toolTips\"]:checked").val()=='toolTips')) {
+        //         $( document ).tooltip("enable"); //track: true
+        //     } else {
+        //         $( document ).tooltip("disable");
+        //     }
+        // });
+            </script> -->
+        <style>
+        /* label {
+            display: inline-block;
+            width: 5em;
+        } */
+        /* HIDE Bottom tooltip, issue olf jquery */
+        .ui-helper-hidden-accessible {
+            display:none;
+        }
+        </style>
     </body>
 </html>
