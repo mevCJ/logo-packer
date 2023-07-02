@@ -129,7 +129,16 @@ function getLogoColorList(colors, mediaType){
     // Make array of stringlist from HTML
     // colors = colors.split(',');
     var artboardsNames = colors.split(',');
-    var colors = colors.split(',');
+    var colors = colors.split(','); // convert stringlist to objectlist
+    
+    abLength = docRef.artboards.length;
+    // alert(abLength)
+    // alert(colors.length)
+    // alert(typeof(colors))
+    // for (var i = 0; i < colors.length; i++) {
+    //     alert(colors[i])
+    // }
+    
 
     // source https://www.geeksforgeeks.org/remove-elements-from-a-javascript-array/#:~:text=pop()%20function%3A%20This%20method,specific%20index%20of%20an%20array.
     for (var i = 0; i < colors.length; i++) {
@@ -155,7 +164,7 @@ function getLogoColorList(colors, mediaType){
     return [colors, artboardsNames]
 }
 
-function generateLogoVariation(clientName, logotype, colors, mediaType, sepaRator, forMats, autoResize, extensionRoot) {
+function generateLogoVariation(clientName, logotype, colors, mediaType, sepaRator, forMats, autoResize, extensionRoot, exportInfo) {
     docRef = app.activeDocument;
     logotypes = getArtboardLogoTypes(docRef, false);
     clearedItemsDocs = ['']; // clear list of doc with cleared swatches
@@ -166,36 +175,35 @@ function generateLogoVariation(clientName, logotype, colors, mediaType, sepaRato
             app.selection = null;
             docRef.artboards.setActiveArtboardIndex(ab);
             docRef.selectObjectsOnActiveArtboard();
-            createLogoTypes(docRef, clientName, colors, logotypes[ab], mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile)
+            createLogoTypes(docRef, clientName, colors, logotypes[ab], mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportInfo)
             // switch to generated logo
-            app.documents.getByName(docRef.name).activate();
+            if (run==true) app.documents.getByName(docRef.name).activate();
         }
-        app.documents.getByName(clientName).activate();
+        if (run==true) app.documents.getByName(clientName).activate();
     } else {
-        createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile);
+        createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportInfo);
     }
     app.executeMenuCommand('fitall')
     return run
 }
 
-function createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile) {
+function createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportInfo) {
     logotype = logotype;
     // var run = false;
     separator = sepaRator;
     if (app.selection.length == 0) {
-        run = "selection"
+        return run = "selection"
     } else if (clientName == "") {
-        run = "clientname"
+        return run = "clientname"
     } else if (colors == "") {
-        run = "colors"
+        return run = "colors"
     } else if (logotype == "select" || logotype == "") {
-        run = "logotype"
+        return run = "logotype"
     } else if (mediaType == "undefined" || mediaType == "") {
-        run = "mediatype"
+        return run = "mediatype"
     } else if (sepaRator == "undefined" || sepaRator == "") {
-        run = "separator"
+        return run = "separator"
     } else {
-
         app.copy()
         separator = separator == 'dash' ? '-' : '_';
         // var addDocName = 'logo_var.ai';
@@ -289,19 +297,19 @@ function createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRa
 
         //paste and group
         app.paste();
-        //force group item to fix bugs
+        //force group item to fix bugs cmyktopms bug
         app.executeMenuCommand('group');
-        
+
         item = docRef.selection[0];
 
         // Only group if not alreadt a group
-        // if (item.typename != "GroupItem") app.executeMenuCommand('group');
+        if (item.typename != "GroupItem") app.executeMenuCommand('group');
 
         // Give groupname Client name and logotype as name, Looks clean in layers :)
         item.name = clientName+"-"+logotype;
         
         // check logo size
-        if (item.width <= 70 || item.height <= 70) resizeLogo(item, autoResize)
+        if (item.width <= 70 || item.height <= 70) resizeLogo(item, autoResize, exportInfo)
 
         if (hasDoc) {
             // var prevArtboard = docRef.artboards[initArtboardsLength - 5]
@@ -336,6 +344,9 @@ function createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRa
             }
 
         }
+        
+        // Fix for when single color is used
+        if (colors.length == 0) docRef.fitArtboardToSelectedArt(0);    
 
         // Add grayscale, black & white version
         for (var i = 0; i < colors.length; i++) {
@@ -382,6 +393,7 @@ function createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRa
         logotype = logotype;
         run = setLogoInfo(docRef, logotype, artboardsNames, initArtboardsLength, false);
     }
+    // alert(run)
     return run
 }
 
@@ -407,7 +419,7 @@ function fillColor(obj, color, extensionRoot) {
 }
 
 
-function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, exportInfo) {
+function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, exportInfo, separator) {
     // convert string list of josn settings back to object
     exportInfo = exportInfo.split(',')
 
@@ -508,12 +520,12 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
                         logoTypeExp = logoType[i].substr(3, logoType[i].length).toLowerCase().split('-').pop(); //[0];
                         expArtboards = getExpArtboards(logoTypeExp, true, checkABhasArt);
                         
-                        if (expArtboards != '') exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportInfo);
+                        if (expArtboards != '') exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportInfo, separator);
                     }
                 } else {
                     logoTypeExp = logoType.substr(3, logoType.length).toLowerCase().split('-').pop(); //[0];
                     expArtboards = getExpArtboards(logoTypeExp, true, checkABhasArt);
-                    exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportInfo);
+                    exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportInfo, separator);
                 }
 
             // Use subfolders by logotype    
@@ -529,7 +541,7 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
                                 if (!destPath.exists) destPath.create();
 
                                 expArtboards = getExpArtboards(logoTypeExp, true, checkABhasArt);
-                                exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportInfo);
+                                exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportInfo, separator);
                             }
                         }
                     }
@@ -540,7 +552,7 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
 
                     logoTypeExp = logoType.substr(3, logoType.length).toLowerCase().split('-').pop(); //[0];
                     expArtboards = getExpArtboards(logoTypeExp, true, checkABhasArt);
-                    exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportInfo);
+                    exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportInfo, separator);
                 }
             }
 
@@ -617,15 +629,17 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
                 docRef.artboards.setActiveArtboardIndex(i);
                 docRef.selectObjectsOnActiveArtboard();
 
+                // Turned of Canceling with empty artboards
                 if (docRef.selection.length === 0) {
                     var title = "Warning!";
-                    var msg1 = "All artboards are empty, export will be canceled";
+                    // var msg1 = "All artboards are empty, export will be canceled";
+                    var msg1 = "On or more artboards are empty, result will have an empty file.";
                     var msg2 = false;
                     var okStr = "Exit";
                     var cancelStr = "Exit";
                     scriptAlert(title, msg1, msg2, false, true, okStr, cancelStr, aiIcon64);
-                    run = scriptAlertResult;
-                    return run
+                    // run = scriptAlertResult;
+                    // return run
                 } else {
                     expArtboards = getABlist(i, logotypePrefix, string, expArtboards);
                 }
@@ -651,7 +665,7 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
     }
 
 
-    function exportFormats(destPath, mediatype, logotypePrefix, expArtboards, exportInfo) {
+    function exportFormats(destPath, mediatype, logotypePrefix, expArtboards, exportInfo, separator) {
         lyrLogoInfo = app.activeDocument.layers.getByName(LOGO_INFO);
         lyrLogoInfo.visible = false;
 
@@ -666,18 +680,17 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
         var docRef = app.activeDocument;
         var afile = docRef.fullName;
         var fileNamePrefix = docRef.name.split('.')[0] + "_";
-        // alert(fileNamePrefix)
         var whatToExport = new ExportForScreensItemToExport();
         whatToExport.assets = [];
-
+        
         // Fix if not last artboard string traling comma
         whatToExport.artboards = expArtboards.toString();
-
+        
         // whatToExport.artboards = '1,2,4';
 
         // Sizes
         // var sizes = [1024, 512, 300, 256, 150, 100, 64, 50, 32, 16];
-        var sizes = [1024, 256, 64, 32, 16];
+        // var sizes = [1024, 256, 64, 32, 16];
         var targetResolutions = [1000]; /* [1000, 500]; */
         var baseFileSize = docRef.width;
         // var expResolution = setResolution(targetResolutions, baseFileSize);
@@ -726,6 +739,10 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
         }
 
         var size, file;
+
+        // turn off subfolder creation exportforscreens
+        var creatSubFolders = app.preferences.getIntegerPreference ('plugin/SmartExportUI/CreateFoldersPreference')
+        app.preferences.setIntegerPreference ('plugin/SmartExportUI/CreateFoldersPreference', 0);
 
         if (ai !== -1) {
             if (aiFolder != null) {
@@ -943,64 +960,108 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
 
         //ignore white object
         // if (jpg!==-1) {
+        // var imageScales = [1000,500,250];
+        // alert(exportInfo[32])
+        // alert(exportInfo[33])
+        // alert(exportInfo[34])
+        var imageScales = exportInfo[32].split('-');
+        // alert(typeof(imageScales))
+        // alert(typeof(imageScales))
         if (jpgFolder != null) {
-            // var options = new ExportForScreensOptionsJPEG();
-            // options.antiAliasing = AntiAliasingMethod.ARTOPTIMIZED;
-            // options.scaleType = ExportForScreensScaleType.SCALEBYRESOLUTION;
-            // options.scaleTypeValue = 300;
-            // options.horizontalScale  = expResolution;
-            // options.verticalScale    = expResolution;
-            // options.qualitySetting = 0;
-            // var options = new exportOptionsJPEG();
-            var options = new ExportForScreensOptionsJPEG();
-            options.compressionMethod = jpgCompressionMethod(exportInfo[24]);
-            options.progressiveScan = stringToNumber(exportInfo[25]) + 3; // compensate for 3,4,5 by adding 3 as start value
-            options.antiAliasing = jpgAntiAliasing(exportInfo[26]); // AntiAliasingMethod.TYPEOPTIMIZED;
-            options.embedICCProfile = stringToBoolean(exportInfo[27]); // true
+            for(var size = 0; size < imageScales.length; size++){
 
-            /** source: https://gist.github.com/haysclark/9d143284b0791faa90517acb32d1855e
-            SCALEBYFACTOR = 0,
-            * Scale artwork by factors like 1x, 2x, 3x and so on, where 1x means 72 ppi.
-            SCALEBYHEIGHT = 2,
-            * Scale artwork by specifying artwork height in pixels like 100px, 124px etc. Width of the artwork is adjusted automatically to maintain the aspect ratio.
-            SCALEBYRESOLUTION = 3,
-            * Scale artwork by specifying resolution in ppi like 72 ppi, 100 ppi, 144 ppi etc.
-            //SCALEBYWIDTH = 1,
-            * Scale artwork by specifying artwork width in pixels like 100px, 124px etc. Height of the artwork is adjusted automatically to maintain the aspect ratio.
-            */
-            // https://community.adobe.com/t5/illustrator/what-s-new-in-illustrator-scripting-cc2018/td-p/9422236/page/2?page=1
-            // options.scaleType = ExportForScreensScaleType.SCALEBYRESOLUTION;
-            options.scaleType = ExportForScreensScaleType.SCALEBYWIDTH;
-            options.scaleTypeValue = 1000;
-            // options.scaleType = ExportForScreensScaleType.SCALEBYHEIGHT;
-            // options.scaleType = ExportForScreensScaleType.SCALEBYFACTOR;
+                // var options = new ExportForScreensOptionsJPEG();
+                // options.antiAliasing = AntiAliasingMethod.ARTOPTIMIZED;
+                // options.scaleType = ExportForScreensScaleType.SCALEBYRESOLUTION;
+                // options.scaleTypeValue = 300;
+                // options.horizontalScale  = expResolution;
+                // options.verticalScale    = expResolution;
+                // options.qualitySetting = 0;
+                // var options = new exportOptionsJPEG();
+                var options = new ExportForScreensOptionsJPEG();
+                options.compressionMethod = jpgCompressionMethod(exportInfo[24]);
+                options.progressiveScan = stringToNumber(exportInfo[25]) + 3; // compensate for 3,4,5 by adding 3 as start value
+                options.antiAliasing = jpgAntiAliasing(exportInfo[26]); // AntiAliasingMethod.TYPEOPTIMIZED;
+                options.embedICCProfile = stringToBoolean(exportInfo[27]); // true
 
-            // JPG Options
-            // scaletype causes issues with small docs
-            // alert(expResolution)
-            // options.scaleTypeValue = 1000;
-            // alert("expResolution "+expResolution)
-            // options.scaleTypeValue = 1000;
-            // options.horizontalScale = expResolution;
-            // options.horizontalScale = expResolution;
-            // options.verticalScale = expResolution;
-            // options.scaleTypeValue = 72;
-            // options.artBoardClipping = true;
-            // options.saveMultipleArtboards = true;
-            // options.qualitySetting = 100;
-            // app.activeDocument.exportFile(jpgFolder, ExportForScreensType.SE_JPEG100, options, whatToExport, fileNamePrefix);
+                /** source: https://gist.github.com/haysclark/9d143284b0791faa90517acb32d1855e
+                SCALEBYFACTOR = 0,
+                * Scale artwork by factors like 1x, 2x, 3x and so on, where 1x means 72 ppi.
+                SCALEBYHEIGHT = 2,
+                * Scale artwork by specifying artwork height in pixels like 100px, 124px etc. Width of the artwork is adjusted automatically to maintain the aspect ratio.
+                SCALEBYRESOLUTION = 3,
+                * Scale artwork by specifying resolution in ppi like 72 ppi, 100 ppi, 144 ppi etc.
+                //SCALEBYWIDTH = 1,
+                * Scale artwork by specifying artwork width in pixels like 100px, 124px etc. Height of the artwork is adjusted automatically to maintain the aspect ratio.
+                */
+                // https://community.adobe.com/t5/illustrator/what-s-new-in-illustrator-scripting-cc2018/td-p/9422236/page/2?page=1
+                // options.scaleType = ExportForScreensScaleType.SCALEBYRESOLUTION;
+                // ExportForScreensScaleType.SCALEBYRESOLUTION
+                options.scaleType = scaleTypeMethod(exportInfo[33])//ExportForScreensScaleType.SCALEBYWIDTH;
+                // alert(Number(imageScales[size]))
+                options.scaleTypeValue = Number(imageScales[size]);//1000;
+                // options.scaleType = ExportForScreensScaleType.SCALEBYHEIGHT;
+                // options.scaleType = ExportForScreensScaleType.SCALEBYFACTOR;
 
-            // whatToExport.artboards = getArtboards(document, newArtboards);
-            // whatToExport.artboards = expArtboards;
-            // alert(expArtboards)
-            // alert(jpgFolder)
-            // alert(fileNamePrefix)
-            // var newArtboards = '';
-            // alert('JPG ab '+getArtboards(document, newArtboards))
-            // whatToExport.artboards = getArtboards(document, newArtboards);
+                // JPG Options
+                // scaletype causes issues with small docs
+                // alert(expResolution)
+                // options.scaleTypeValue = 1000;
+                // alert("expResolution "+expResolution)
+                // options.scaleTypeValue = 1000;
+                // options.horizontalScale = expResolution;
+                // options.horizontalScale = expResolution;
+                // options.verticalScale = expResolution;
+                // options.scaleTypeValue = 72;
+                // options.artBoardClipping = true;
+                // options.saveMultipleArtboards = true;
+                // options.qualitySetting = 100;
+                // app.activeDocument.exportFile(jpgFolder, ExportForScreensType.SE_JPEG100, options, whatToExport, fileNamePrefix);
 
-            // file = new File(jpgFolder.fsName + '/' + filename + "-" + size + "px.jpg");
-            app.activeDocument.exportForScreens(jpgFolder, ExportForScreensType.SE_JPEG100, options, whatToExport, fileNamePrefix);
+                // whatToExport.artboards = getArtboards(document, newArtboards);
+                // whatToExport.artboards = expArtboards;
+            
+                // var newArtboards = '';
+                // alert('JPG ab '+getArtboards(document, newArtboards))
+                // whatToExport.artboards = getArtboards(document, newArtboards);
+
+                // https://community.adobe.com/t5/illustrator-discussions/export-selected-artboards-png24-javascript/m-p/12894621#M319113
+                // file = new File(jpgFolder.fsName + '/' + filename + "-" + size + "px.jpg");
+                // for (var i = 0; i < list.length; i++) {
+                // docRef.artboards.setActiveArtboardIndex(list[i] - 1);
+                // var itemToExport = new ExportForScreensItemToExport() ; 
+                // var whatToExport = new ExportForScreensItemToExport();
+                // // Fix if not last artboard string traling comma
+                // whatToExport.artboards = expArtboards.toString();
+                // var activeAB = docRef.artboards[docRef.artboards.getActiveArtboardIndex()]; // get active AB
+                // var ABname = activeAB.name.replace(/\//g, "_") 
+                // var jpgFile = new File(jpgFolder+'/'+ ABname + "-"+imageScales[size] + '.jpg');
+                // var jpgFile = new File(fileNamePrefix + ABname + "-"+imageScales[size]);// + '.jpg');
+                // alert(separator)
+                // alert(separator.toString())
+                // alert(separator.toString() == '-')
+                // var sep = separator == "dash" ? '-' : '_';
+                // var jpgFile = fileNamePrefix +imageScales[size] + sep;
+                // alert(jpgFile)
+                app.activeDocument.exportForScreens(jpgFolder, ExportForScreensType.SE_JPEG100, options, whatToExport, fileNamePrefix);
+                if (stringToBoolean(exportInfo[31])==true){
+                    for(i=0;i<docRef.artboards.length;i++){
+                    // var ABname = activeAB.name.replace(/\//g, "_") 
+                        var activeAB = docRef.artboards[i]; // get active AB
+                        var saveFile = File(jpgFolder + "/" + docRef.name+'_' + activeAB.name+'.jpg');
+                        if(saveFile.exists){
+                            var sep = separator == "dash" ? '-' : '_';
+                            var imageSuffix = imageScales[size].toString()+exportInfo[34].toString();
+                            saveFile.rename(docRef.name+'_' + activeAB.name + sep + imageSuffix+'.jpg');
+                            // alert(jpgFolder + "/" + docRef.name+'_' + activeAB.name + sep + imageSuffix+'.jpg')
+                            // saveFile.rename(jpgFolder + "/" + docRef.name+'_' + activeAB.name + sep + imageSuffix+'.jpg');
+                            // saveFile.rename(jpgFolder + "/" + docRef.name+'_' + activeAB.name + sep + imageSuffix+'px.jpg');
+                            // var jpgFile = fileNamePrefix +imageScales[size] + sep;
+                            // var jpgFile = sep +imageScales[size];
+                        }
+                    }
+                }
+            }
 
             // Workaround resolution issues
             // https://community.adobe.com/t5/illustrator/exporting-to-jpeg/m-p/9412616
@@ -1014,25 +1075,59 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
         }
         if (png !== -1) {
             if (pngFolder != null) {
-                var options = new ExportForScreensOptionsPNG24();
-                options.antiAliasing = pngAntiAliasing(exportInfo[28]); // AntiAliasingMethod.ARTOPTIMIZED;
-                options.interlaced = stringToBoolean(exportInfo[29]); // true;
-                options.transparency = stringToNumber(exportInfo[30]); // true;
+                for(var size = 0; size < imageScales.length; size++){
+                    var options = new ExportForScreensOptionsPNG24();
+                    options.antiAliasing = pngAntiAliasing(exportInfo[28]); // AntiAliasingMethod.ARTOPTIMIZED;
+                    options.interlaced = stringToBoolean(exportInfo[29]); // true;
+                    if (stringToNumber(exportInfo[30])==0) {
+                        options.transparency = true; //stringToNumber(exportInfo[30]); // true;
+                    } else {
+                        options.transparency = false;
+                    }
+                    // https://www.indesignjs.de/extendscriptAPI/illustrator-latest/#ExportForScreensOptionsPNG24.html
+                    if (stringToNumber(exportInfo[30])==1) {
+                        options.backgroundBlack = true; // Black
+                    } else {
+                        options.backgroundBlack = false; // white
+                    }
+                    options.scaleType = options.scaleType = scaleTypeMethod(exportInfo[33]); //ExportForScreensScaleType.SCALEBYWIDTH; // ExportForScreensScaleType.SCALEBYRESOLUTION;
+                    // options.scaleTypeValue = expResolution;
+                    // 2023-05-17 set it fixed value for now. need to extend export sizes
+                    options.scaleTypeValue = Number(imageScales[size]);//1000;
 
-                options.scaleType = ExportForScreensScaleType.SCALEBYWIDTH; // ExportForScreensScaleType.SCALEBYRESOLUTION;
-                options.scaleTypeValue = expResolution;
-                // options.scaleType = ExportForScreensScaleType.SCALEBYFACTOR;
-                // options.horizontalScale = expResolution;
-                // options.verticalScale = expResolution;
-                // options.scaleTypeValue = 72;
 
-                app.activeDocument.exportForScreens(pngFolder, ExportForScreensType.SE_PNG24, options, whatToExport, fileNamePrefix);
+                    // options.scaleType = ExportForScreensScaleType.SCALEBYFACTOR;
+                    // options.horizontalScale = expResolution;
+                    // options.verticalScale = expResolution;
+                    // options.scaleTypeValue = 72;
+
+                    app.activeDocument.exportForScreens(pngFolder, ExportForScreensType.SE_PNG24, options, whatToExport, fileNamePrefix);
+                    if (stringToBoolean(exportInfo[31])==true){
+                        for(i=0;i<docRef.artboards.length;i++){
+                            var activeAB = docRef.artboards[i]; // get active AB
+                            var saveFile = File(pngFolder + "/" + docRef.name+'_'  + activeAB.name+'.png');
+                            if(saveFile.exists){
+                                var sep = separator == "dash" ? '-' : '_';
+                                var imageSuffix = imageScales[size].toString()+exportInfo[34].toString();
+                                saveFile.rename(docRef.name+'_' + activeAB.name + sep + imageSuffix+'.png')
+                                // saveFile.rename(docRef.name+'_' + activeAB.name + sep + imageScales[size]+'px.png')
+                                // saveFile.rename(pngFolder + "/" + docRef.name+'_' + activeAB.name + sep + imageScales[size]+'px.png')
+                                // saveFile.rename(pngFolder + "/" + docRef.name+'_' + activeAB.name+sep +Number(imageScales[size])+exportInfo[34]+'.png')
+                                // saveFile.rename(pngFolder + "/" + docRef.name+'_' + activeAB.name + sep + imageSuffix + '.png')
+                            }
+                        }
+                    }
+                }
+
             }
         }
         // }
 
         // reopenDocument(document, afile);
         lyrLogoInfo.visible = true;
+
+        // Set create subfolders for exportforscreens back to its setting
+        app.preferences.setIntegerPreference ('plugin/SmartExportUI/CreateFoldersPreference', creatSubFolders);
     }
 
 
@@ -1362,6 +1457,31 @@ function jpgAntiAliasing(index){
     return index;
 }
 
+
+///////////////////////////////////////////////////////////////////////////
+// SCALE SETTINGS
+///////////////////////////////////////////////////////////////////////////
+
+function scaleTypeMethod(index){
+    switch (stringToNumber(index)) {
+        case 0:
+            index = ExportForScreensScaleType.SCALEBYWIDTH;
+            break;
+        case 1:
+            index = ExportForScreensScaleType.SCALEBYHEIGHT;
+            break;
+        case 2:
+            index = ExportForScreensScaleType.SCALEBYRESOLUTION;
+            break;
+        case 3:
+            index = ExportForScreensScaleType.SCALEBYFACTOR;
+            break;
+        default:
+            index = ExportForScreensScaleType.SCALEBYWIDTH;
+    }
+    return index;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Function: addLogoInfo
 // Usage: add logo info per artboard describing logo type & media
@@ -1386,6 +1506,25 @@ function setLogoInfo(docRef, logotype, colors, initArtboardsLength, steps) {
     docRef.artboards.setActiveArtboardIndex(0);
     docRef.selectObjectsOnActiveArtboard();
 
+    // If extra artboards are added later, add them to color list
+    abLength = docRef.artboards.length;
+    // Add extra colors names for colorinfo
+    if (colors.length != abLength) {
+        for (abindex = colors.length+1; abindex < abLength; abindex++) {
+            color = docRef.artboards[abindex].name.split('-');
+            // only add extra added colors here
+            // alert(color[i].toString())
+            // alert(color[i].toString() != "fullcolor")
+            // alert(colors.indexOf(color[1]))
+            // alert(colors.indexOf(color[1])==-1)
+            if ((colors.indexOf(color[1])==-1) && (color[1]!= "fullcolor")){
+                // alert(colors)
+                // alert(color[1])
+            // if (color not in colors){ doesnt work in extendscript
+                colors.push(color[1]);
+            }
+        }
+    }
     // Add logo info: Logo type & Media type
     if (steps != false){
         var ab = docRef.artboards[steps-1]; // correct with subtracting -1 for index starts at 0
@@ -1673,7 +1812,7 @@ function getRulerUnits() {
 // Function: minimalSize
 // Usage: width, height as input returns scaled object 
 // Input: String
-// Return: scaled object to minimal width and height
+// Return: scaled object to minimal widht and height
 // Source: Wundes Scripts setAllTheThings
 ///////////////////////////////////////////////////////////////////////////////   
 function minimalSize(v) {
@@ -1729,20 +1868,34 @@ var toPixels = function(v) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Function: resizeLogo
-// item = doc.selection[x];
+// item = docRef.selection[x];
 ///////////////////////////////////////////////////////////////////////////////
-function resizeLogo(item, autoResize) {
+function resizeLogo(item, autoResize, exportInfo) {
     var docRef = app.activeDocument;
     var board = docRef.artboards[docRef.artboards.getActiveArtboardIndex()];
     var right = board.artboardRect[2];
     var bottom = board.artboardRect[3];
+    
+    // convert string list of josn settings back to object
+    exportInfo = exportInfo.split(',')
+    var scaleSize = exportInfo[32].split('-');
+    var widthHeight = exportInfo[33];
+    // alert(Math.max(scaleSize))
+    // Get largest export size and use for AutoResize
+    var largest = Number(scaleSize[0]);
+    for (i=0; i<scaleSize.length; i++){
+        if (Number(scaleSize[i])>largest) {
+            largest=Number(scaleSize[i]);
+        }
+    }
+    // alert(largest)
     // if (item.width <= 70 || item.height <= 70){
     // _scaleW = 70 / docRef.selection[x].width;
     // _scaleH = 70 / docRef.selection[x].height;
     // resize(docRef.selection[x], (100+_scaleW));
     // alert(board.name+" design is to small for export, minimal req. 70 x 70px "+ docRef.selection[x].width+" "+docRef.selection[x].height)
     if (autoResize != "autoresize") {
-        // scaleItems = confirm("For this workflow, logo's need to have a minimal of 70px width or height. Do you want to upscale it?");
+        // scaleItems = confirm("For this workflow, logo's need to have a minimal of 70px widht or height. Do you want to upscale it?");
         var title = "Logo size warning";
         var msg1 = "For this workflow, logo's need to have a minimal width or height of 70px. Do you want it to be to upscaled?";
         var msg2 = false;
@@ -1763,9 +1916,12 @@ function resizeLogo(item, autoResize) {
         var idoc = app.activeDocument;
         // var sel = idoc.selection[0];
         var sel = item;
-        var max = Math.max(sel.width, sel.height);
+        if (widthHeight!=1) var max = Math.max(sel.width, sel.height);
+        if (widthHeight==1) var max = Math.min(sel.width, sel.height);
+        
         // var targetSize = 50*72/25.4; // to mm
-        var targetSize = 70; // to px
+        // var targetSize = 70; // to px
+        var targetSize = largest / 10 + 200;// 200; // to px
         var percent = targetSize / max * 100;
         sel.resize(percent, percent);
     }
@@ -1862,9 +2018,14 @@ function addMarginToArtboard(marginVal, margintype, allArtboards, logotype, colo
         var docRef = app.activeDocument;
         var ABs = docRef.artboards;
         
+        // ToDo check if margins in print docuemnt works the same. Think we need to check if print or difgital
+        // When adding big margins, artboards still get overlapping
+        
         // var margins = 30*72/25.4;
         // var margins = 30*72;
         var margins = []
+        // Replace all none numberical characters
+        marginVal = marginVal.replace(/[^\d]/g, '');
         margins.pt = Number(marginVal); //pt
         // margins.pt = 30*72; //pt
         margins.in = margins.pt * 72;
@@ -1872,8 +2033,9 @@ function addMarginToArtboard(marginVal, margintype, allArtboards, logotype, colo
         margins.mm = margins.cm / 10;
         // margins.pt = area; //result.mm * 28.346438836889; // 1cm > 28.3465 pt; 
         margins.pc = margins.cm / 4, 233;
-        margins.px = margins.mm / 16; // 1cm > 28.3
-
+        // margins.px = margins.mm / 16; // 1cm > 28.3
+        margins.px = margins.pt; // same as points
+        // 2.834645669 
         if (app.documents.length > 0) {
             var allArtboards = allArtboards == "all" ? true : false;
             // var allArtboards = Window.confirm("Yes - All Artboards \nNo - Active Artboard", false, title);
@@ -1923,7 +2085,9 @@ function addMarginToArtboard(marginVal, margintype, allArtboards, logotype, colo
                 run = setLogoInfo(docRef, logotypes[ab], artboardsNames, ab, ab);
             }
         } else {
+            var oldABindex = docRef.artboards.getActiveArtboardIndex();
             run = setLogoInfo(docRef, logotype, artboardsNames, initArtboardsLength, false);
+            docRef.artboards.setActiveArtboardIndex(oldABindex)
         }
         return run
     }
@@ -1947,6 +2111,7 @@ function addMargins(docRef, activeAB, margins, margintype, count) {
     // Add margins
     // https://github.com/andrewcockerham/Adobe-Illustrator-Scripts/blob/master/fitObjectToArtboard_v2.jsx
     marg = margins[margintype];
+
     var ableft = count == 0 ? abBounds[0] - marg - marg : abBounds[0]; //subtract if 1 ab or last is being set, this is for offsetting ab's;
     // var ableft = count == 0 ? abBounds[0]-marg-marg-(count*marg) : abBounds[0]+(count*2*marg); //subtract if 1 ab or last is being set, this is for offsetting ab's;
     var abtop = abBounds[1] + marg;
