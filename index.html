@@ -22,6 +22,18 @@
                     <div id="openDestFolder" class="icon icon-btn openDestFolder disabled"></div>
                     <div id="clearDestFolder" class="icon icon-btn clearDestFolder disabled"></div>
                 </div> -->
+                <div class="iconSettings"><!-- title="Options to reset all resets. export settings to JSON and import JSON settings." -->
+                    <label >Settings:&nbsp;</label>
+                    <!-- <button id="resetJSON_btn" class="hostButton">reset JSON</button>
+                        <button id="saveJSON_btn" class="hostButton">Save JSON</button>
+                        <button id="loadJSON_btn" class="hostButton">Load JSON</button>
+                        <button id="importJSON_btn" class="hostButton">Import JSON</button> -->
+                        <!-- <div id="loadJSON_btn" class="icon icon-btn folder-open"></div> -->
+                    <div id="resetJSON_btn" class="icon icon-btn reload" title="Reset the export settings to defaults."></div>
+                    <!-- <div id="saveJSON_btn" class="icon icon-btn save"></div> -->
+                    <div id="importJSON_btn" class="icon icon-btn import" title="Import a prior saved settings file containing all settings."></div>
+                    <div id="exportJSON_btn" class="icon icon-btn export" title="Export settings file in JSON format, containing all settings."></div>
+                </div>
             </div>
             <!-- <div class="row radioButtons">
                 <div class="col">
@@ -69,7 +81,7 @@
             </div>
             <div class="row radioButtons" id="colors">
                 <div class="col">
-                    <label for="colors">Colors:&nbsp;</label>
+                    <label for="colors">Colors:&nbsp;</label><div id="colorSettingsIcon_btn" class="icon icon-btn settingsIcon" title="Edit extra settings for clolor variations generation. Like Custom Gray, Custom Black Print and Custom Black Digital."></div>
                 </div>
                 <div class="col col-column" title="Pick the color variants needed. After creation, you can add custom colors or variations.">
                     <div>
@@ -81,8 +93,17 @@
                         <label for="pms">PMS</label>
                     </div>
                     <div>
-                        <input type="checkbox" class="hostButton" name="colors" value="grayscale" checked/>
-                        <label for="grayscale">Grayscale<label>
+                        <input type="checkbox" class="hostButton" name="colors" value="inverted"/>
+                        <label for="inverted">Inverted</label>
+                        <input type="checkbox" class="hidden" name="invertedName" placeholder=""/>
+                        <input name="invertedType" class="hidden"placeholder="" value/>
+                        <input id="invertedColor" class="hidden" placeholder="" value/> 
+                        <div id="setInverted" class="invertedPreview" style="background-color: transparent;"></div> 
+                        <!-- value="C=0 M=100 Y=100 K=0"  /> -->
+                    </div>
+                    <div>
+                        <input type="checkbox" class="hostButton" name="colors" value="grayscale"/>
+                        <label for="grayscale">Grayscale</label>
                     </div>
                 </div>
                 <div class="col col-column">
@@ -124,17 +145,7 @@
             <div id="settings">
                 <div class="settings flex flex-row flex-between">
                     <h1 class="hostFont">Export Settings</h1>
-                    <div class="iconSettings">
-                        <!-- <button id="resetJSON_btn" class="hostButton">reset JSON</button>
-                            <button id="saveJSON_btn" class="hostButton">Save JSON</button>
-                            <button id="loadJSON_btn" class="hostButton">Load JSON</button>
-                            <button id="importJSON_btn" class="hostButton">Import JSON</button> -->
-                            <!-- <div id="loadJSON_btn" class="icon icon-btn folder-open"></div> -->
-                        <div id="resetJSON_btn" class="icon icon-btn reload" title="Reset the export settings to defaults."></div>
-                        <!-- <div id="saveJSON_btn" class="icon icon-btn save"></div> -->
-                        <div id="importJSON_btn" class="icon icon-btn import" title="Import a prior saved settings file containing all settings."></div>
-                        <div id="exportJSON_btn" class="icon icon-btn export" title="Export settings file in JSON format, containing all settings."></div>
-                    </div>
+                    
                     <!-- <div class="iconSettings">
                         <div id="openDestFolder" class="icon icon-btn openDestFolder"></div>
                         <div id="clearDestFolder" class="icon icon-btn clearDestFolder"></div>

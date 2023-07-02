@@ -22,8 +22,8 @@ var obj = {
 	myNativeObj: $.global,
 };
 // var data = JSON(obj);
-// alert(typeof(data))
-// alert( JSON(obj,1) );
+
+
 
 ///////////////////////////////////////////////////
 // Logging & Timer
@@ -38,7 +38,7 @@ var obj = {
 //     application: CS.getSystemPath(SystemPath.APPLICATION),
 //     project: {},
 // };
-// alert(userData)
+
 var useLogging = true;
 var useTimer = false;
 // 
@@ -71,6 +71,91 @@ var deletedPanelItems = false;
 var clearedItemsDocs = [''];
 var extensionRoot = '';
 
+
+
+
+///////////////////////////////////////////////////
+// Get OS
+// fromt "_LastLogEntry.jsx"
+///////////////////////////////////////////////////
+isWindows = function() {
+  return $.os.match(/windows/i);
+};
+isMac = function() {
+  return !isWindows();
+};
+
+
+///////////////////////////////////////////////////
+// Object: Logger
+// Usage: Logs all outputs feed
+// Input: Text file
+// Return: Date - Time - Data be marked for log
+// Usage: appendLog('Logitem.' + logitem, logFile);
+// Autohor: Mike Voropaev, 2019.
+// Source: https://www.youtube.com/channel/UCbX5bb9yeLw8V9emYE-fOXw
+///////////////////////////////////////////////////
+function startLog() {
+    // logpath = getSystemPath(SystemPath.EXTENSION);
+    if(isMac()) var userData = Folder.userData;
+    if(!isMac()) var userData = Folder.commonFiles;
+    var myDocuments = Folder.myDocuments;
+    var extension = Folder.extension;
+    var commonFiles = Folder.commonFiles;
+    var application = Folder.application;
+
+    if (!userData || !userData.exists) {
+        userData = Folder("~");
+    }
+    // var logopackerFolder = new Folder(userData + "/Adobe/CEP/Extensions/logo-packer-main");
+    var logopackerFolder = Folder(userData + "/Adobe/CEP/Extensions/logo-packer-main");
+    if (useLogging) {
+        // Windows cant write to hidden files, not sure why
+        logFile = File(logopackerFolder + '/logo-packer.log');
+        logFile.encoding = 'UTF8';
+        // Remove > we keep log small
+        // if (logFile.exists)
+        // 	logFile.remove();
+
+        logFile.open('w'); // W overwrites - A appends
+        // appendLog("extension "+extension, logFile);
+        // appendLog("myDocuments "+myDocuments, logFile);
+        // appendLog("commonFiles "+commonFiles, logFile);
+        // appendLog("application "+application, logFile);
+        appendLog("", logFile);
+        appendLog('____________________________', logFile);
+        appendLog(logFile, logFile);
+        // appendLog(logpath, logFile);
+        return logFile
+    }
+}
+
+function appendLog(message, fileToLog) {
+    // alert(message+"\n"+fileToLog)
+    // alert(message)
+    // alert(fileToLog.exists)
+    // alert(useLogging)
+    if (useLogging) {
+        logFile.open('A');
+        var time = new Date();
+        fileToLog.write(('0' + time.getHours()).slice(-2) + ':' + ('0' + time.getMinutes()).slice(-2) + ':' + ('0' + time.getSeconds()).slice(-2));
+        fileToLog.write('  |  ' + message);
+        fileToLog.writeln('');
+        fileToLog.close();
+    }
+}
+
+function _zeroPad(val) {
+    return (val < 10) ? '0' + val : val;
+}
+
+// logFile = startLog(Folder.desktop+'/Export/Logo Packer');//app.activeDocument.path + "/")
+var logFile = startLog(); // userdata folder
+var date = new Date();
+appendLog('New log: ' + _zeroPad(date.getDate(), 2) + '-' + _zeroPad(date.getMonth() + 1, 2) + '-' + date.getFullYear(), logFile);
+appendLog("", logFile);
+
+
 function getColorProfile(activeDocument){
     return activeDocument.colorProfileName;
 }
@@ -99,25 +184,41 @@ function getArtboardLogoTypes(docRef, strip) {
     return abLogotypes
 }
 
-// Get logo colors list, return names and color object for black and white
-function getLogoColorList(colors, mediaType){
+// Get logo colors list, return names and color object for black and white, if custom black is set it uses those values
+function getLogoColorList(colors, mediaType, colorSettings){
     // colors variation
     // Set black and white print colors
+    colorSettings = colorSettings.split(',');
     var black = mediaType == 'Print' ? new CMYKColor() : new RGBColor();
     var white = mediaType == 'Print' ? new CMYKColor() : new RGBColor();
     if (mediaType == 'Print'){
-        black.cyan = 0;
-        black.magenta = 0;
-        black.yellow = 0;
-        black.black = 100;
+        if (colorSettings[1]=="true"){
+            customPrint = colorSettings[2].split('-');
+            black.cyan = customPrint[0];
+            black.magenta = customPrint[1];
+            black.yellow = customPrint[2];
+            black.black = customPrint[3];
+        } else {
+            black.cyan = 0;
+            black.magenta = 0;
+            black.yellow = 0;
+            black.black = 100;
+        }
         white.cyan = 0;
         white.magenta = 0;
         white.yellow = 0;
         white.black = 0;
     } else {
-        black.red = 0;
-        black.green = 0;
-        black.blue = 0;
+        if (colorSettings[3]=="true"){
+            customDigital = colorSettings[4].split('-');
+            black.red = customDigital[0];
+            black.green = customDigital[1];
+            black.blue = customDigital[2];
+        } else {
+            black.red = 0;
+            black.green = 0;
+            black.blue = 0;
+        }
         white.blue = 255;
         white.red = 255;
         white.green = 255;
@@ -132,13 +233,6 @@ function getLogoColorList(colors, mediaType){
     var colors = colors.split(','); // convert stringlist to objectlist
     
     abLength = docRef.artboards.length;
-    // alert(abLength)
-    // alert(colors.length)
-    // alert(typeof(colors))
-    // for (var i = 0; i < colors.length; i++) {
-    //     alert(colors[i])
-    // }
-    
 
     // source https://www.geeksforgeeks.org/remove-elements-from-a-javascript-array/#:~:text=pop()%20function%3A%20This%20method,specific%20index%20of%20an%20array.
     for (var i = 0; i < colors.length; i++) {
@@ -156,41 +250,118 @@ function getLogoColorList(colors, mediaType){
             colors.push(white);
             // artboardsNames.push("white");
         }
-        // alert(colors[i])
+        
     }
-    // alert("colors.length "+colors.length)
-    // alert(artboardsNames)
+    
+    
 
     return [colors, artboardsNames]
 }
 
-function generateLogoVariation(clientName, logotype, colors, mediaType, sepaRator, forMats, autoResize, extensionRoot, exportInfo) {
+function createTemplateLayer(docRef){
+    try {
+        ilayer = docRef.layers.getByName("WONT EXPORT");
+    } catch (e) {
+        var ilayer = docRef.layers.add();
+        ilayer.name = "WONT EXPORT"
+        ilayer.printable = false;
+        var newColor = new CMYKColor();
+        newColor.cyan = 0;
+        newColor.magenta = 0;
+        newColor.yellow = 0;
+        newColor.black = 35;
+        var abBounds = docRef.artboards[0].artboardRect;// left, top, right, bottom
+        var ableft = abBounds[0]; // 0
+        var abtop = abBounds[1]; // 612
+        var abwidth = abBounds[2] - ableft; // 792 // width
+        var abheight = abtop- abBounds[3]; // 0 // height
+        var abName = docRef.artboards[0].name // Get AB name
+        var igroup = ilayer.groupItems.add();
+        igroup.name = abName;
+        var ipath = igroup.pathItems.rectangle(abtop, ableft, abwidth, abheight);
+        igroup.pathItems[0].name = "WONT EXPORT"; 
+        ipath.filled = true;
+        ipath.fillColor = newColor;
+        igroup.artworkKnockout = KnockoutState.ENABLED;
+        ipath.resize(5000,5000);
+
+        // app.activeDocument.layers[1].move(ilayer, ElementPlacement.PLACEATEND)
+        // https://ai-scripting.docsforadobe.dev/jsobjref/Layer.html?highlight=zOrderPosition#layer-zorderposition
+        // Order is top down 0 > numbers  oflayers
+        app.activeDocument.layers[0].zOrder(ZOrderMethod.SENDTOBACK)
+        ilayer.locked = true;
+    }
+}
+function generateLogoVariation(clientName, logotype, colors, inverted, mediaType, sepaRator, forMats, autoResize, extensionRoot, exportSettings, colorSettings) {
+    appendLog('', logFile);
+    appendLog('generateLogoVariation()', logFile);
+    appendLog(clientName+' \n\t\t\t '+logotype+' \n\t\t\t '+colors+' \n\t\t\t '+inverted+' \n\t\t\t '+mediaType+' \n\t\t\t '+sepaRator+' \n\t\t\t '+forMats+' \n\t\t\t '+autoResize+' \n\t\t\t '+extensionRoot+' \n\t\t\t '+exportSettings+' \n\t\t\t '+colorSettings, logFile);
+
     docRef = app.activeDocument;
     logotypes = getArtboardLogoTypes(docRef, false);
     clearedItemsDocs = ['']; // clear list of doc with cleared swatches
     sourceProfile = getColorProfile(docRef);
     if (logotype == "alltypes") {
-        abLength = docRef.artboards.length;
-        for (ab = 0; ab < abLength; ab++) {
+        docRefabLength = docRef.artboards.length;
+        for (ab = 0; ab < docRefabLength; ab++) {
             app.selection = null;
+            
             docRef.artboards.setActiveArtboardIndex(ab);
             docRef.selectObjectsOnActiveArtboard();
-            createLogoTypes(docRef, clientName, colors, logotypes[ab], mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportInfo)
+            createLogoTypes(docRef, clientName, colors, inverted, logotypes[ab], mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportSettings, colorSettings)
             // switch to generated logo
             if (run==true) app.documents.getByName(docRef.name).activate();
         }
         if (run==true) app.documents.getByName(clientName).activate();
     } else {
-        createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportInfo);
+        createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportSettings, colorSettings);
     }
-    app.executeMenuCommand('fitall')
+    if (run!=true) return run
+    
+    // switch to generated logo
+    if (run==true) app.documents.getByName(clientName).activate();
+    if (run==true) createTemplateLayer(app.documents.getByName(clientName));
+    // needs to be done in end, it crashes illuistrator and returns errors in cmyk
+    // customize gray values
+    docRef.selection = null;
+    colorSettings = colorSettings.split(',')
+    if (colorSettings[0]=="true") {
+        for(i=0;i<docRef.artboards.length;i++){
+            var activeAB = docRef.artboards[i]; // get active AB
+            if (activeAB.name.indexOf("grayscale")!=-1){
+                docRef.artboards.setActiveArtboardIndex(i);
+                docRef.selectObjectsOnActiveArtboard();
+                app.executeMenuCommand('fitin')
+                app.executeMenuCommand('Adjust3');
+                // docRef.selection = null; doesnt work deslecting?!
+                app.selection = null;
+                app.selection = 0;
+                if (space == "RGB") app.defaultFillColor = new RGBColor();
+                // Set defaultFillColor to None, so colors in RGB still look like rgb after customGray
+                // It would show RGB values in black values, letting the user thing the color is not correctsto
+                docRef.defaultFillColor = docRef.swatches.getByName('[None]').color;
+            }
+        }
+    }
+    app.executeMenuCommand('fitall');
+    
     return run
 }
 
-function createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportInfo) {
+function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportSettings, colorSettings) {
+    appendLog("createLogoTypes()", logFile)
+
     logotype = logotype;
-    // var run = false;
     separator = sepaRator;
+    for (col=0; col < colors.length; col++){
+        if (colors[col]=='inverted'){
+            if (inverted == ",,") {
+                return run = "inverted"
+            } else if (inverted[2].split('-') == "") {
+                return run = "invertedColor"
+            } 
+        }
+    }
     if (app.selection.length == 0) {
         return run = "selection"
     } else if (clientName == "") {
@@ -213,20 +384,15 @@ function createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRa
         initArtboardsLength = 1; // Reset always to 1 other we have generation error
         
         // get list of colors
-        var colorList = getLogoColorList(colors, mediaType);
+        var colorList = getLogoColorList(colors, mediaType, colorSettings);
         var colors = colorList[0];
         var artboardsNames = colorList[1];
-        // alert("returned colors length list" +colors.length)
-        // alert("returned colors " +colors)
-        // alert("returned ABnames " +artboardsNames)
 
         // Filter function 
         // Source https://stackoverflow.com/a/20690490
         // let forDeletion = ["black". "white"]
         // colors = colors.filter(item => !forDeletion.includes(item))
-        
 
-        
         var mediatype = mediaType == 'Print' ? 'cmyk' : 'rgb';
         var rasterEffectSettings = mediaType == 'Print' ? '300' : '72'
         // var mediaTypeFolder = mediaType;
@@ -261,6 +427,7 @@ function createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRa
                 // $.evalFile(new File(extensionRoot+'/jsx/alert-dialog.jsx'));
 
                 var title = "Warning!  Document Color Mismatch";
+                if (sourceProfile=="") sourceProfile = "Untagged";
                 var msg1 = "Source: "+sourceProfile+"\nWorking: "+destinationProfile;
                 var msg2 = "The source logo has a diffirent Color Profile then the Color Management Settings. Do you want to assign the same Color Profile to the new document?";
                 var okStr = "Yes";
@@ -290,6 +457,8 @@ function createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRa
         docRef.rasterEffectSettings.resolution = rasterEffectSettings;
 
         docRef.artboards[initArtboardsLength - 1].name = logotype + separator + 'fullcolor' + separator + mediatype
+        
+        appendLog("Create fullcolor logo", logFile)
 
         // Delete all unused color swatches, only first gen logos
         // Cleans doc of all items; swatches, brushes, styles etc etc
@@ -302,14 +471,21 @@ function createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRa
 
         item = docRef.selection[0];
 
+        // WIP > check if logo is in PMS colors
+        // checkColorsForPMS(docRef);
+
         // Only group if not alreadt a group
         if (item.typename != "GroupItem") app.executeMenuCommand('group');
 
         // Give groupname Client name and logotype as name, Looks clean in layers :)
         item.name = clientName+"-"+logotype;
         
-        // check logo size
-        if (item.width <= 70 || item.height <= 70) resizeLogo(item, autoResize, exportInfo)
+        // Check logo size and upscale when to small for export suze
+        // if (item.width <= 70 || item.height <= 70) resizeLogo(item, autoResize, exportSettings)
+        if (item.width <= 70 || item.height <= 70) resizeLogo(item, autoResize, exportSettings, "upscale")
+
+        // Check logo size and downscale when to large, causes issues with fillColor function on Windows
+        if (item.width >= 400 || item.height >= 400) resizeLogo(item, autoResize, exportSettings, "downscale")
 
         if (hasDoc) {
             // var prevArtboard = docRef.artboards[initArtboardsLength - 5]
@@ -317,10 +493,7 @@ function createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRa
             // works by more then 1
             // var prevArtboard = docRef.artboards[initArtboardsLength - (colors.length +1)]
             var prevArtboard = docRef.artboards[initArtboardsLength - colors.length]
-            // alert(prevArtboard)
-            // alert("initArtboardsLength " + initArtboardsLength)
-            // alert("colors.length "+ colors.length)
-            // alert("initArtboardsLength - colors.length " + (initArtboardsLength - colors.length))
+
             var initialObjHeight = Math.abs(prevArtboard.artboardRect[1] - prevArtboard.artboardRect[3]);
 
             //move copied items to previouse item's position
@@ -342,16 +515,16 @@ function createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRa
                     }
                 }
             }
-
         }
         
         // Fix for when single color is used
         if (colors.length == 0) docRef.fitArtboardToSelectedArt(0);    
 
-        // Add grayscale, black & white version
+        // Add pms, inverted, grayscale, black & white version
         for (var i = 0; i < colors.length; i++) {
+            appendLog("Create "+ artboardsNames[i]+" logo", logFile)
             var firstObj = app.selection[0];
-            var orgObj = app.selection[0];
+            // var orgObj = app.selection[0];
         
             var curFirstBoard = hasDoc ? (initArtboardsLength - 1 + i) : i;
             var mainArtboard;
@@ -372,20 +545,66 @@ function createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRa
 
 
             // Fixed for very light grayscale due to PMS version was used now
-            if (colors[i] != 'pms'){
-                orgObj.duplicate();
-                orgObj.translate(orgObj.width + 100, 0);
-                firstObj = orgObj;
-            } else {
-                firstObj.duplicate();
-                firstObj.translate(firstObj.width + 100, 0);
-            }
+            // if (colors[i] != 'pms' || colors[i] != 'inverted'){
+            //     
+            //     
+            //     orgObj.duplicate();
+            //     orgObj.translate(orgObj.width + (100 + abR), 0);
+            //     firstObj = orgObj;
+            // } else {
+            //     
+            //     
+            //     firstObj.duplicate();
+            //     firstObj.translate(firstObj.width + (100 + abR), 0);
+            // }
+
+            firstObj.duplicate();
+            firstObj.translate(firstObj.width + (100 + abL), 0);
+            
+            // correct wrong offset from duplicate original logo > needs work
+            docRef.artboards.setActiveArtboardIndex(curFirstBoard+1);
+            app.executeMenuCommand('selectallinartboard');
+
+            // Center logo back on artboard > causes issue on WIndows illustrator 
+            // var board = docRef.artboards[docRef.artboards.getActiveArtboardIndex()];
+            // var right = board.artboardRect[2];
+            // var bottom = board.artboardRect[3];
+            // firstObj.position = [
+            //     Math.round((right - firstObj.width) / 2),
+            //     Math.round((bottom + firstObj.height) / 2)
+            // ];
+            // We need different, appMenuCommand doesnt work in 2018cc
+            // workaround for centering on artboard 
+            //   https://community.adobe.com/t5/illustrator-discussions/script-to-align-selected-objects-to-artboard/m-p/5595165#M225552
+            // var abIdx = aDoc.artboards.getActiveArtboardIndex();
+            var coordSystemOld = docRef.coordinateSystem;
+            app.coordinateSystem = CoordinateSystem.ARTBOARDCOORDINATESYSTEM;
+            var abIdx = docRef.artboards.getActiveArtboardIndex();
+            var actAbBds = docRef.artboards[abIdx].artboardRect;
+            firstObj.position = new Array ((actAbBds[2]-actAbBds[0])/2 - firstObj.width/2, (actAbBds[3]-actAbBds[1])/2  + firstObj.height/2);
+            // obj2move.position = new Array ((actAbBds[2]-actAbBds[0])/2 - obj2move.width/2, 0);
+            // Set coordystsytem back
+            app.coordinateSystem = coordSystemOld;
+            
+            // Aligns 2 objects
+            // app.activeDocument.align(app.selection, AlignOptions.HORIZONTAL_CENTERS);
+            // app.executeMenuCommand("Horizontal Align Center");
 
             // Make color logo versions
-            fillColor(firstObj, colors[i], extensionRoot);
+            run = fillColor(firstObj, colors[i],inverted, extensionRoot, exportSettings);
+            // alert("scriptAlertResult "+scriptAlertResult)
+            // only check for Inverted
+            if(colors[i]=='inverted' && run ==false){
+                // Stop creation if result = false > user input
+                if (scriptAlertResult==false) return run = "canceled";
+            }
 
+            //reset to first object so we can color correct > changed due to grayscale and inverted versions
+            // docRef.artboards.setActiveArtboardIndex(0);
+            // Set to first artboard per colortype > not 0 because with all types we work in a loop
+            docRef.artboards.setActiveArtboardIndex(initArtboardsLength-1);
             //select the latest object
-            docRef.artboards.setActiveArtboardIndex(docRef.artboards.length - 1);
+            // docRef.artboards.setActiveArtboardIndex(docRef.artboards.length - 1);
             docRef.selectObjectsOnActiveArtboard();
         }
 
@@ -393,12 +612,17 @@ function createLogoTypes(docRef, clientName, colors, logotype, mediaType, sepaRa
         logotype = logotype;
         run = setLogoInfo(docRef, logotype, artboardsNames, initArtboardsLength, false);
     }
-    // alert(run)
+    
+    // createTemplateLayer(docRef);
+
     return run
 }
 
-//change object colors
-function fillColor(obj, color, extensionRoot) {
+// change object colors
+function fillColor(obj, color, inverted, extensionRoot, exportSettings) {
+    appendLog("fillColor()", logFile);
+    appendLog("Color "+color, logFile);
+
     var docRef = app.activeDocument;
     docRef.layers[0].hasSelectedArtwork = false;
     docRef.artboards.setActiveArtboardIndex(docRef.artboards.length - 1);
@@ -406,22 +630,116 @@ function fillColor(obj, color, extensionRoot) {
 
     if (color == 'grayscale') {
         app.executeMenuCommand('Colors7');
-        return;
+        return true;        
     }
     if (color == 'pms') {
         // Cant find other method for this
-        $.evalFile(new File(extensionRoot+'/jsx/cmyktopms.jsxbin'));
-        return;
+        $.evalFile(new File(extensionRoot+'/jsx/cmyktopms.jsx'));
+        // Clean unused swathes PMS
+        app.doScript("Delete Unused Panel Items", "Default Actions")
+        return true;
+    }
+    if (color == 'inverted') {
+        // app.executeMenuCommand('expandStyle');
+        // app.executeMenuCommand("ungroup");
+        inverted = inverted.split(',');
+        
+        // docRef.defaultFillColor = docRef.swatches.getByName(inverted[2]).color.spot.color;
+        // app.executeMenuCommand("Find Fill Color menu item");
+        // app.executeMenuCommand("hide");
+        // // app.executeMenuCommand("lock");
+        // docRef.selectObjectsOnActiveArtboard();
+        // // app.executeMenuCommand("selectall");
+
+        docRef.selectObjectsOnActiveArtboard();
+        app.executeMenuCommand("ungroup");
+        app.executeMenuCommand("deselectall");
+        // var inverted = [true, "C=0 M=100 Y=100 K=0"];
+        if (inverted[2].split('-') == "") {
+            var title = "Warning creating Inverted logo!";
+            var msg1 = "No inverted color set, please restart generation and pick a color.";
+            var msg2 = "Logo generation can continue but inverted logo type is skipped. Do you want to continou?";
+            var okStr = "Yes";
+            var cancelStr = "No";
+            scriptAlert(title, msg1, msg2, true, true, okStr, cancelStr, warningIcon64);
+            return scriptAlertResult;
+            run = false;
+        }
+        if (inverted[1]=="RGBColor"){
+            rgbValues = inverted[2].split('-');//docRef.swatches.getByName(inverted[2]).fillColor.color;
+            rgbColor = new RGBColor();
+            rgbColor.red = rgbValues[0];
+            rgbColor.green = rgbValues[1];
+            rgbColor.blue = rgbValues[2];
+            getColor = rgbColor;
+        }
+        if (inverted[1]=="CMYKColor"){
+            cmykValues = inverted[2].split('-');//docRef.swatches.getByName(inverted[2]).fillColor.color;
+            cmykColor = new CMYKColor();
+            cmykColor.cyan = cmykValues[0];
+            cmykColor.magenta = cmykValues[1];
+            cmykColor.yellow = cmykValues[2];
+            cmykColor.black = cmykValues[3];
+            getColor = cmykColor;
+        }
+        if (inverted[1]=="SpotColor"){
+            // needs try otherwise cant catch error
+            try{
+                docRef.swatches.getByName(inverted[2])
+            } catch(e){
+                var title = "Warning creating Inverted logo!";
+                var msg1 = "The spot color set for inverted, can not be found. Make sure to use a color which is actually used in the logo.";
+                var msg2 = "Logo generation can continue but inverted logo type is skipped. Do you want to continou?";
+                var okStr = "Yes";
+                var cancelStr = "No";
+                scriptAlert(title, msg1, msg2, true, true, okStr, cancelStr, warningIcon64);
+                return scriptAlertResult;
+                run = false;
+                // pass
+            }
+            getColor = docRef.swatches.getByName(inverted[2]).color;
+        }
+        if (inverted[1]=="GrayColor"){
+            grayValue = inverted[2];
+            grayColor = new GrayColor();
+            grayColor.gray = grayValue;
+            getColor = grayColor;
+        }
+        app.activeDocument.defaultFillColor = getColor;
+        app.executeMenuCommand("Find Fill Color menu item");
+        if (app.activeDocument.selection == 0) {
+            var title = "Warning creating Inverted logo!";
+            var msg1 = "The color set for inverted, can not be found. Make sure to use a color which is actually used in the logo.";
+            var msg2 = "Logo generation can continue but inverted logo type is skipped. Do you want to continou?";
+            var okStr = "Yes";
+            var cancelStr = "No";
+            scriptAlert(title, msg1, msg2, true, true, okStr, cancelStr, warningIcon64);
+            return scriptAlertResult;
+        }
+        app.executeMenuCommand("lock");
+        app.executeMenuCommand("deselectall");
+        docRef.selectObjectsOnActiveArtboard();
+        inverseLogo();
+        app.executeMenuCommand("showAll");
+        docRef.selectObjectsOnActiveArtboard();
+        app.executeMenuCommand("group");
+        
+        return true;
     }
     var aDoc = docRef;
+    
     aDoc.defaultFillColor = color;
     app.executeMenuCommand("Find Fill Color menu item");
+    return true
 }
 
 
-function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, exportInfo, separator) {
+function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, exportSettings, separator) {
+    appendLog('exportFiles()', logFile);
+    appendLog(mediaType+' \n\t\t\t '+logotype+' \n\t\t\t '+forMats+' \n\t\t\t '+subFolders+' \n\t\t\t '+checkABhasArt+' \n\t\t\t '+exportSettings+' \n\t\t\t '+separator, logFile);
+
     // convert string list of josn settings back to object
-    exportInfo = exportInfo.split(',')
+    exportSettings = exportSettings.split(',')
 
     // Timer Tom Ruark 
     // Source: Getter.jsx
@@ -429,8 +747,6 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
         var totalTime = new Timer();
     }
 
-    appendLog('Starting Export ', logFile);
-    // alert(subFolders)
     var run = false;
     var cancel = false;
 
@@ -520,12 +836,12 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
                         logoTypeExp = logoType[i].substr(3, logoType[i].length).toLowerCase().split('-').pop(); //[0];
                         expArtboards = getExpArtboards(logoTypeExp, true, checkABhasArt);
                         
-                        if (expArtboards != '') exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportInfo, separator);
+                        if (expArtboards != '') exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportSettings, separator);
                     }
                 } else {
                     logoTypeExp = logoType.substr(3, logoType.length).toLowerCase().split('-').pop(); //[0];
                     expArtboards = getExpArtboards(logoTypeExp, true, checkABhasArt);
-                    exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportInfo, separator);
+                    exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportSettings, separator);
                 }
 
             // Use subfolders by logotype    
@@ -541,7 +857,7 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
                                 if (!destPath.exists) destPath.create();
 
                                 expArtboards = getExpArtboards(logoTypeExp, true, checkABhasArt);
-                                exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportInfo, separator);
+                                exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportSettings, separator);
                             }
                         }
                     }
@@ -552,7 +868,7 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
 
                     logoTypeExp = logoType.substr(3, logoType.length).toLowerCase().split('-').pop(); //[0];
                     expArtboards = getExpArtboards(logoTypeExp, true, checkABhasArt);
-                    exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportInfo, separator);
+                    exportFormats(destPath, mediatype, logoTypeExp, expArtboards, exportSettings, separator);
                 }
             }
 
@@ -578,7 +894,7 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
             // var expResolution = 100 * (targetResolution / baseFileSize);
             // var expResolution = targetResolution * 100 / 72;
             // 100 * (targetResolution / baseFileSize)
-            // alert(expResolution)
+            
             // return Math.round(expResolution - baseFileSize)
             return targetResolution * 100 / 72;
         }
@@ -602,8 +918,8 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
     //         // docRef.selectObjectsOnActiveArtboard();
 
     //         // if (docRef.selection.length === 0) {
-    //         //     // alert('AB '+i+' empty')
-    //         // } // alert('AB '+i+' has art')
+    //         //     
+    //         // } 
     //         abName = docRef.artboards[i].name.split('-')[0];
     //         if ((abName == logotypePrefix) || (logotype != "alltypes")) {
     //             // scriptAlert(docRef.name,i+" "+abName, logotypePrefix)
@@ -665,9 +981,13 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
     }
 
 
-    function exportFormats(destPath, mediatype, logotypePrefix, expArtboards, exportInfo, separator) {
+    function exportFormats(destPath, mediatype, logotypePrefix, expArtboards, exportSettings, separator) {
+        // Hide logo info layer
         lyrLogoInfo = app.activeDocument.layers.getByName(LOGO_INFO);
         lyrLogoInfo.visible = false;
+        // Hide logo preview background
+        lyrPreviewBackdrop = app.activeDocument.layers.getByName("WONT EXPORT");
+        lyrPreviewBackdrop.visible = false;
 
         var ai = forMats.indexOf("ai")
         var pdf = forMats.indexOf("pdf");
@@ -695,7 +1015,7 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
         var baseFileSize = docRef.width;
         // var expResolution = setResolution(targetResolutions, baseFileSize);
         var expResolution = setResolutionScale(targetResolutions, baseFileSize);
-        // alert(expResolution)
+        
 
         if (ai !== -1) {
             var aiFolder = new Folder(destPath + "/AI");
@@ -747,12 +1067,12 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
         if (ai !== -1) {
             if (aiFolder != null) {
                 var options = new IllustratorSaveOptions();
-                options.compatibility = aiCompatibility(exportInfo[0])//Compatibility.ILLUSTRATOR17;
-                // options.flattenOutput = aiFlattening()exportInfo[1]; Illustrator 8 feature // OutputFlattening.PRESERVEAPPEARANCE;
-                options.PDFCompatibility = stringToBoolean(exportInfo[1]); //true
-                options.embedLinkedFiles = stringToBoolean(exportInfo[2]); //true;
-                options.embedICCProfile = stringToBoolean(exportInfo[3]); //true;
-                options.compressed = stringToBoolean(exportInfo[4]); //true;
+                options.compatibility = aiCompatibility(exportSettings[0])//Compatibility.ILLUSTRATOR17;
+                // options.flattenOutput = aiFlattening()exportSettings[1]; Illustrator 8 feature // OutputFlattening.PRESERVEAPPEARANCE;
+                options.PDFCompatibility = stringToBoolean(exportSettings[1]); //true
+                options.embedLinkedFiles = stringToBoolean(exportSettings[2]); //true;
+                options.embedICCProfile = stringToBoolean(exportSettings[3]); //true;
+                options.compressed = stringToBoolean(exportSettings[4]); //true;
 
                 options.saveMultipleArtboards = true;
                 // options.artboardRange = 1+','+2+','+4; // Works
@@ -800,10 +1120,10 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
                     var pdfProfileAI = "[PDF/X-4:2008]";
                     options.pDFPreset = pdfProfileAI ? checkPresets(true, pdfProfileAI) : "[High Quality Print]";
                     // If this option is true, opening the PDF in illustrator will show all other arboards
-                    options.preserveEditability = stringToBoolean(exportInfo[6]); //false
-                    options.generateThumbnails = stringToBoolean(exportInfo[7]); //true;
-                    options.optimization = stringToBoolean(exportInfo[8]); //true;
-                    options.layers = stringToBoolean(exportInfo[9]); //false;
+                    options.preserveEditability = stringToBoolean(exportSettings[6]); //false
+                    options.generateThumbnails = stringToBoolean(exportSettings[7]); //true;
+                    options.optimization = stringToBoolean(exportSettings[8]); //true;
+                    options.layers = stringToBoolean(exportSettings[9]); //false;
 
                     // options.saveMultipleArtboards = false;
                     if (expArtboards.slice(-1) == ',') {
@@ -821,10 +1141,10 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
                 } else if (mediaType == 'Digital') {
                     var options = new ExportForScreensPDFOptions();
                     options.pDFPreset = pdfProfileAI ? checkPresets(true, pdfProfileAI) : "[High Quality Print]";
-                    options.preserveEditability = stringToBoolean(exportInfo[6]); //false
-                    options.generateThumbnails = stringToBoolean(exportInfo[7]); //true;
-                    options.optimization = stringToBoolean(exportInfo[8]); //true;
-                    options.layers = stringToBoolean(exportInfo[9]); //false;
+                    options.preserveEditability = stringToBoolean(exportSettings[6]); //false
+                    options.generateThumbnails = stringToBoolean(exportSettings[7]); //true;
+                    options.optimization = stringToBoolean(exportSettings[8]); //true;
+                    options.layers = stringToBoolean(exportSettings[9]); //false;
                     // var options = new PDFSaveOptions();
                     // options.compatibility = PDFCompatibility.ACROBAT5;
                     // options.compatibility = PDFCompatibility.ACROBAT8;
@@ -852,7 +1172,7 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
 
                 // var options = new PDFSaveOptions();
                 // var pdfProfileAI = "[PDF/X-4:2008]";
-                // // alert(checkPresets( true, pdfProfileAI ));
+                // 
 
                 // // options.pDFPreset = pdfProfileAI ? checkPresets( true, pdfPresetAI ) : "[High Quality Print]";
                 // options.pDFPreset = pdfProfileAI ? checkPresets( true, pdfProfileAI ) : "[High Quality Print]";
@@ -886,15 +1206,15 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
                 // // options.optimization = true;
                 // // options.pageInformation = true;
                 // ABs = expArtboards.split(',');
-                // // alert(expArtboards.length)
-                // // alert(ABs)
+                // 
+                // 
                 // for (var i = 0; i < ABs.length; i++) {
-                //     // alert(ABs[i+1])
-                //     // alert(pdfFolder)
-                //     // alert(docRef.artboards[i].name)
+                //     
+                //     
+                //     
                 //     options.artboardRange = ABs[i];
                 //     abName = docRef.artboards[i].name;
-                //     // alert(pdfFolder+'/'+addDocName+'_'+abName)
+                //     
                 //     fileName = File(pdfFolder+'/'+addDocName+'_'+abName)
                 //     docRef.saveAs(fileName, options, fileNamePrefix);
                 // }
@@ -918,14 +1238,14 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
         if (eps !== -1) {
             if (epsFolder != null) {
                 var options = new EPSSaveOptions();
-                options.compatibility = epsCompatibility(exportInfo[10]); // Compatibility.ILLUSTRATOR17 ; //ILLUSTRATOR24;
-                options.embedAllFonts = stringToBoolean(exportInfo[11]); // true;
-                options.embedLinkedFiles = stringToBoolean(exportInfo[12]); // true;
-                options.includeDocumentThumbnails = stringToBoolean(exportInfo[13]); // true;
+                options.compatibility = epsCompatibility(exportSettings[10]); // Compatibility.ILLUSTRATOR17 ; //ILLUSTRATOR24;
+                options.embedAllFonts = stringToBoolean(exportSettings[11]); // true;
+                options.embedLinkedFiles = stringToBoolean(exportSettings[12]); // true;
+                options.includeDocumentThumbnails = stringToBoolean(exportSettings[13]); // true;
                 options.preview = EPSPreview.BWTIFF;
-                options.cmykPostScript = stringToBoolean(exportInfo[14]); // true;
-                options.compatibleGradientPrinting = stringToBoolean(exportInfo[15]); // true;
-                options.postScript = epsPostscript(exportInfo[16]); // EPSPostScriptLevelEnum.LEVEL2;
+                options.cmykPostScript = stringToBoolean(exportSettings[14]); // true;
+                options.compatibleGradientPrinting = stringToBoolean(exportSettings[15]); // true;
+                options.postScript = epsPostscript(exportSettings[16]); // EPSPostScriptLevelEnum.LEVEL2;
                 options.saveMultipleArtboards = true; // otherwise saves all artboards to each folder.
 
                 options.artboardRange = expArtboards.toString();
@@ -945,13 +1265,13 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
         if (svg !== -1) {
             if (svgFolder != null) {
                 var options = new ExportForScreensOptionsWebOptimizedSVG();
-                options.cssProperties = svgCSSproperty(exportInfo[17]); //SVGCSSPropertyLocation.STYLEELEMENTS; // STYLEATTRIBUTES  PRESENTATIONATTRIBUTES
-                options.fontType = svgFontType(exportInfo[18]); //SVGFontType.OUTLINEFONT; // SVGFONT
-                options.rasterImageLocation = svgRasterImageLocation(exportInfo[19]);//RasterImageLocation.EMBED;
-                options.svgId = svgObjectID(exportInfo[20])//SVGIdType.SVGIDUNIQUE; // SVGIDMINIMAL  SVGIDREGULAR
-                options.coordinatePrecision = stringToNumber(exportInfo[21]); //5;
-                options.svgMinify = stringToBoolean(exportInfo[22]);//false;
-                options.svgResponsive = stringToBoolean(exportInfo[23]); //false;
+                options.cssProperties = svgCSSproperty(exportSettings[17]); //SVGCSSPropertyLocation.STYLEELEMENTS; // STYLEATTRIBUTES  PRESENTATIONATTRIBUTES
+                options.fontType = svgFontType(exportSettings[18]); //SVGFontType.OUTLINEFONT; // SVGFONT
+                options.rasterImageLocation = svgRasterImageLocation(exportSettings[19]);//RasterImageLocation.EMBED;
+                options.svgId = svgObjectID(exportSettings[20])//SVGIdType.SVGIDUNIQUE; // SVGIDMINIMAL  SVGIDREGULAR
+                options.coordinatePrecision = stringToNumber(exportSettings[21]); //5;
+                options.svgMinify = stringToBoolean(exportSettings[22]);//false;
+                options.svgResponsive = stringToBoolean(exportSettings[23]); //false;
                 // options.fontSubsetting = SVGFontSubsetting.None;
                 // options.compressed = true;
                 app.activeDocument.exportForScreens(svgFolder, ExportForScreensType.SE_SVG, options, whatToExport, fileNamePrefix);
@@ -961,12 +1281,7 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
         //ignore white object
         // if (jpg!==-1) {
         // var imageScales = [1000,500,250];
-        // alert(exportInfo[32])
-        // alert(exportInfo[33])
-        // alert(exportInfo[34])
-        var imageScales = exportInfo[32].split('-');
-        // alert(typeof(imageScales))
-        // alert(typeof(imageScales))
+        var imageScales = exportSettings[32].split('-');
         if (jpgFolder != null) {
             for(var size = 0; size < imageScales.length; size++){
 
@@ -979,10 +1294,10 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
                 // options.qualitySetting = 0;
                 // var options = new exportOptionsJPEG();
                 var options = new ExportForScreensOptionsJPEG();
-                options.compressionMethod = jpgCompressionMethod(exportInfo[24]);
-                options.progressiveScan = stringToNumber(exportInfo[25]) + 3; // compensate for 3,4,5 by adding 3 as start value
-                options.antiAliasing = jpgAntiAliasing(exportInfo[26]); // AntiAliasingMethod.TYPEOPTIMIZED;
-                options.embedICCProfile = stringToBoolean(exportInfo[27]); // true
+                options.compressionMethod = jpgCompressionMethod(exportSettings[24]);
+                options.progressiveScan = stringToNumber(exportSettings[25]) + 3; // compensate for 3,4,5 by adding 3 as start value
+                options.antiAliasing = jpgAntiAliasing(exportSettings[26]); // AntiAliasingMethod.TYPEOPTIMIZED;
+                options.embedICCProfile = stringToBoolean(exportSettings[27]); // true
 
                 /** source: https://gist.github.com/haysclark/9d143284b0791faa90517acb32d1855e
                 SCALEBYFACTOR = 0,
@@ -997,17 +1312,17 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
                 // https://community.adobe.com/t5/illustrator/what-s-new-in-illustrator-scripting-cc2018/td-p/9422236/page/2?page=1
                 // options.scaleType = ExportForScreensScaleType.SCALEBYRESOLUTION;
                 // ExportForScreensScaleType.SCALEBYRESOLUTION
-                options.scaleType = scaleTypeMethod(exportInfo[33])//ExportForScreensScaleType.SCALEBYWIDTH;
-                // alert(Number(imageScales[size]))
+                options.scaleType = scaleTypeMethod(exportSettings[33])//ExportForScreensScaleType.SCALEBYWIDTH;
+                
                 options.scaleTypeValue = Number(imageScales[size]);//1000;
                 // options.scaleType = ExportForScreensScaleType.SCALEBYHEIGHT;
                 // options.scaleType = ExportForScreensScaleType.SCALEBYFACTOR;
 
                 // JPG Options
                 // scaletype causes issues with small docs
-                // alert(expResolution)
+                
                 // options.scaleTypeValue = 1000;
-                // alert("expResolution "+expResolution)
+                
                 // options.scaleTypeValue = 1000;
                 // options.horizontalScale = expResolution;
                 // options.horizontalScale = expResolution;
@@ -1022,7 +1337,7 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
                 // whatToExport.artboards = expArtboards;
             
                 // var newArtboards = '';
-                // alert('JPG ab '+getArtboards(document, newArtboards))
+                
                 // whatToExport.artboards = getArtboards(document, newArtboards);
 
                 // https://community.adobe.com/t5/illustrator-discussions/export-selected-artboards-png24-javascript/m-p/12894621#M319113
@@ -1037,28 +1352,67 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
                 // var ABname = activeAB.name.replace(/\//g, "_") 
                 // var jpgFile = new File(jpgFolder+'/'+ ABname + "-"+imageScales[size] + '.jpg');
                 // var jpgFile = new File(fileNamePrefix + ABname + "-"+imageScales[size]);// + '.jpg');
-                // alert(separator)
-                // alert(separator.toString())
-                // alert(separator.toString() == '-')
+                
+                
+                
                 // var sep = separator == "dash" ? '-' : '_';
                 // var jpgFile = fileNamePrefix +imageScales[size] + sep;
-                // alert(jpgFile)
+                
                 app.activeDocument.exportForScreens(jpgFolder, ExportForScreensType.SE_JPEG100, options, whatToExport, fileNamePrefix);
-                if (stringToBoolean(exportInfo[31])==true){
+                var sep = separator == "dash" ? '-' : '_';
+                if (stringToBoolean(exportSettings[31])==true){
                     for(i=0;i<docRef.artboards.length;i++){
                     // var ABname = activeAB.name.replace(/\//g, "_") 
                         var activeAB = docRef.artboards[i]; // get active AB
                         var saveFile = File(jpgFolder + "/" + docRef.name+'_' + activeAB.name+'.jpg');
+                        var imageSuffix = imageScales[size].toString()+exportSettings[34].toString();
                         if(saveFile.exists){
-                            var sep = separator == "dash" ? '-' : '_';
-                            var imageSuffix = imageScales[size].toString()+exportInfo[34].toString();
                             saveFile.rename(docRef.name+'_' + activeAB.name + sep + imageSuffix+'.jpg');
-                            // alert(jpgFolder + "/" + docRef.name+'_' + activeAB.name + sep + imageSuffix+'.jpg')
+                            
                             // saveFile.rename(jpgFolder + "/" + docRef.name+'_' + activeAB.name + sep + imageSuffix+'.jpg');
                             // saveFile.rename(jpgFolder + "/" + docRef.name+'_' + activeAB.name + sep + imageSuffix+'px.jpg');
                             // var jpgFile = fileNamePrefix +imageScales[size] + sep;
                             // var jpgFile = sep +imageScales[size];
                         }
+                        if (activeAB.name.indexOf("inverted")!=-1 || activeAB.name.indexOf("white")!=-1 || activeAB.name.indexOf("pms")!=-1){
+                            var saveFile = File(jpgFolder + "/" + docRef.name+'_' + activeAB.name + sep + imageSuffix+'.jpg');
+                            if (saveFile.exists) {
+                                saveFile.remove();
+                            }
+                        }
+                        // if (activeAB.name.indexOf("white")!=-1){
+                        //     var saveFile = File(jpgFolder + "/" + docRef.name+'_' + activeAB.name + sep + imageSuffix+'.jpg');
+                        //     if (saveFile.exists) {
+                        //         saveFile.remove();
+                        //     }
+                        // }
+                        // if (activeAB.name.indexOf("pms")!=-1){
+                        //     var saveFile = File(jpgFolder + "/" + docRef.name+'_' + activeAB.name + sep + imageSuffix+'.jpg');
+                        //     if (saveFile.exists) {
+                        //         saveFile.remove();
+                        //     }
+                        // }
+                    }
+                } else {
+                    // Remove inverted & white logo variation in JPG
+                    for(i=0;i<docRef.artboards.length;i++){
+                        var activeAB = docRef.artboards[i]; // get active AB
+                        var removeJPG = ["inverted","white"];
+                        // for(i=0;i<removeJPG.length;i++){
+                        // if (activeAB.name.indexOf(removeJPG[i].toString())!=-1){
+                        // }
+                        if (activeAB.name.indexOf("inverted")!=-1 || activeAB.name.indexOf("white")!=-1 || activeAB.name.indexOf("pms")!=-1){
+                            var saveFile = File(jpgFolder + "/" + docRef.name+'_' + activeAB.name+'.jpg');
+                            if (saveFile.exists) {
+                                saveFile.remove();
+                            }
+                        }
+                        // if (activeAB.name.indexOf("white")!=-1){
+                        //     var saveFile = File(jpgFolder + "/" + docRef.name+'_' + activeAB.name+'.jpg');
+                        //     if (saveFile.exists) {
+                        //         saveFile.remove();
+                        //     }
+                        // }
                     }
                 }
             }
@@ -1077,20 +1431,20 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
             if (pngFolder != null) {
                 for(var size = 0; size < imageScales.length; size++){
                     var options = new ExportForScreensOptionsPNG24();
-                    options.antiAliasing = pngAntiAliasing(exportInfo[28]); // AntiAliasingMethod.ARTOPTIMIZED;
-                    options.interlaced = stringToBoolean(exportInfo[29]); // true;
-                    if (stringToNumber(exportInfo[30])==0) {
-                        options.transparency = true; //stringToNumber(exportInfo[30]); // true;
+                    options.antiAliasing = pngAntiAliasing(exportSettings[28]); // AntiAliasingMethod.ARTOPTIMIZED;
+                    options.interlaced = stringToBoolean(exportSettings[29]); // true;
+                    if (stringToNumber(exportSettings[30])==0) {
+                        options.transparency = true; //stringToNumber(exportSettings[30]); // true;
                     } else {
                         options.transparency = false;
                     }
                     // https://www.indesignjs.de/extendscriptAPI/illustrator-latest/#ExportForScreensOptionsPNG24.html
-                    if (stringToNumber(exportInfo[30])==1) {
+                    if (stringToNumber(exportSettings[30])==1) {
                         options.backgroundBlack = true; // Black
                     } else {
                         options.backgroundBlack = false; // white
                     }
-                    options.scaleType = options.scaleType = scaleTypeMethod(exportInfo[33]); //ExportForScreensScaleType.SCALEBYWIDTH; // ExportForScreensScaleType.SCALEBYRESOLUTION;
+                    options.scaleType = options.scaleType = scaleTypeMethod(exportSettings[33]); //ExportForScreensScaleType.SCALEBYWIDTH; // ExportForScreensScaleType.SCALEBYRESOLUTION;
                     // options.scaleTypeValue = expResolution;
                     // 2023-05-17 set it fixed value for now. need to extend export sizes
                     options.scaleTypeValue = Number(imageScales[size]);//1000;
@@ -1102,29 +1456,46 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
                     // options.scaleTypeValue = 72;
 
                     app.activeDocument.exportForScreens(pngFolder, ExportForScreensType.SE_PNG24, options, whatToExport, fileNamePrefix);
-                    if (stringToBoolean(exportInfo[31])==true){
+                    if (stringToBoolean(exportSettings[31])==true){
                         for(i=0;i<docRef.artboards.length;i++){
                             var activeAB = docRef.artboards[i]; // get active AB
                             var saveFile = File(pngFolder + "/" + docRef.name+'_'  + activeAB.name+'.png');
                             if(saveFile.exists){
                                 var sep = separator == "dash" ? '-' : '_';
-                                var imageSuffix = imageScales[size].toString()+exportInfo[34].toString();
+                                var imageSuffix = imageScales[size].toString()+exportSettings[34].toString();
                                 saveFile.rename(docRef.name+'_' + activeAB.name + sep + imageSuffix+'.png')
                                 // saveFile.rename(docRef.name+'_' + activeAB.name + sep + imageScales[size]+'px.png')
                                 // saveFile.rename(pngFolder + "/" + docRef.name+'_' + activeAB.name + sep + imageScales[size]+'px.png')
-                                // saveFile.rename(pngFolder + "/" + docRef.name+'_' + activeAB.name+sep +Number(imageScales[size])+exportInfo[34]+'.png')
+                                // saveFile.rename(pngFolder + "/" + docRef.name+'_' + activeAB.name+sep +Number(imageScales[size])+exportSettings[34]+'.png')
                                 // saveFile.rename(pngFolder + "/" + docRef.name+'_' + activeAB.name + sep + imageSuffix + '.png')
+                            }
+                            if (activeAB.name.indexOf("pms")!=-1){
+                                var saveFile = File(pngFolder + "/" + docRef.name+'_' + activeAB.name + sep + imageSuffix+'.png');
+                                if (saveFile.exists) {
+                                    saveFile.remove();
+                                }
+                            }
+                        }
+                    } else {
+                        // Remove pms logo variation in PNG
+                        for(i=0;i<docRef.artboards.length;i++){
+                            var activeAB = docRef.artboards[i]; // get active AB
+                            if (activeAB.name.indexOf("pms")!=-1){
+                                var saveFile = File(pngFolder + "/" + docRef.name+'_' + activeAB.name+'.png');
+                                if (saveFile.exists) {
+                                    saveFile.remove();
+                                }
                             }
                         }
                     }
                 }
-
             }
         }
         // }
 
         // reopenDocument(document, afile);
         lyrLogoInfo.visible = true;
+        lyrPreviewBackdrop.visible = true;
 
         // Set create subfolders for exportforscreens back to its setting
         app.preferences.setIntegerPreference ('plugin/SmartExportUI/CreateFoldersPreference', creatSubFolders);
@@ -1135,7 +1506,6 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
         for (var i = 0; i <= app.activeDocument.artboards.length; i++) {
             if (i % 4 !== 0) {
                 newArtboards += i;
-                alert(newArtboards)
                 if (i !== app.activeDocument.artboards.length - 1)
                     newArtboards += ', '
             }
@@ -1224,7 +1594,6 @@ function stringToBoolean(string){
 
 function stringToNumber(string){
     try {
-        // alert(parseInt(string)+" "+string)
         return parseInt(string)
     } catch (e) {
         alert("stringToNumber() error: "+e)
@@ -1498,14 +1867,17 @@ if (!infoColorRGB.exists) {
 }
 
 function setLogoInfo(docRef, logotype, colors, initArtboardsLength, steps) {
+    appendLog('', logFile);
     appendLog('setLogoInfo()', logFile);
-    appendLog(initArtboardsLength, logFile);
+    appendLog(docRef+' \n\t\t\t '+logotype+' \n\t\t\t '+colors+' \n\t\t\t '+initArtboardsLength+' \n\t\t\t '+steps, logFile);
+    appendLog("initArtboardsLength "+initArtboardsLength, logFile);
+
     // Add logo info
     // initArtboardsLength = app.activeDocument.artboards.length;
     // var artboardsNames = ['grayscale', 'black', 'white'];
     docRef.artboards.setActiveArtboardIndex(0);
     docRef.selectObjectsOnActiveArtboard();
-
+    
     // If extra artboards are added later, add them to color list
     abLength = docRef.artboards.length;
     // Add extra colors names for colorinfo
@@ -1513,13 +1885,13 @@ function setLogoInfo(docRef, logotype, colors, initArtboardsLength, steps) {
         for (abindex = colors.length+1; abindex < abLength; abindex++) {
             color = docRef.artboards[abindex].name.split('-');
             // only add extra added colors here
-            // alert(color[i].toString())
-            // alert(color[i].toString() != "fullcolor")
-            // alert(colors.indexOf(color[1]))
-            // alert(colors.indexOf(color[1])==-1)
+            
+            
+            
+            
             if ((colors.indexOf(color[1])==-1) && (color[1]!= "fullcolor")){
-                // alert(colors)
-                // alert(color[1])
+                
+                
             // if (color not in colors){ doesnt work in extendscript
                 colors.push(color[1]);
             }
@@ -1564,6 +1936,9 @@ function setLogoInfo(docRef, logotype, colors, initArtboardsLength, steps) {
 }
 
 function addLogoInfo(docRef, layerName, posX, posY, justDir) {
+    appendLog('setLogoInfo()', logFile);
+    appendLog(layerName+' \n\t\t\t '+posX+' \n\t\t\t '+posY+' \n\t\t\t '+justDir, logFile);
+
     // find existing layers or add new one
     var x = convertToPoints(posX);
     var y = convertToPoints(posY);
@@ -1601,6 +1976,8 @@ function addLogoInfo(docRef, layerName, posX, posY, justDir) {
 // Source: https://community.adobe.com/t5/photoshop/photoshop-javascript-open-files-in-all-subfolders/m-p/5162230
 ///////////////////////////////////////////////////////////////////////////////   
 function scanSubFolders(setDest, mask) {
+    appendLog('scanSubFolders()',logFile);
+
     var sFolders = [];
     var allFiles = [];
     sFolders[0] = setDest;
@@ -1624,19 +2001,22 @@ function scanSubFolders(setDest, mask) {
 }
 
 function setDestFolder() {
+    appendLog('setDestFolder()', logFile);
+
     run = false;
     // setDest = [];
     setDest = Folder.selectDialog();
-    // alert(setDest)
-    // alert(typeof(setDest))
     if (setDest) {
         // setDest = [setDest];
         run = true;
+        appendLog(setDest, logFile);
     }
     return [run, setDest]
 }
 
 function setDestFolderFromJson(setDestFromJson) {
+    appendLog('setDestFolderFromJson()',logFile);
+
     run = false;
     if (setDest) {
         // setDest = Object(setDest);
@@ -1651,6 +2031,7 @@ function setDestFolderFromJson(setDestFromJson) {
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI
         // setDest = decodeURI(setDest);
         run = true;
+        appendLog(setDest,logFile);
     }
     return [run, setDest]
 }
@@ -1662,6 +2043,8 @@ function setDestFolderFromJson(setDestFromJson) {
 // Return: cleans destination folder of all sub folders and files
 ///////////////////////////////////////////////////////////////////////////////   
 function clearDestFolder() {
+    appendLog('clearDestFolder()',logFile);
+
     setDest = Folder(setDest);
     // Find temp files windows, need to be deleted as well
     filter_files = /\.(jpg|psd|png|svg|ai|pdf|eps|DS_STORE)$/i;
@@ -1690,6 +2073,7 @@ function clearDestFolder() {
                 var delFolder = Folder(delFolders[1][l - 1]);
                 delFolder.remove();
             }
+            appendLog(clearFolder, logFile);
             return true
         }
     }
@@ -1702,13 +2086,15 @@ function clearDestFolder() {
 // Return: opens folder location in OS
 ///////////////////////////////////////////////////////////////////////////////   
 function openDestFolder() {
-    // setDest = Folder("c:/users/romboutversluijs/desktop/export/logo packer/surfscool");
+    appendLog('openDestFolder()',logFile);
+
     run = false;
     setDest = Folder(setDest);
     if (setDest.exists) {
         //https://extendscript.docsforadobe.dev/file-system-access/folder-object.html?highlight=open%20folder
         setDest.execute();
         run = true;
+        appendLog('setDest',logFile);
     }
     return run
 }
@@ -1719,14 +2105,26 @@ function openDestFolder() {
 // Return: opens folder location in OS
 ///////////////////////////////////////////////////////////////////////////////   
 function openLog() {
-    // setDest = Folder("c:/users/romboutversluijs/desktop/export/logo packer/surfscool");
-    logFile = Folder(logFile);
-    if (logFile.exists) {
-        //https://extendscript.docsforadobe.dev/file-system-access/folder-object.html?highlight=open%20folder
-        logFile.execute();
-        run = true;
+    appendLog('openLog()',logFile);
+
+    try {
+        logFile = File(logFile);
+        if (logFile.exists) {
+            appendLog('logFile',logFile);
+            //https://extendscript.docsforadobe.dev/file-system-access/folder-object.html?highlight=open%20folder
+            logFile.execute();
+            run = true;
+        }
+        return run
+    } catch(e) {
+        var title = "Warning!";
+        var msg1 = "Can't open log file.";
+        var msg2 = false;
+        var okButton = "OK";
+        var okStr = "OK";
+        var cancelStr = "";
+        scriptAlert(title, msg1, msg2, true, true, okStr, cancelStr, warningIcon64);
     }
-    return run
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1737,7 +2135,6 @@ function openLog() {
 // Source: Specify CEP panel
 ///////////////////////////////////////////////////////////////////////////////   
 function convertToPoints(value) {
-    // alert(app.activeDocument.rulerUnits)
     switch (app.activeDocument.rulerUnits) {
         case RulerUnits.Picas:
             value = new UnitValue(value, "pc").as("pt");
@@ -1870,17 +2267,20 @@ var toPixels = function(v) {
 // Function: resizeLogo
 // item = docRef.selection[x];
 ///////////////////////////////////////////////////////////////////////////////
-function resizeLogo(item, autoResize, exportInfo) {
+function resizeLogo(item, autoResize, exportSettings, scaleMethod) {
+    appendLog('resizeLogo()',logFile);
+    appendLog(item+' \n\t\t\t '+autoResize+' \n\t\t\t '+exportSettings+' \n\t\t\t '+scaleMethod, logFile);
+
     var docRef = app.activeDocument;
     var board = docRef.artboards[docRef.artboards.getActiveArtboardIndex()];
     var right = board.artboardRect[2];
     var bottom = board.artboardRect[3];
     
     // convert string list of josn settings back to object
-    exportInfo = exportInfo.split(',')
-    var scaleSize = exportInfo[32].split('-');
-    var widthHeight = exportInfo[33];
-    // alert(Math.max(scaleSize))
+    exportSettings = exportSettings.split(',')
+    var scaleSize = exportSettings[32].split('-');
+    var widthHeight = exportSettings[33];
+    
     // Get largest export size and use for AutoResize
     var largest = Number(scaleSize[0]);
     for (i=0; i<scaleSize.length; i++){
@@ -1888,41 +2288,57 @@ function resizeLogo(item, autoResize, exportInfo) {
             largest=Number(scaleSize[i]);
         }
     }
-    // alert(largest)
-    // if (item.width <= 70 || item.height <= 70){
-    // _scaleW = 70 / docRef.selection[x].width;
-    // _scaleH = 70 / docRef.selection[x].height;
-    // resize(docRef.selection[x], (100+_scaleW));
-    // alert(board.name+" design is to small for export, minimal req. 70 x 70px "+ docRef.selection[x].width+" "+docRef.selection[x].height)
-    if (autoResize != "autoresize") {
-        // scaleItems = confirm("For this workflow, logo's need to have a minimal of 70px widht or height. Do you want to upscale it?");
-        var title = "Logo size warning";
-        var msg1 = "For this workflow, logo's need to have a minimal width or height of 70px. Do you want it to be to upscaled?";
-        var msg2 = false;
-        var okStr = "Yes";
-        var cancelStr = "No";
-        scriptAlert(title, msg1, msg2, true, true, okStr, cancelStr, aiIcon64);
-        scaleItems = scriptAlertResult;
-    } else {
-        scaleItems = true;
+
+    if(scaleMethod=="upscale"){
+        // }
+        
+        // if (item.width <= 70 || item.height <= 70){
+        // _scaleW = 70 / docRef.selection[x].width;
+        // _scaleH = 70 / docRef.selection[x].height;
+        // resize(docRef.selection[x], (100+_scaleW));
+        
+        if (autoResize != "autoresize") {
+            // scaleItems = confirm("For this workflow, logo's need to have a minimal of 70px widht or height. Do you want to upscale it?");
+            var title = "Logo size warning";
+            var msg1 = "For this workflow, logo's need to have a minimal width or height of 70px. Do you want it to be to upscaled?";
+            var msg2 = false;
+            var okStr = "Yes";
+            var cancelStr = "No";
+            scriptAlert(title, msg1, msg2, true, true, okStr, cancelStr, aiIcon64);
+            scaleItems = scriptAlertResult;
+        } else {
+            scaleItems = true;
+        }
+        // scaleItems=confirm("The logo is smaller than minimal of 70px. Do want to scale it to the minimal requirements? For Jpg files types, this is needed using this workflow.?");
+        // scaleItems=true;
+        if (scaleItems) {
+            // resize to 50 mm
+            // carlos canto
+            // https://community.adobe.com/t5/illustrator/illustrator-script-that-compares-object-width-to-length/td-p/10984755?page=1
+
+            var idoc = app.activeDocument;
+            // var sel = idoc.selection[0];
+            var sel = item;
+            if (widthHeight!=1) var max = Math.max(sel.width, sel.height);
+            if (widthHeight==1) var max = Math.min(sel.width, sel.height);
+            
+            // var targetSize = 50*72/25.4; // to mm
+            // var targetSize = 70; // to px
+            var targetSize = largest / 10 + 200;// 200; // to px
+            var percent = targetSize / max * 100;
+            sel.resize(percent, percent);
+        }
     }
-    // scaleItems=confirm("The logo is smaller than minimal of 70px. Do want to scale it to the minimal requirements? For Jpg files types, this is needed using this workflow.?");
-    // scaleItems=true;
-    if (scaleItems) {
+    if(scaleMethod=="downscale"){
         // resize to 50 mm
         // carlos canto
         // https://community.adobe.com/t5/illustrator/illustrator-script-that-compares-object-width-to-length/td-p/10984755?page=1
 
         var idoc = app.activeDocument;
-        // var sel = idoc.selection[0];
         var sel = item;
-        if (widthHeight!=1) var max = Math.max(sel.width, sel.height);
-        if (widthHeight==1) var max = Math.min(sel.width, sel.height);
-        
-        // var targetSize = 50*72/25.4; // to mm
-        // var targetSize = 70; // to px
-        var targetSize = largest / 10 + 200;// 200; // to px
-        var percent = targetSize / max * 100;
+        var max = Math.max(sel.width, sel.height);
+        var targetSize = 200*72/25.4;
+        var percent = targetSize/max*100;
         sel.resize(percent, percent);
     }
     // Center on Artboard
@@ -1933,7 +2349,12 @@ function resizeLogo(item, autoResize, exportInfo) {
         ];
     } catch (e) {
         appendLog('Resize logo Center it ' + e, logFile);
-        alert(e);
+        var title = "Warning!";
+        var msg1 = e;
+        var msg2 = "";
+        var okStr = "Yes";
+        var cancelStr = "No";
+        scriptAlert(title, msg1, false, true, true, okStr, cancelStr, warningIcon64);
     }
     resizeArtboard(item);
 }
@@ -1945,6 +2366,8 @@ function resizeLogo(item, autoResize, exportInfo) {
 // http://556.sub.jp/scriptclip/highlight/135
 ///////////////////////////////////////////////////////////////////////////////
 function resizeArtboard(sel) {
+    appendLog('resizeArtboard()',logFile);
+    appendLog(sel,logFile);
 
     var boundssel = 1; // 0: geometricBounds, 1: visibleBounds
     var modesel = 0; // 0: Fit active artboat, 1: Make a new artboard.
@@ -1962,7 +2385,7 @@ function resizeArtboard(sel) {
         l = sel.length;
 
     // //
-    // alert(l < 1)
+    
     // if (l < 1) return errorEvent(0);
     var a = sel[bounds[boundssel]],
         b = false;
@@ -1992,7 +2415,12 @@ function resizeArtboard(sel) {
 function errorEvent(errorNumber) {
     switch (errorNumber) {
         case 1:
-            alert("There is an artboard of the same size.");
+            var title = "Warning!";
+            var msg1 = "There is an artboard of the same size.";
+            var msg2 = "";
+            var okStr = "Yes";
+            var cancelStr = "No";
+            scriptAlert(title, msg1, false, true, true, okStr, cancelStr, warningIcon64);
         default:
             return false;
     }
@@ -2004,9 +2432,12 @@ function errorEvent(errorNumber) {
 // Add margins to Artboards
 // 
 ///////////////////////////////////////////////////////////////////////////////
-function addMarginToArtboard(marginVal, margintype, allArtboards, logotype, colors, mediaType) {
+function addMarginToArtboard(marginVal, margintype, allArtboards, logotype, colors, mediaType, colorSettings) {
+    appendLog('', logFile);
     appendLog('addMarginsToArtboard()', logFile);
-    appendLog(initArtboardsLength, logFile);
+    appendLog(marginVal+' \n\t\t\t '+margintype+' \n\t\t\t '+allArtboards+' \n\t\t\t '+logotype+' \n\t\t\t '+colors+' \n\t\t\t '+mediaType+' \n\t\t\t '+colorSettings, logFile);
+    appendLog("artboardLength "+initArtboardsLength, logFile);
+
     run = false;
     if (margins == "") {
         run = "margins";
@@ -2055,12 +2486,17 @@ function addMarginToArtboard(marginVal, margintype, allArtboards, logotype, colo
                 run = true;
             }
         } else {
-            alert('Open a document before running this script', 'Error running FitArtboardToArt.jsx');
+            var title = "Warning!";
+            var msg1 = "Open a document before running this script.";
+            var msg2 = "";
+            var okStr = "Yes";
+            var cancelStr = "No";
+            scriptAlert(title, msg1, false, true, true, okStr, cancelStr, warningIcon64);
             run = false
         }
         
          // get list of colors
-        var colorList = getLogoColorList(colors, mediaType);
+        var colorList = getLogoColorList(colors, mediaType, colorSettings);
         var colors = colorList[0];
         var artboardsNames = colorList[1];
 
@@ -2100,6 +2536,9 @@ function addMarginToArtboard(marginVal, margintype, allArtboards, logotype, colo
 //
 ///////////////////////////////////////////////////////////////////////////////
 function addMargins(docRef, activeAB, margins, margintype, count) {
+    appendLog('addMargins()',logFile);
+    appendLog(docRef+' \n\t\t\t '+activeAB+' \n\t\t\t '+margins+' \n\t\t\t '+margintype+' \n\t\t\t '+count, logFile);
+
     var abBounds = activeAB.artboardRect; // get bounds [left, top, right, bottom]
     // var selObjBounds = docRef.pageItems[i].visibleBounds;
     docRef.selectObjectsOnActiveArtboard();
@@ -2134,6 +2573,8 @@ function addMargins(docRef, activeAB, margins, margintype, count) {
 //
 ///////////////////////////////////////////////////////////////////////////////
 function deleteUnusedPanelItems() {
+    appendLog('deleteUnusedPanelItems()', logFile);
+
     swatchesCleaned = false;
     try {
         docName = app.activeDocument.name;
@@ -2143,7 +2584,7 @@ function deleteUnusedPanelItems() {
         return run
     }
     for (i = 0; i < clearedItemsDocs.length; i++) {
-        if (clearedItemsDocs.toString().indexOf(docName) === -1) {
+        if (clearedItemsDocs.toString().indexOf(docName) === -1){
             app.doScript("Delete Unused Panel Items", "Default Actions")
             swatchesCleaned = true;
             clearedItemsDocs.push(docName)
@@ -2160,6 +2601,8 @@ function deleteUnusedPanelItems() {
 //
 ///////////////////////////////////////////////////////////////////////////////
 function deleteUnusedSwatches() {
+    appendLog('deleteUnusedSwatches()', logFile);
+
     try {
         var docRef = app.activeDocument;
         var items = docRef.pageItems,
@@ -2199,7 +2642,7 @@ function deleteUnusedSwatches() {
             arr.push(sw.getSelected()[0]);
             path.remove();
         }
-        // alert(len)
+        
         str = arr.toString();
         for (j = slen - 1; j > 1; j--) {
             RegExp(sw[j].name).test(str) || sw[j].remove();
@@ -2225,6 +2668,10 @@ function deleteUnusedSwatches() {
 //
 ///////////////////////////////////////////////////////////////////////////////
 function cleanupLogos(clientName) {
+    appendLog('', logFile);
+    appendLog('cleanupLogos()', logFile);
+    appendLog(clientName, logFile);
+
     var colorgroup = "";
     try {
         docRef = app.activeDocument;
@@ -2281,10 +2728,10 @@ function cleanupLogos(clientName) {
         if (app.documents.length > 0) {
             var title = "Apply to all artboards";
             var msg1 = "Would you like to clean all the artboards at once?"; //"Yes - All Artboards \nNo - Active Artboard";
-            var msg2 = false;
+            var msg2 = "";
             var okStr = "Yes";
             var cancelStr = "No";
-            scriptAlert(title, msg1, msg2, true, true, okStr, cancelStr, aiIcon64);
+            scriptAlert(title, msg1, false, true, true, okStr, cancelStr, aiIcon64);
             allArtboards = scriptAlertResult;
             // var allArtboards = Window.confirm("Yes - All Artboards \nNo - Active Artboard", false, title);
             if (allArtboards) {
@@ -2306,11 +2753,11 @@ function cleanupLogos(clientName) {
             var title = "Error running clean logos";
             var msg1 = "Open a document before running this script?";
             var msg2 = false;
-            var okStr = "Exit";
-            var cancelStr = "No";
+            var okStr = "OK";
+            var cancelStr = "";
             scriptAlert(title, msg1, msg2, true, false, okStr, cancelStr, aiIcon64);
             donothing = scriptAlertResult;
-            // alert('Open a document before running this script', 'Error running clean logos');
+            
             run = false
         }
     }
@@ -2330,8 +2777,7 @@ function cleanLogoItem(docRef, clientName) {
 
     var activeAB = docRef.artboards[docRef.artboards.getActiveArtboardIndex()];
     // check if selection is group > if not results are bad
-    // alert(app.activeDocument.selection[0].typename == "GroupItem")
-    // alert(!app.activeDocument.selection[0].typename == "GroupItem")
+
     // if(!app.activeDocument.selection[0].typename == "GroupItem")alert("Please make group of logo "+activeAB.name)return
 
     app.executeMenuCommand("group");
@@ -2559,11 +3005,18 @@ function act_ExitIsolateMode() {
 //
 ///////////////////////////////////////////////////////////////////////////////
 function deleteEmptyLayers() {
+    appendLog('deleteEmptyLayers', logFile);
+
     try {
         var idoc = app.activeDocument;
     } catch (e) {
         appendLog('deleteEmptyLayers ' + e, logFile);
-        alert('Open a document and try again');
+        var title = "Warning!";
+        var msg1 = "Open a document before running this script.";
+        var msg2 = "";
+        var okStr = "OK";
+        var cancelStr = "";
+        scriptAlert(title, msg1, false, true, false, okStr, cancelStr, warningIcon64);
         return
     };
 
@@ -2577,6 +3030,9 @@ function deleteEmptyLayers() {
 
 // return empty layers, except the ones that have sublayers with objects
 function getEmptyLayers(container, arr) {
+    appendLog('getEmptyLayers', logFile);
+    appendLog(container+' \n\t\t\t\s'+arr, logFile);
+
     var layers = container.layers;
 
     for (var k = 0; k < layers.length; k++) {
@@ -2659,48 +3115,6 @@ function Timer() {
 }
 
 
-///////////////////////////////////////////////////
-// Object: Logger
-// Usage: Logs all outputs feed
-// Input: Text file
-// Return: Date - Time - Data be marked for log
-// Usage: appendLog('Logitem.' + logitem, logFile);
-// Autohor: Mike Voropaev, 2019.
-// Source: https://www.youtube.com/channel/UCbX5bb9yeLw8V9emYE-fOXw
-///////////////////////////////////////////////////
-function startLog(targetPath) {
-    // logpath = getSystemPath(SystemPath.EXTENSION);
-    var userData = Folder.userData;
-    var myDocuments = Folder.myDocuments;
-    var extension = Folder.extension;
-    var commonFiles = Folder.commonFiles;
-    var application = Folder.application;
-    if (!userData || !userData.exists) {
-        userData = Folder("~");
-    }
-    var logopackerFolder = new Folder(userData + "/Adobe/CEP/Extensions/logo-packer-main");
-
-    if (useLogging) {
-        var logFile = File(logopackerFolder + '/.logo-packer.log');
-        logFile.encoding = 'UTF8';
-        // Remove > we keep log small
-        // if (logFile.exists)
-        // 	logFile.remove();
-
-        logFile.open('w'); // W overwrites - A appends
-
-        // appendLog("extension "+extension, logFile);
-        // appendLog("myDocuments "+myDocuments, logFile);
-        // appendLog("commonFiles "+commonFiles, logFile);
-        // appendLog("application "+application, logFile);
-        appendLog("", logFile);
-        appendLog('____________________________', logFile);
-        appendLog(logFile, logFile);
-        // appendLog(logpath, logFile);
-        return logFile
-    }
-}
-
 function loadTextFile(relPath) {
     var script = new File($.fileName);
     var textFile = new File(script.path + '/' + relPath);
@@ -2710,27 +3124,6 @@ function loadTextFile(relPath) {
 
     return str.split('\n');
 }
-
-function appendLog(message, file) {
-
-    if (useLogging) {
-        var time = new Date();
-        file.write(('0' + time.getHours()).slice(-2) + ':' + ('0' + time.getMinutes()).slice(-2) + ':' + ('0' + time.getSeconds()).slice(-2));
-        file.write('  |  ' + message);
-        file.writeln('');
-    }
-}
-
-function _zeroPad(val) {
-    return (val < 10) ? '0' + val : val;
-}
-
-// logFile = startLog(Folder.desktop+'/Export/Logo Packer');//app.activeDocument.path + "/")
-logFile = startLog(); // userdata folder
-var date = new Date();
-appendLog('New log: ' + _zeroPad(date.getDate(), 2) + '-' + _zeroPad(date.getMonth() + 1, 2) + '-' + date.getFullYear(), logFile);
-appendLog("", logFile);
-
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -2742,8 +3135,9 @@ appendLog("", logFile);
 //
 ///////////////////////////////////////////////////////////////////////////////
 function newBaseDoc(clientName, docType) {
-    appendLog('Add Basedoc*()', logFile);
+    appendLog('Add Basedoc()', logFile);
     appendLog(docType, logFile);
+
     try {
         if (clientName == "") {
             return run = "clientname"
@@ -2763,7 +3157,7 @@ function newBaseDoc(clientName, docType) {
             docPreset.width = 283.465; // 1 pt > 2.83465mm
 		    docPreset.height = 283.465;
             // docPreset.units = RulerUnits.Pixels;
-            docPreset.units = RulerUnits.Millimeters;
+            // docPreset.units = RulerUnits.Millimeters;
             // docPreset.units = RulerUnits.Points;
             docPreset.colorMode = docType == 'cmyk' ? DocumentColorSpace.CMYK : DocumentColorSpace.RGB;
             app.documents.addDocument("", docPreset);
@@ -2804,7 +3198,7 @@ function newBaseDoc(clientName, docType) {
                 var abT = mainArtboard.artboardRect[1];
                 var abR = mainArtboard.artboardRect[2];
                 var abB = mainArtboard.artboardRect[3];
-                // alert(abT+" "+abL+' '+abR+' '+abB)
+                
 
                 docRef.artboards.add([abR + 100, abT, abR + 100 + (abR - abL), abB]);
                 // docRef.artboards[initArtboardsLength + i].name = artboardsNames[i];
@@ -2829,10 +3223,17 @@ function newBaseDoc(clientName, docType) {
 //
 ///////////////////////////////////////////////////////////////////////////////
 function getExtensionRootPath() {
+    appendLog('getExtensionRootPath', logFile);
+
     extensionRoot = $.fileName.split('/').slice(0, -2).join('/') + '/';
     var folderPath = extensionRoot;
     if (!Folder(folderPath).exists) {
-        alert("There is no Root folder with that name", "Warning")
+        var title = "Warning!";
+        var msg1 = "There is no Root folder with that name.";
+        var msg2 = "";
+        var okStr = "OK";
+        var cancelStr = "";
+        scriptAlert(title, msg1, false, true, false, okStr, cancelStr, warningIcon64);
     } else {
         return folderPath
     }
@@ -2871,18 +3272,19 @@ var psIcon32 = "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00 \x00\x00\x00 \
 
 var psIcon64 = "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00@\x00\x00\x00@\b\x02\x00\x00\x00%\x0B\u00E6\u0089\x00\x00\x00\x19tEXtSoftware\x00Adobe ImageReadyq\u00C9e<\x00\x00\x03\x1DIDATx\u00DA\u00ECZ=l\u00D3@\x18\u00BD\u00B32FY\u00A9D'\u009A\u0085,\u00ED\u00D6JE\fH-\x0B[&\u00BAT]\u00CA\u00C0P\x15\u00A90u\u00A1,\x05\u00A9\x12\x03\bX*\u0096l\u00D9XJ\u00A5\x0E\u0088J\u00EDF\x07\u00D2%0\u00B5R\u00BB\u0086\u00B0\u00FAxW\x07\u00D7\u00BE\x1F\u00F7\x12\u00DB\u00B1O\u00BAS\"\u00E5\u00C7\u00B1\u00EF\u00DD\u00F7\u00BD\u00F7\u00BD\u00EF\x1C\u00EA\u00FDd\u00C4\u00E6\u00E1\x11\u00CB\u0087\u00F5\x00*\u00E1+\u00FF\u00C1\x1D\u009B\x16\u00FE\u00E0\u00B7K!\x07\u00C0\x01p\x00\x1C\x00\x07\u00C0\x01p\x002\u00F4B\t\u00836WH\u00B5\u0096tD\u00B7\u00C3~\u009D\u0092\u008B\u00B3\u00B2\x02x\u00BAy\u00F31x^\u009C\u00B1\u00BD6k\u00EF\u0092~\u00CF\u00CE\x14\u009A\u0098\u00A4\u00CBk^\u00EB\x1B}\u00D8\u00B4\u0099\x03\u00D5\x1A}\u00F1\x06\x0F\u00BBI\u008C p\u00E6\u0094\u0084\x03\u00E2\u00B8\u00CA\u00F5\u00EB\u00B7\u00F5\x06\u009D\u009E\u0095Y\x0E\u00E6\u00B0\u00C3\u00FD\u00BC\u0099=\x12\u0080\u00CBs\u00F6\u00F9m\u00F4\x03\u0086\u00B4i\u00AE\u0080\x00\"\u0086\u00E55\u00B6\u00BDQ>\x00\u00F2\u00E8\u00F78\u00A4~O\u00D0+:\u00BFp\u00F3\u009E\x07\x02\u00F8?z\u00AC\u00DB\x19V\u00C1*\x19.\x06\x04\u0094\u00EBO\u00BD\x11#\u00F4\u00CC\x1C\u00FBq\u00A4 \u00C9\u00CC\x1CA\u00D0\u00E6\x17D-\u00C6Z\u009C\x1C\u0093\u00F6\u00AE\u00F2W\u00F9\x02\u00E0\x18\u00F6\u00DA4\n\x00c\u00EA.\x11\u00A6R\u00ADy[\x1F\th\u00A3\x131\u00A0\u00AA\u00D6\u008A\x01@P\u008F\u00A5\t\u0089\u00B3\u00DFi\x11\x01\u00A4E^\u0088\x13=\u00BB\u00D9\u00E7\x10\u0081[\u00B7e~\u00C7\u00D2C.\x0E\u00D0\u00D9\u00CB\u00F3\u00C1k]^\u008D\x0F\x00\u00A8\u00A9O**\u00CD\u008F{\u00A7\u00B8\u00CEr\x02\u00DC[\u00A4\x13\u0093E\x00\u0080 J.\u0088+c\u00E4\x00\u00F1[\u00A9J\u00F0\u00DAw\u00B8\u00CF\n\u00E0@\u00BD\u00E1=\x7F\u00AD\u0098M\u00B2\u00AE\x1B\u00AFt\u008E\x00\u00A0\u00E8\u00A8_jm\u0081\u00B5\x16\u00D2]\u00B8\u00FC\u00CB\x0F)9=R\nM\u00CF\u0086{\u00ABI5\x01\u0099\x10\u00D7rT(*\u00C7\u00ED\u00D3\x17T\u00F1\u0091\u00BB\u0088\u00DCd\x14=\u009A\u00EC\u0082\x10\x01TY\u0095\u00B6\u00F2.B\u00B2R\u00C5\x0189\u00F6\u009F-)W\u00D4\x7F\u00B7\u00A5^i(l\x00C\u00D6\u00B1\u00B1\x02\u0080\u00D3\u00DE\u00DE\u00F0\u00D7\x1Fk\u00F3\u00A1\u00DB\u00D1a\x1B\u00F4t;\u00AD\u00A1\x1A\u0089Jf\u00F3Fn|\u00FF\u00CAe\u00C7 \u00BB\u00FC\u00D5G\x1EZ6M\u00D9\n,-\x13\x04@'!\u00E1M\u00BE\u0084;4\"e\u0091\u00DF\u00EF_\rx\u0089\u00B4\x1E\u00B5e\u00E1\u00F2\x05\u00E5\u00D5(\u00A9\u00BFt?\u00E1\u00CC\u00E9\u00EE\u00D0\u00FC\u00FD\x03y\t\x1Ei\x1A.\u00FC\x1C\u00B3\u00E4\\We\u0094a\"\x15\u00BF\u00B1\x057\u00C1\x17[R'jV\x1F\u00CA\u00B13\u00D7\u00EF\u00F9\u009BO\u00C4`\u009A\x19\u00BB\u00F1\x02@\u00BA\u00EBv\u00F8\u0090E\u00A1'-m?\x00\u00AB\u0087\u00BA\u00CB\r\u009F\f\x03\u009F\u00A0w\u008B\x17\u0093\"\u00EC\u00B4A\x10\u00F8\u00B6W\u00E0\u00F3B\u00A3\u008A*&\u00A1\u008A\u00D9\u00D8\x12\x01\u0088\u00FA\u00FExG/\u0093\u00DB\x1E\x12\u00AB68\u0088Y\x04\u00CA\b\u0080\u00B7i\u00B0LYZ\tHD\u00F2\u00FD\x01\u00F3u\x05\x07\u00AEvM\u00B4\x1E\x16\u00D6\u00DA\u00C4\u008F\fe%\u00F8U#\x05?\u008D}\u00B8\u00DE\u00D5\u0082\u00E6Da\x04n\u00CA\u00F8\u00B4\u00A1\u00950\x03P\u00BE\u00E1\u00FE\u00AD\u00E2\x008\x00\x0E\u0080\x03\u00E0\x008\x00\x0E@&}\u0085\u00FB\u00F3\u00B7\x03\u0090n\u00FC\x13`\x00\u00F2\x14>Qh\u00FA\u00DB\u0093\x00\x00\x00\x00IEND\u00AEB`\u0082"
 
+warningIcon64 = "\u0089PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00@\x00\x00\x00@\b\x06\x00\x00\x00\u00AAiq\u00DE\x00\x00\x00\x19tEXtSoftware\x00Adobe ImageReadyq\u00C9e<\x00\x00\x04\u00B5IDATx\u00DA\u00EC[ML\x13A\x14\u009EN\u00A9T\bX\u0094D\x05\u0085E\u008C\x01\x0E\u00A4\u00C4\u0083$^\u00B6\x07\u00E3\u00C5\u00C4\u00AAA\u00D4S\u00B9y\u00A3\x17\u00CF\u00CB\u00C1{\u00E3\u00C9c\u00BDh\u0082\x7F\u0091\u00A3\u00F1\x00\u00DE\u00E0`$&\x1A.\u0084\x06C\u00D4\x04c\u00A1!\u0092\x10\u0088\u00FB\u00EA\u00EC0\x1D\u00A6\u00BB\u00B3\u00DD\u00E9\u00F6\u00F7K6\u00BB\u00DD\u009D\u009D\u00DDy\u00EF\u00CD{\u00DF\u00BC\u00B7E\u00A8\u0089&\u009A\u00A8\x14\u00DE\u00CE\u00BEL\u00C2V\u00C9w\u00C0\x15\x1C\u00FC\u008C\u00B9K\u00C1F\u008E+\u0082@\u0085\x06\u00AF\u0099\u00BB5\u00EE\u00F4\u00C0\u00ED\u00C9\u00BB\u0099F\u00B1\x00C\u00F2\\\u00FDY\u0080\u00A9}\u00DD\u00DC\u00CD\x17\u00B9\x1C3\u00AD`\u00A1\u00DE-\u0080j\u00BA\u00BB#\u0093\u00DF*i\x05\u00D8g\u00ED\u00C7\u00CD\u009Dn\u00FD\x1E\u00EE\u00FD\u0098\u00DF\x18\u00E8\u00A4M\u00DDZ@\u00CA:\u00E8\u00EB^\u00A6\x16\x00\u00C7\u00A26u%\x00\x12\u00EA4\u00AA\u00FD\u009EC\u00CD\u00B3\u00C7\u00D0\u00C6\u00CF\u00B0\u0088}\x1A|\u00C4\u00DCM\u00B3\u00A6\u00DF\u00D6\u009A\u00A5\u00D7\u00E1\u0098\u009B\n\u00D3\u00E4\u009E\u00BA\u00B1\x00pn\u00F9\x01\u0085\u0082\u00BBh\u00F0\u00F4\u00E2\u0091\x06p\x0E\u00AE\x11D\u00FCr\u0088\u00D8\x07\u00ED\u0083\u00D9S\u00BA;\u00DA\u00F7\u009E\x1D(\x05\u009C\u0083k\f\u0092\u00E4\u00DE\u009A\u00B7\u0080\x14k\u00EA\u009C\u00C3+\x00\\c\u00A7\u0086\x1F\x0E\x11\u0097Y\u00FB\x10\u00F2hX\u00BB<0\u00E7x\x0F\u00D7&N\u00FA\u00A8Y\x0BH\u00D9\u0090\x1E!\x04\u00EDR5)\x00Ss\ts\x17e\u00E7\u00BE,\u00B8\u00B6Q\u00D2W\u00ED\u00AC\x05H\b\u00FBl\u00C5}\u0098\u00DB\u00ACi/\x7F\u00DBEs\x1Fr\u00E6\u00FE/\u00CA\u00E6\x0EPt8\u008C\u00FA\u00CF\u0085P\u00E2N\x04E:\u0083\u00F96\u009F\u00D6n\u00A2\u00F5M*?0\u00891s\u009D\u0090U\u00FD\u00AE-e\x12l\u00D2\x1A\u00BC\u00C0\u00BB\u00A3\u00D8\u0083\f\u00CAn\u00EF\u00D3\u00DF\x0B\u008B;\u00877N\u009D\u00A2V\u00F0\u00E3\u00CF\x10\u00DA\u00DB\x0F#\u00D2\x17\u00F49S\u00F5S\u0080\u0084.Jz.\u009EY:\x12\u00F6\u00D8\u00C1\u00B3\u00D8\u00DA>(\b\u008Bp/G\u008E\u00B4Z\u00F0\x01\u0094\u00F4@H\x13\u0091\x1EY\u00C0\u00BDLX,\x0B9\u00C2\u008A\u00B5\x0F\u00936\u00C1r|\x11\u00E9\u0091\x05\u00DC\u00CB\u00AD\x13\x12\u00E4\x19Uk\x014d\u009Dh\u00FBiKzd\x01}@_\u00E5\n\u008BX\u00A1\u00F6uv\u00AD\u00EF&\u00ECQ\u00A1ub\u0099\u00B0\u00A8\u00AB$G*- m\x1D\u009C\u00EDZ\u0091\"=<\u00A2#\u00E1\u00A2\u00E4\b\u00FA\x14=\u00AB*\x04@r\u00FB\u00D4C\u008F\u009E\u00B7\u00D7\u00BEf\u00C6|\u00B7\u00E0\u00FA\u00D4T\u00D5\x13\u00B0\u0082\u00C1\x17xg\u00CEs\x17\x11\u00C01\u00D7\u00CF\x11D\x14CE\u00CE@\u0085\x05$\u00D9\u00B5>\u0097\u00D8P\n\u00E8\u009B\u00CB\x19$+*\x00BL\u008C\"/\u00A8\x1C\x02\x01\x1B^\u00C9\u0091W\x0B0lL\u00D45\u00B4^\u00E7\u00A9!\u0098bFE\x04@BQB\u00D6\u00F1\x15\x0E4\u00E4\u00C99r\u00CFJx\t\u008BX\u0085\u00F6\x05aJ\u00B9\x13d!\b\u00B3\u0086\u00AF\x02 \u00EBs\u009D\u009D\u00FB~CPPI\u00F8i\x01\x06KUK!=^\u00B9\u0081\u00A0\u00A0b\u00F8\"\x00\u00B6\u00C0!X\u00ACH\u00A1_0\u00D8R\u00A6\x05\u00B7\u00D8*\u00A9\u00A0\u0082]\x0E>\u00C2\u00AF\u00F5\u009DH\u008F*&X\u008C\x1C\tr\x06\u0091rZ\u0080c\u0081\u00C3ox-\u00A8`\x17\u00DA\u00D7\u0090D\u0081\u00A3T@^\u00B0Tr\u00E4\u00A5\u00A0\u00E2\u00C6\x02\u00D2\u00AC\u00E9yY\u00EB\u008B\b\u008F\u0095\f-5g\u00C0M\u00C5\u00B4R\x01\u00F0k}\u0099\x02\u0087\u0093\x0F\u00D0\u00C7\u00DB\x0B\u00B6~\u008F~\u0081{'\u00E9\u009C\u0081lV\u00D8u\u0081\u00C3\t\u00F3/4\u00A5\u00BE\u00C0z\u00AF\u00CD\u009C\u00C6\u00BE\u00F3\u0098g\x0B\u00E0\x0B\x1C^\u00B5_Np\u00EF&UP\u00C1n\u00D6\u00FA\u0082\u00B9VU\x10\u00F8&\u00C7\u009C\u0081\u0093\x05\u00D8\x168\u00AA\x11\\t\u00D2\u009Cr\x06\u00D8!\u00EC\u00D9\x168J\x05\x14F\u00A6\x1Em\u00A0\u00AE\u00E8\n\n\\\u00F8\u008A\u00C6n\u00AC\u00A2\u0085\u00A5\x1De9\x037\x05\x15,CzT\u00AC\u00F5Y\u00DCz\u00F8\x1D={\u0093\u00A5\x15\"\u00A8\x15\u00C6\u00EEg\u00F2{U\u00E4H\u00B6\u00A0\u0082\u008Bh_i\u0081\u0083\x05\f\u0092\u00AD\x05\u00B2x\u0092\u00FE\u00AD.s$YP\u00C12aOE\u0081\u0083\u009A\x7Fn\u00BF\u00E8\u00B5\u00CC\u00C6\u009E\u00B2\u00E7\bV\u00A9))\x01\u0088>fT\u0089HGP9\x1Dv\u00913\u0088\u00CBX@\u00CA&\u00F3\u00E2\u009D\u00F3\u008F\u0084\u00F3\u00CCOD\u0085\u00A7Ii\\%9\u00E22UG\u00AC \u00C8i\x1FB\u00C6=\u00EB\u00F7\u00D5K\u00CFQ\u00A8E}\u00967~\u00AD\x03\x1Do\u00C5\u00F9\u00CF3 \x0F\u00A0_iGO\x1F\u00F7\u00A0\u00A1\u00C1V\u00E5\u00CF:\u00D9\u00BE\u0081V\x7F\u008DS9ONLl\u00CD\u00BE~E=z\u0080#=k\u0096\u00E7\x07OZ\x0Bq_\x06_\u00D6\u00AF\u00B3B\u0080\u00F00`}m\u00829\u00D2\u00E3K\u0081\u00C3o\u00D8\x15T0Cz|+p\u00F8\r\u00BB\u0082\n\u00E6\u009D\u0083j\u00D2S-\x10\x14T\u00F2c\x0E8\u00FC\u0083\u00A3\u00DE\x11\u00C3l\u00CCo@\u00E8 \u0080w\u00E8\u00FFwx\u008D\u0086\f\x19{\x13M4\u00D1\u00C0\u00F8'\u00C0\x00\x12[\u00C8\x1C\x07<\x13\u00D4\x00\x00\x00\x00IEND\u00AEB`\u0082"
+
 var scriptAlertResult = false;
 
 // Custom Dialog Alert + Icon
 // https://community.adobe.com/t5/photoshop/script-alert-title-alert-box/m-p/11701555#M497514
 function scriptAlert(alertTitle, alertString1, alertString2, okBtn, cancelBtn, okStr, cancelStr, iconType) {
+    scriptAlertResult = false;
     var alertWindow = new Window("dialog", undefined, undefined, {resizeable: false});
         alertWindow.text = alertTitle;
         alertWindow.alignment = ["right", "top"];
-        // alertWindow.titleLayout = ['right', 'center'];
-        // alertWindow.title = alertTitle; // Not working OSX
         alertWindow.preferredSize.width = 400;
-        // alertWindow.preferredSize.height = 250;
+        
         alertWindow.orientation = "column";
         alertWindow.alignChildren = ["fill", "top"];
         alertWindow.spacing = 0;
@@ -2904,31 +3306,24 @@ function scriptAlert(alertTitle, alertString1, alertString2, okBtn, cancelBtn, o
         alertText.preferredSize.width = 375;
         alertText.orientation = "column";
         alertText.alignChildren = ["fill", "top"];
-        alertText.spacing = 0; 
+        alertText.spacing = -20; 
         alertText.margins = 0;
-        // alertText.alignment = ["left", "top"];
-        // alertStringSize1 = alertText.add("statictext", undefined, alertString1, {properties: {name: "alertText", multiline: true}});
+        
         alertStringSize1 = alertText.add("statictext", undefined, alertString1, {name: "alertText", multiline: true});
-        // alertStringSize1.preferredSize.width = 240;
-        alertStringSize1.preferredSize.height = 40;   
-        // alertStringSize1.graphics.font = "dialog:13";
-        // alertStringSize1.graphics.font = ScriptUI.newFont ("dialog", "Bold", 18);
+        alertStringSize1.preferredSize.height = 40;
         
         // Only show second string text if added
         if (alertString2 != false){
             alertStringSize2 = alertText.add("statictext", undefined, alertString2, {name: "alertText", multiline: true});
-            alertStringSize2.preferredSize.height = 45;   
+            alertStringSize2.preferredSize.height = 40;
         }
-        // alertStringSize2.graphics.font = "dialog:13";
-        // alertStringSize1.graphics.size = 60;   
-        // alertStringSize2.text = "dialog:13";
 
     var buttonGrp = alertWindow.add("group");
         buttonGrp.preferredSize.width = 400;
         buttonGrp.orientation = "row";
         buttonGrp.alignChildren = ["fill", "top"];
         buttonGrp.spacing = 10;
-        buttonGrp.margins = [0,20,0,0]; //0; //
+        buttonGrp.margins = [0,15,0,0]; //0; //
 
 
     if (cancelBtn) {
@@ -2956,3 +3351,566 @@ function scriptAlert(alertTitle, alertString1, alertString2, okBtn, cancelBtn, o
     alertWindow.show();
 }
 
+// inverselogo type 
+// Get inverse colorvalue
+if (activeDocument.documentColorSpace == "DocumentColorSpace.RGB"){
+	var space = "RGB";
+} else {
+	var space = "CMYK";
+}
+
+function getColorNameValue(){
+    appendLog("getColorNameValue", logFile);
+
+    var selectedPath = app.activeDocument.selection;
+    if (selectedPath.length > 0 ) {
+        var item = selectedPath[0];
+        return getBasicColorsFromItem(item)
+    } else {
+        var title = "Warning!";
+        var msg1 = "Please select path item to get color from.";
+        var msg2 = "";
+        var okStr = "OK";
+        var cancelStr = "";
+        scriptAlert(title, msg1, false, true, false, okStr, cancelStr, warningIcon64);
+    }
+
+
+    /**
+    * Source: https://community.adobe.com/t5/illustrator-discussions/get-spot-colors-from-selected-object-group-objects/m-p/13356189#M344245
+    * Returns array of swatches or colors
+    * found in fill or stroke of page item.
+    * @author m1b
+    * @version 2022-10-11
+    * @param {PageItem} item - an Illustrator page item.
+    * @returns {Object} -  {fillColors: Array<Color>, strokeColors: Array<Color>}
+    */
+    function getBasicColorsFromItem(item) {
+        appendLog("getBasicColorsFromItem", logFile);
+        appendLog(item, logFile);
+
+        if (item == undefined)
+            throw Error('getItemColor: No item supplied.');
+        var noColor = "[NoColor]",
+            colorables = [],
+            foundColors = {
+                fillColors: [],
+                strokeColors: []
+            };
+        // collect all the colorables
+        if (item.constructor.name == 'PathItem') {
+            colorables.push(item);
+            run = getPathColorInfo(item, item);
+        } else if (item.constructor.name == 'CompoundPathItem' && item.pathItems) {
+            colorables.push(item.pathItems[0]);
+            run = getPathColorInfo(item.pathItems[0], item.pathItems[0]);
+        } else if (item.constructor.name == 'TextFrame' && item.textRanges) {
+            for (var i = item.textRanges.length - 1; i >= 0; i--)
+                colorables.push({
+                    fillColor: item.textRanges[i].characterAttributes.fillColor,
+                    strokeColor: item.textRanges[i].characterAttributes.strokeColor
+                });
+        }
+        if (colorables.length > 0)
+            for (var i = 0; i < colorables.length; i++) {
+                if (
+                    colorables[i].hasOwnProperty('fillColor')
+                    && colorables[i].fillColor != noColor
+                    && (
+                        !colorables[i].hasOwnProperty('filled')
+                        || colorables[i].filled == true
+                    )
+                    && colorables[i].fillColor != undefined
+                )
+                    foundColors.fillColors.push(colorables[i].fillColor);
+                if (
+                    colorables[i].hasOwnProperty('strokeColor')
+                    && colorables[i].strokeColor != noColor
+                    && (
+                        colorables[i].constructor.name == 'CharacterAttributes'
+                        || colorables[i].stroked == true
+                    )
+                    && colorables[i].strokeColor != undefined
+                )
+                    foundColors.strokeColors.push(colorables[i].strokeColor);
+            }
+        else if (item.constructor.name == 'GroupItem') {
+            // add colors from grouped items
+            for (var i = 0; i < item.pageItems.length; i++) {
+                getBasicColorsFromItem(item.pageItems[i]);
+            }
+        }
+        return run
+    };
+
+    // https://stackoverflow.com/questions/17204335/convert-decimal-to-hex-missing-padded-0
+    function d2h(d) {
+        var s = (+d).toString(16);
+        if(s.length < 2) {
+            s = '0' + s;
+        }
+        return s;
+    }
+    function roundToFixed(toRound){
+        var numb = toRound;
+        numb = numb.toFixed(2);
+        return numb
+    }
+    function getPathColorInfo(colorItem, item){
+        colorItem = colorItem.fillColor;
+        tint = false;
+        run = false;
+
+        if (colorItem.typename == "GradientColor"){
+            return "gradient"
+        }
+        if (colorItem.typename == "CMYKColor"){
+            colorName = false;
+            fil = colorItem;
+            inpt = roundToFixed(fil.cyan)+"-"+roundToFixed(fil.magenta)+"-"+roundToFixed(fil.yellow)+"-"+roundToFixed(fil.black);
+
+            // Make Hex value for preview in panel
+            colorArray = [roundToFixed(fil.cyan), roundToFixed(fil.magenta), roundToFixed(fil.yellow), roundToFixed(fil.black)];
+            // [Math.round(c), Math.round(m), Math.round(y), Math.round(k)]
+            rgbConv = app.convertSampleColor(ImageColorSpace["CMYK"], colorArray, ImageColorSpace["RGB"], ColorConvertPurpose.defaultpurpose);          
+            setInverted = d2h(rgbConv[0])+d2h(rgbConv[1])+d2h(rgbConv[2]);
+            run = true;
+        } else if (colorItem.typename == "RGBColor"){
+            colorName = false;
+            fil = colorItem;
+            inpt = fil.red+"-"+fil.green+"-"+fil.blue;
+            // inpt = RGB2CMYK(col).C+", "+RGB2CMYK(col).M+", "+RGB2CMYK(col).Y+", "+RGB2CMYK(col).K;
+            // Make Hex value for preview in panel
+            setInverted = d2h(fil.red)+d2h(fil.green)+d2h(fil.blue);
+            run = true;
+        } else if(colorItem.typename == "SpotColor"){
+            fil = colorItem.spot.color;
+            tint = colorItem.tint;
+            if (app.activeDocument.documentColorSpace == DocumentColorSpace.CMYK){
+                colorName = true;
+                fil = colorItem.spot.color;
+                inpt = colorItem.spot.name;
+                 // Make Hex value for preview in panel
+                var cyan  
+                
+                colorArray = [roundToFixed(fil.cyan), roundToFixed(fil.magenta), roundToFixed(fil.yellow), roundToFixed(fil.black)];
+                // [Math.round(c), Math.round(m), Math.round(y), Math.round(k)]
+                rgbConv = app.convertSampleColor(ImageColorSpace["CMYK"], colorArray, ImageColorSpace["RGB"], ColorConvertPurpose.previewpurpose);          
+                setInverted = d2h(rgbConv[0])+d2h(rgbConv[1])+d2h(rgbConv[2]);
+                run = true;
+                // setInverted = rgbConv[0].toString(16).padStart(2, '0')+rgbConv[1].toString(16).padStart(2, '0')+rgbConv[2].toString(16).padStart(2, '0');
+            } else{
+                colorName = true;
+                fil = colorItem.spot.color;
+                inpt = colorItem.spot.name;
+                
+                // Make Hex value for preview in panel
+                setInverted = d2h(fil.red)+d2h(fil.green)+d2h(fil.blue);
+                run = true;
+            }
+        } else if (colorItem.typename=="GrayColor"){
+            if (app.activeDocument.documentColorSpace == DocumentColorSpace.CMYK){
+                colorName = false;
+                fil = colorItem;
+                inpt = fil.gray;
+                colorArray = [inpt, inpt, inpt, inpt];
+                rgbConv = app.convertSampleColor(ImageColorSpace["CMYK"], colorArray, ImageColorSpace["RGB"], ColorConvertPurpose.previewpurpose);          
+                setInverted = d2h(rgbConv[0])+d2h(rgbConv[1])+d2h(rgbConv[2]);
+                run = true;
+            } else {
+                colorName = false;
+                fil = colorItem;
+                inpt = fil.gray;
+                colorArray = [inpt, inpt, inpt, inpt];
+                rgbConv = app.convertSampleColor(ImageColorSpace["CMYK"], colorArray, ImageColorSpace["RGB"], ColorConvertPurpose.previewpurpose);          
+                setInverted = d2h(rgbConv[0])+d2h(rgbConv[1])+d2h(rgbConv[2]);
+                run = true;
+            }
+        } else if (colorItem.typename=="NoColor"){
+            return run = "noclor"
+        }
+        return [run, colorName, inpt, colorItem.typename, setInverted]
+    }
+}
+
+
+// -------------------------------------------------------
+// CMYKMetrics()        constructor
+// -------------------------------------------------------
+function CMYKMetrics(C, M, Y, K) {
+    this.C = 0.0;
+    this.M = 0.0;
+    this.Y = 0.0;
+    this.K = 0.0;
+    this.error = false;
+
+    if (C != undefined && M != undefined && Y != undefined && K != undefined) {
+        if (isNaN(C) || isNaN(M) || isNaN(Y) || isNaN(K))
+            throw("HSBMetrics() Invalid values [" + C + ", " + M + ", " + Y + ", " + K + "]");
+        this.C = C;
+        this.M = M;
+        this.Y = Y;
+        this.K = K;
+    }
+    return(this);
+}
+
+// Returns opposite of souceSpace
+// example RGB in is CMYK out
+function targetSpace(sourceSpace) {
+    return targetSpace = sourceSpace == "RGB" ? "CMYK" : "RGB"
+}
+// -----------------------------------------
+// RGB2CMYK()
+// accepts RGBMetrics, returns CMYKMetrics
+// -----------------------------------------
+function RGB2CMYK(RGB) {
+    var sc, cmyk;
+    var C, M, Y, K;
+    if (app.name == 'Adobe Photosop') {
+        var sc = new SolidColor();
+        sc.rgb.red = RGB.r;
+        sc.rgb.green = RGB.g;
+        sc.rgb.blue =  RGB.b;
+        C = Math.round(sc.cmyk.cyan*100.0)/100.0;
+        M = Math.round(sc.cmyk.magenta*100.0)/100.0;
+        Y = Math.round(sc.cmyk.yellow*100.0)/100.0;
+        K = Math.round(sc.cmyk.black*100.0)/100.0;
+    }
+    if (space == "RGB") {
+        sc = new RGBColor();
+        sc.r = RGB.r;
+        sc.g = RGB.g;
+        sc.b =  RGB.b;
+        app.foregroundColor = sc
+        
+        sourceSpace = space;
+        colorComponents = RGB.r,RGB.g,RGB.b;
+        
+        var returnColors = app.convertSampleColor(ImageColorSpace[sourceSpace], [RGB.r,RGB.g,RGB.b], ImageColorSpace[targetSpace(sourceSpace)], ColorConvertPurpose.previewpurpose);
+        
+        sc.cyan= returnColors[0];
+        sc.magenta = returnColors[1];
+        sc.yellow= returnColors[2];
+        sc.black= returnColors[3];
+        // sc.cyan = app.convertSampleColor(ImageColorSpace["RGB"], [RGB.r,RGB.g,RGB.b], ImageColorSpace["CMYK"], ColorConvertPurpose.previewpurpose)[0];//defaultpurpose))
+        // sc.magenta = app.convertSampleColor(ImageColorSpace["RGB"], [RGB.r,RGB.g,RGB.b], ImageColorSpace["CMYK"], ColorConvertPurpose.previewpurpose)[1];//defaultpurpose))
+        // sc.yellow = app.convertSampleColor(ImageColorSpace["RGB"], [RGB.r,RGB.g,RGB.b], ImageColorSpace["CMYK"], ColorConvertPurpose.previewpurpose)[2];//defaultpurpose))
+        // sc.black = app.convertSampleColor(ImageColorSpace["RGB"], [RGB.r,RGB.g,RGB.b], ImageColorSpace["CMYK"], ColorConvertPurpose.previewpurpose)[3];//defaultpurpose))
+        C = Math.round(sc.cyan*100.0)/100.0;
+        M = Math.round(sc.magenta*100.0)/100.0;
+        Y = Math.round(sc.yellow*100.0)/100.0;
+        K = Math.round(sc.black*100.0)/100.0;
+        
+    }
+    if (space == "CMYK") colorType = new CMYKColor();
+    // if (app.name == 'Adobe Illustrator') var sc = colorType;
+
+    cmyk = new CMYKMetrics(C, M, Y, K);
+    return(cmyk);
+}
+
+
+function grayToCMYK(color){
+    if(color.typename !== 'GrayColor') return false;
+        var CMYK = new CMYKColor(),
+        convertColor = app.convertSampleColor(ImageColorSpace.GrayScale, [color.gray], ImageColorSpace.CMYK, ColorConvertPurpose.defaultpurpose);
+        CMYK.cyan = convertColor[0];
+        CMYK.magenta = convertColor[1];
+        CMYK.yellow = convertColor[2];
+        CMYK.black = convertColor[3];
+    return CMYK;
+}
+function grayToRGB(color){
+    if(color.typename !== 'GrayColor') return false;
+        var RGB = new RGBColor(),
+        convertColor = app.convertSampleColor(ImageColorSpace.GrayScale, [color.gray], ImageColorSpace.RGB, ColorConvertPurpose.defaultpurpose);
+        RGB.red = convertColor[0];
+        RGB.green = convertColor[1];
+        RGB.blue = convertColor[2];
+    return RGB;
+}
+
+
+// Inverted Logo
+// Find inverse color and lock it
+// Fill all paths and fill with white
+function inverseLogo(){
+    appendLog('inverseLogo()', logFile);
+
+    var mediaType = "Print";
+    var black = mediaType == 'Print' ? new CMYKColor() : new RGBColor();
+    var white = mediaType == 'Print' ? new CMYKColor() : new RGBColor();
+    if (mediaType == 'Print'){
+        black.cyan = 0;
+        black.magenta = 0;
+        black.yellow = 0;
+        black.black = 100;
+        white.cyan = 0;
+        white.magenta = 0;
+        white.yellow = 0;
+        white.black = 0;
+    } else {
+        black.red = 0;
+        black.green = 0;
+        black.blue = 0;
+        white.blue = 255;
+        white.red = 255;
+        white.green = 255;
+    }
+    for (var i = 0; i < app.activeDocument.selection.length; i++) {
+        
+        var item = app.activeDocument.selection[i];
+        fillPathItem(item, white)
+        
+    }
+    app.executeMenuCommand("unlockAll");
+
+
+    function fillPathItem(item, color) {
+        if (item == undefined)
+            throw Error('fillPathItem: No item supplied.');
+        var noColor = "[NoColor]",
+            colorables = [],
+            foundColors = {
+                fillColors: [],
+                strokeColors: []
+            };
+        
+        // collect all the colorables
+        if (item.constructor.name == 'PathItem') {
+            colorables.push(item);
+            item.fillColor = color;
+        } else if (item.constructor.name == 'CompoundPathItem' && item.pathItems) {
+            colorables.push(item.pathItems[0]);
+            item.pathItems[0].fillColor = color;
+        } else if (item.constructor.name == 'TextFrame' && item.textRanges) {
+            for (var i = item.textRanges.length - 1; i >= 0; i--)
+                colorables.push({
+                    fillColor: item.textRanges[i].characterAttributes.fillColor,
+                    strokeColor: item.textRanges[i].characterAttributes.strokeColor
+                });
+        }
+        if (colorables.length > 0)
+            for (var i = 0; i < colorables.length; i++) {
+                if (
+                    colorables[i].hasOwnProperty('fillColor')
+                    && colorables[i].fillColor != noColor
+                    && (
+                        !colorables[i].hasOwnProperty('filled')
+                        || colorables[i].filled == true
+                    )
+                    && colorables[i].fillColor != undefined
+                )
+                    foundColors.fillColors.push(colorables[i].fillColor);
+                if (
+                    colorables[i].hasOwnProperty('strokeColor')
+                    && colorables[i].strokeColor != noColor
+                    && (
+                        colorables[i].constructor.name == 'CharacterAttributes'
+                        || colorables[i].stroked == true
+                    )
+                    && colorables[i].strokeColor != undefined
+                )
+                    foundColors.strokeColors.push(colorables[i].strokeColor);
+            }
+        else if (item.constructor.name == 'GroupItem') {
+            // add colors from grouped items
+            for (var i = 0; i < item.pageItems.length; i++) {
+                if (!item.pageItems[i].locked){
+                    fillPathItem(item.pageItems[i], color);
+                }
+            }
+        }
+    };
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Function: selectItemsOnLayer
+// Usage: return path color spot color
+// Input: activeLayer
+// Return: True or False
+// Source: https://community.adobe.com/t5/illustrator-discussions/script-for-select-sequentially-all-paths-compound-paths-by-position-at-layer/m-p/11483356#M246927
+//
+///////////////////////////////////////////////////////////////////////////////
+function selectItemsOnLayer() {
+    var doc = app.activeDocument;
+    app.selection = null;
+    var selectedLayer = doc.activeLayer;
+    var _pageItems = selectedLayer.pageItems
+    for (var i = 0; i < _pageItems.length; i++) {
+        if (_pageItems[i].typename == 'PathItem' || _pageItems[i].typename == 'CompoundPathItem') {
+            try {
+                var item = _pageItems.getByName((i+1));
+                item.selected = true;
+            } catch (e) {
+                try {
+                    var item = _pageItems.getByName((i+1));
+                    item.selected = true;
+                } catch (e) {
+
+                }
+            }
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Function: checkColorsForPMS
+// Usage: return path color spot color
+// Input: activeLayer
+// Return: True or False
+// Source: https://community.adobe.com/t5/illustrator-discussions/script-for-select-sequentially-all-paths-compound-paths-by-position-at-layer/m-p/11483356#M246927
+//
+///////////////////////////////////////////////////////////////////////////////
+// function checkColorsForPMS(item) {
+//     var doc = app.activeDocument;
+//     app.selection = null;
+//     var selectedLayer = doc.activeLayer;
+//     var _pageItems = selectedLayer.pageItems;
+//     for (var i = 0; i < _pageItems.length; i++) {
+//         alert(_pageItems[i].typename)
+//         if (_pageItems[i].typename == 'PathItem' || _pageItems[i].typename == 'CompoundPathItem') {
+//             try {
+//                 var item = _pageItems.getByName((i+1));
+//                 item.selected = true;
+//                 pms = searchForPMS(item);
+//                 alert(pms)
+//             } catch (e) {
+//                 try {
+//                     var item = _pageItems.getByName((i+1));
+//                     item.selected = true;
+//                     pms = searchForPMS(item);
+//                 } catch (e) {
+//                     alert(e)
+//                 }
+//             }
+//         }
+//         else if (item.constructor.name == 'GroupItem') {
+//             // add colors from grouped items
+//             for (var i = 0; i < item.pageItems.length; i++) {
+//                 checkColorsForPMS(item.pageItems[i]);
+//             }
+//         }
+//     }
+//     // alert(pms)
+// }
+function checkColorsForPMS() {
+    var fillColorList = new Array();
+    for (var i = 0; i < app.activeDocument.selection.length; i++) {
+        var item = app.activeDocument.selection[i];
+        alert(getFillColor(item, fillColorList))
+    }
+}
+
+
+function getFillColor(item, fillColorList){
+    // var pmsColors = undefined;
+    // alert(item.typename)
+    // alert(docRef.name)
+    // alert(app.activeDocument.name)
+    if (item.typename == 'PathItem'){
+        var PathItemFill = item.fillColor;
+        try {
+            // pms = searchForPMS(item);
+            if (PathItemFill.typename != 'SpotColor') {
+                fillColorList.push(false);
+            }
+            if (PathItemFill.typename == 'SpotColor') {
+                // https://community.adobe.com/t5/illustrator-discussions/illustrator-script-to-get-the-path-item-used-fill-color-name/m-p/11537495#M249407
+                var selectedSwatches = app.activeDocument.swatches.getSelected();
+                // alert(selectedSwatches)
+                alert(selectedSwatches[0].color.typename)
+                alert(selectedSwatches[0].color.spot.color.typename)
+                alert(selectedSwatches[0].color.spot.spotKind)
+                alert(selectedSwatches[0].color.spot.color.spotKind)
+                // swatchColor = docRef.swatches.getByName(PathItemFill.name);
+                // fillColorList.push(swatchColor.color.spot.color.spotKind);
+            }
+        } catch (e) {
+            // alert(e)
+            // alert(e)
+            // alert(item.name)
+            // return false
+            // try {
+            //     pms = searchForPMS(item);
+            // } catch (e) {
+            //     item.name
+            //     item.selected = true;
+            //     alert(e)
+            //     return false
+            // }
+        }
+    }
+    if (item.typename == 'CompoundPathItem') {
+        var compoundPathItemFill = item.pathItems[0].fillColor;
+        try {
+            // pms = searchForPMS(item);
+            if (compoundPathItemFill.typename != 'SpotColor') {
+                fillColorList.push(false);
+            }
+            if (compoundPathItemFill.typename == 'SpotColor') {
+                // https://community.adobe.com/t5/illustrator-discussions/illustrator-script-to-get-the-path-item-used-fill-color-name/m-p/11537495#M249407
+                var selectedSwatches = app.activeDocument.swatches.getSelected();
+                alert(selectedSwatches[0].color.spot.color.spotKind)
+                // alert(selectedSwatches[0].spotKind)
+                // alert(selectedSwatches)
+                // alert(selectedSwatches[0].name)
+                // spot = docRef.swatches.getByName(compoundPathItemFill.name).spot.color;
+                // fillColorList.push(spot.spotKind);
+            }
+        } catch (e) {
+            // alert(e)
+            // alert(item.name)
+            // return false
+            // try {
+            //     pms = searchForPMS(item);
+            // } catch (e) {
+            //     item.name
+            //     item.selected = true;
+            //     alert(e)
+            //     return false
+            // }
+        }
+    }
+    else if (item.constructor.name == 'GroupItem') {
+        app.activeDocument.selection = null;
+        // add colors from grouped items
+        for (var i = 0; i < item.pageItems.length; i++) {
+            item.pageItems[i].selected = true
+            getFillColor(item.pageItems[i], fillColorList);
+        }
+    }
+    // alert("pmsColors "+pmsColors)
+    // alert(fillColorList)
+    return fillColorList
+}
+
+
+function searchForPMS(colorItem){
+    colorItem = colorItem.fillColor;
+    var fil = colorItem.typename;
+    if(colorItem.typename == "SpotColor"){
+        fil = colorItem.spot.color;
+        tint = colorItem.tint;
+        if (app.activeDocument.documentColorSpace == DocumentColorSpace.CMYK){
+            fil = colorItem.spot.color;
+            inpt = fil.cyan+", "+fil.magenta+", "+fil.yellow+", "+fil.black;
+        } else{
+            fil = colorItem.spot.color;
+            inpt = fil.red+", "+fil.green+", "+fil.blue;
+            
+            // 2022-12-29
+            // use CMYK for RGB better outcome
+            var col = new RGBColor;
+                col.r = fil.red;
+                col.g = fil.green;
+                col.b = fil.blue;
+            // alert("RGB2CMYK "+RGB2CMYK(col))
+            inpt = RGB2CMYK(col).C+", "+RGB2CMYK(col).M+", "+RGB2CMYK(col).Y+", "+RGB2CMYK(col).K;
+        }
+    }
+    return fil
+}
