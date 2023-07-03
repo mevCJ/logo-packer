@@ -65,6 +65,9 @@ Open the extension in Window > Extensions > Logo Packer and follow the instructi
   
   ## Custom Black for Print & Digital
   ![custom-black-demo](https://raw.githubusercontent.com/wiki/schroef/logo-packer/custom-black-color-options-v132.gif?raw=true)
+  
+  ## Custom Gray for Print & Digital
+  ![custom-gray-demo](https://raw.githubusercontent.com/wiki/schroef/logo-packer/custom-gray-colors-v132.gif?raw=true)
 
   ## Margin & padding
   ![export-files-demo](https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/margin-padding.gif?raw=true)
