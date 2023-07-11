@@ -2,7 +2,7 @@
 <ExtensionList>
     <Extension Id="com.doingdesign.logopacker">
         <HostList>
-            <Host Name="ILST" Port="9900"/>
+            <Host Name="ILST" Port="8705"/>
         </HostList>
     </Extension>
 </ExtensionList>

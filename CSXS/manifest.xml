@@ -12,7 +12,7 @@
 			<Locale Code="All" />
 		</LocaleList>
 		<RequiredRuntimeList>
-			<RequiredRuntime Name="CSXS" Version="6.0" />
+			<RequiredRuntime Name="CSXS" Version="11.0" />
 		</RequiredRuntimeList>
 	</ExecutionEnvironment>
 	<DispatchInfoList>
@@ -22,9 +22,9 @@
 					<MainPath>./index.html</MainPath>
 					<ScriptPath>./jsx/hostscript.jsx</ScriptPath>
 					<CEFCommandLine>
-                        <Parameter>--mixed-context</Parameter>
-                        <Parameter>--enable-nodejs</Parameter>
-                    </CEFCommandLine>
+							<Parameter>--mixed-context</Parameter>
+							<Parameter>--enable-nodejs</Parameter>
+					</CEFCommandLine>
 				</Resources>
 				<Lifecycle>
 					<AutoVisible>true</AutoVisible>
