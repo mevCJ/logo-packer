@@ -734,7 +734,7 @@ $path = {
             // <MenuItem Id="debugPanel" Label="Debug" Enabled="true" Checkable="true" Checked="false"/> \
             '<Menu> \
             <MenuItem Label="Logo Packer v1.3.2.1" Enabled="true" Checked="false"/> \
-            <MenuItem Id="info" Label="Goto info web page" Enabled="true" Checked="false"/> \
+            <MenuItem Id="info" Label="Go to info web page" Enabled="true" Checked="false"/> \
             <MenuItem Label="---" /> \
             <MenuItem Id="github" Label="View on Github" Enabled="true" Checked="false"/> \
             <MenuItem Id="githubIssue" Label="Report Issue" Enabled="true" Checked="false"/> \
@@ -782,6 +782,10 @@ $path = {
         }
         /////////////////////////////////////////////////////////////////////////////////////////
     }
+
+    $("#donate").click(()=>{
+        csInterface.openURLInDefaultBrowser("https://www.buymeacoffee.com/doingdesign");
+    })
 
     init();
     // forced dd change so panel refreshes
