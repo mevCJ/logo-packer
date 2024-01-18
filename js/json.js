@@ -159,8 +159,9 @@ var setting = {
             if (b) var t = e;
             if (!b) var t = setting.data; // Reset to default values
             // if (!b) var t = setting.get();
+            var clientName = t.generation.client.replace(/[^a-zA-Z0-9-_]/g, '').trim().replace(/\s+/g, '');
             return (
-                $("#clientName").val(t.generation.client),
+                $("#clientName").val(clientName),
                 $("#logotype option[value=" + t.generation.type + "]").prop("selected", true),
                 $("input[value='"+ t.generation.mediatype+"']").prop("checked", true),
                 $("#colors input[value=fullcolor]").prop("checked", t.generation.colors.fullcolor),

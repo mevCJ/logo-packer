@@ -31,7 +31,7 @@
          * Appends the dropzone to the document.
          */
         function getDropZone() {
-            var $dropzone = $('<textarea allow="clipboard-read; clipboard-write"/>').attr({
+            var $dropzone = $('<textarea readonly allow="clipboard-read; clipboard-write"/>').attr({
                 class: "dropzone",
                 id: "dropzone--" + new Date().getTime(),
                 ondragover: "(function(e) { e.preventDefault() })(event)",

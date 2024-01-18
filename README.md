@@ -57,7 +57,7 @@ Open the extension in Window > Extensions > Logo Packer and follow the instructi
 <details>
   <summary>More functions</summary>
   
-  ## Inverted logo type
+  ## Inverted logot ype
   ![inverted-logo-type-demo](https://raw.githubusercontent.com/wiki/schroef/logo-packer/inverted-logo-color-v132.gif?raw=true)
 
   ## Export sizes JPG & PNG
@@ -65,7 +65,7 @@ Open the extension in Window > Extensions > Logo Packer and follow the instructi
   
   ## Custom Black for Print & Digital
   ![custom-black-demo](https://raw.githubusercontent.com/wiki/schroef/logo-packer/custom-black-color-options-v132.gif?raw=true)
-  
+
   ## Custom Gray for Print & Digital
   ![custom-gray-demo](https://raw.githubusercontent.com/wiki/schroef/logo-packer/custom-gray-colors-v132.gif?raw=true)
 
