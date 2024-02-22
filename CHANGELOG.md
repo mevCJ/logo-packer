@@ -1,6 +1,38 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.3.7] - 2024-01-18
+### Fixed
+- When adding margins > getLogoColorList() docRef was not declared
+- Issue counting artboardnames (color) when adding logoinfo > i was adding Number to Object > colors.length + would do 51 instead of 5+1=6 
+- Issue with dropzone, made textarea readonly, prevents paste error from illustrator
+
+### Changed
+- Adding logo info when margins are changed, when adjusting single artboard it caused issues. Now it adds logo info on all arboards, but only adjust 1 single artboards margins. Works better
+
+### Added
+- Some input like clientname and margins have regex now. So forbidden characters are stripped.
+- loading JSON settings file also correct forbidden characters now
+- All artboards are always fitted into view after each action, expanded to add margins and make base doc.
+
+## [1.3.6] - 2023-12-16
+#### Changed
+- Adjusted Illustrator version for Adobe Exchange
+
+## [1.3.6] - 2023-12-16
+#### Changed
+- CSinterface.js to v11.00
+
+## [1.3.4] - 2023-09-16
+#### Changed
+- Buymeacoffe button to support us
+- Small typos throught some files
+
+## [1.3.3] - 2023-07-11
+#### Changed
+- Updated CSinterface version to CEP11
+- Different port for debugging
+
 ## [1.3.2.1] - 2023-06-27
 ### Fixed
 - Fixed canceletaion when inverted logo type used, but no dialog shpowed, it would still cancel logo generation

@@ -110,13 +110,13 @@ body.closed #instructions {
     height: 20px;
 }
 body.open #instructions {
-    height: 115px;
+    height: 250px;
 }
 body.closedExtras #extras {
     height: 20px;
 }
 body.openExtras #extras {
-    height: auto;
+    height: 320px;
 }
 #messages {
     z-index: 999;
@@ -554,6 +554,10 @@ select {
     -webkit-mask-image: url(../icons/reload.svg);
     mask-image: url(../icons/reload.svg);
 }
+.info {
+    -webkit-mask-image: url(../icons/info.svg);
+    mask-image: url(../icons/info.svg);
+}
 .import {
     -webkit-mask-image: url(../icons/import.svg);
     mask-image: url(../icons/import.svg);
@@ -589,14 +593,14 @@ select {
 
 #instructions,#extras {
     padding: 0;
-    cursor: help;
+    cursor: pointer;
     height: 100%;
     transition: height 0.2s;
     overflow: hidden;
 }
-#extras {
+/* #extras {
     cursor: default;
-}
+} */
 
 .project,
 .settings {

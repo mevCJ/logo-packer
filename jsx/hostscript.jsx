@@ -185,15 +185,15 @@ function getArtboardLogoTypes(docRef, strip) {
 }
 
 // Get logo colors list, return names and color object for black and white, if custom black is set it uses those values
-function getLogoColorList(colors, mediaType, colorSettings){
+function getLogoColorList(colors, mediaType, colorSettingsJSON){
     // colors variation
     // Set black and white print colors
-    colorSettings = colorSettings.split(',');
+    colorSettingsJSON = colorSettingsJSON.split(',');
     var black = mediaType == 'Print' ? new CMYKColor() : new RGBColor();
     var white = mediaType == 'Print' ? new CMYKColor() : new RGBColor();
     if (mediaType == 'Print'){
-        if (colorSettings[1]=="true"){
-            customPrint = colorSettings[2].split('-');
+        if (colorSettingsJSON[1]=="true"){
+            customPrint = colorSettingsJSON[2].split('-');
             black.cyan = customPrint[0];
             black.magenta = customPrint[1];
             black.yellow = customPrint[2];
@@ -209,8 +209,8 @@ function getLogoColorList(colors, mediaType, colorSettings){
         white.yellow = 0;
         white.black = 0;
     } else {
-        if (colorSettings[3]=="true"){
-            customDigital = colorSettings[4].split('-');
+        if (colorSettingsJSON[3]=="true"){
+            customDigital = colorSettingsJSON[4].split('-');
             black.red = customDigital[0];
             black.green = customDigital[1];
             black.blue = customDigital[2];
@@ -231,8 +231,6 @@ function getLogoColorList(colors, mediaType, colorSettings){
     // colors = colors.split(',');
     var artboardsNames = colors.split(',');
     var colors = colors.split(','); // convert stringlist to objectlist
-    
-    abLength = docRef.artboards.length;
 
     // source https://www.geeksforgeeks.org/remove-elements-from-a-javascript-array/#:~:text=pop()%20function%3A%20This%20method,specific%20index%20of%20an%20array.
     for (var i = 0; i < colors.length; i++) {
@@ -292,10 +290,10 @@ function createTemplateLayer(docRef){
         ilayer.locked = true;
     }
 }
-function generateLogoVariation(clientName, logotype, colors, inverted, mediaType, sepaRator, forMats, autoResize, extensionRoot, exportSettings, colorSettings) {
+function generateLogoVariation(clientName, logotype, colors, inverted, mediaType, sepaRator, forMats, autoResize, extensionRoot, exportSettings, colorSettingsJSON) {
     appendLog('', logFile);
     appendLog('generateLogoVariation()', logFile);
-    appendLog(clientName+' \n\t\t\t '+logotype+' \n\t\t\t '+colors+' \n\t\t\t '+inverted+' \n\t\t\t '+mediaType+' \n\t\t\t '+sepaRator+' \n\t\t\t '+forMats+' \n\t\t\t '+autoResize+' \n\t\t\t '+extensionRoot+' \n\t\t\t '+exportSettings+' \n\t\t\t '+colorSettings, logFile);
+    appendLog(clientName+' \n\t\t\t '+logotype+' \n\t\t\t '+colors+' \n\t\t\t '+inverted+' \n\t\t\t '+mediaType+' \n\t\t\t '+sepaRator+' \n\t\t\t '+forMats+' \n\t\t\t '+autoResize+' \n\t\t\t '+extensionRoot+' \n\t\t\t '+exportSettings+' \n\t\t\t '+colorSettingsJSON, logFile);
 
     docRef = app.activeDocument;
     logotypes = getArtboardLogoTypes(docRef, false);
@@ -308,13 +306,15 @@ function generateLogoVariation(clientName, logotype, colors, inverted, mediaType
             
             docRef.artboards.setActiveArtboardIndex(ab);
             docRef.selectObjectsOnActiveArtboard();
-            createLogoTypes(docRef, clientName, colors, inverted, logotypes[ab], mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportSettings, colorSettings)
+            createLogoTypes(docRef, clientName, colors, inverted, logotypes[ab], mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportSettings, colorSettingsJSON, false)
             // switch to generated logo
             if (run==true) app.documents.getByName(docRef.name).activate();
         }
+        // we use resetLogo info, dont need to recrete logo info per tow logo types we create, reptive and slower
         if (run==true) app.documents.getByName(clientName).activate();
+        resetLogoInfo(colors, mediaType, colorSettingsJSON)
     } else {
-        createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportSettings, colorSettings);
+        createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportSettings, colorSettingsJSON, true);
     }
     if (run!=true) return run
     
@@ -324,8 +324,8 @@ function generateLogoVariation(clientName, logotype, colors, inverted, mediaType
     // needs to be done in end, it crashes illuistrator and returns errors in cmyk
     // customize gray values
     docRef.selection = null;
-    colorSettings = colorSettings.split(',')
-    if (colorSettings[0]=="true") {
+    colorSettingsJSON = colorSettingsJSON.split(',')
+    if (colorSettingsJSON[0]=="true") {
         for(i=0;i<docRef.artboards.length;i++){
             var activeAB = docRef.artboards[i]; // get active AB
             if (activeAB.name.indexOf("grayscale")!=-1){
@@ -343,12 +343,13 @@ function generateLogoVariation(clientName, logotype, colors, inverted, mediaType
             }
         }
     }
+    // Fit all artboards into view
     app.executeMenuCommand('fitall');
     
     return run
 }
 
-function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportSettings, colorSettings) {
+function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportSettings, colorSettingsJSON, genLogoInfo) {
     appendLog("createLogoTypes()", logFile)
 
     logotype = logotype;
@@ -384,7 +385,7 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
         initArtboardsLength = 1; // Reset always to 1 other we have generation error
         
         // get list of colors
-        var colorList = getLogoColorList(colors, mediaType, colorSettings);
+        var colorList = getLogoColorList(colors, mediaType, colorSettingsJSON);
         var colors = colorList[0];
         var artboardsNames = colorList[1];
 
@@ -608,9 +609,12 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
             docRef.selectObjectsOnActiveArtboard();
         }
 
-        // Add logo type & color version info
-        logotype = logotype;
-        run = setLogoInfo(docRef, logotype, artboardsNames, initArtboardsLength, false);
+        // only generate per logotype when using single mode. We generate alltypes at end of loop
+        if(genLogoInfo){
+            // Add logo type & color version info
+            logotype = logotype;
+            run = setLogoInfo(docRef, logotype, artboardsNames, initArtboardsLength, false);
+        }
     }
     
     // createTemplateLayer(docRef);
@@ -1852,6 +1856,46 @@ function scaleTypeMethod(index){
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Function: clearLogoInfo
+// Usage: reset logo info imprint around artboards
+// Input: colors (logotypes), mediatype (print/digital), colorsetttingsJSON
+// Return: logo info imprint  
+///////////////////////////////////////////////////////////////////////////////   
+function clearLogoInfo(){
+    var docRef = app.activeDocument;
+    clearLyrLogoInfo(docRef);
+    return run
+}
+///////////////////////////////////////////////////////////////////////////////
+// Function: resetLogoInfo
+// Usage: reset logo info imprint around artboards
+// Input: colors (logotypes), mediatype (print/digital), colorsetttingsJSON
+// Return: logo info imprint  
+///////////////////////////////////////////////////////////////////////////////   
+function resetLogoInfo(colors, mediaType, colorSettingsJSON){
+    var docRef = app.activeDocument;
+    // get list of colors
+    var colorList = getLogoColorList(colors, mediaType, colorSettingsJSON);
+    var colors = colorList[0];
+    var artboardsNames = colorList[1];
+
+    // Update logo info around the artboards
+    logotypes = getArtboardLogoTypes(docRef, true);
+
+    clearLyrLogoInfo(docRef);
+
+    var docRef = app.activeDocument;
+    var ABs = docRef.artboards;
+    abLength = docRef.artboards.length / (artboardsNames.length+1);
+    for (ab = 1; ab < docRef.artboards.length; ab+=(artboardsNames.length+1)) {
+        // ab = ab == 0 ? 0 : ab+4;
+        app.selection = null;
+        docRef.artboards.setActiveArtboardIndex(ab-1); // correct -1 idnex starts at 0
+        run = setLogoInfo(docRef, logotypes[ab], artboardsNames, ab, ab);
+    }
+    return run
+}
+///////////////////////////////////////////////////////////////////////////////
 // Function: addLogoInfo
 // Usage: add logo info per artboard describing logo type & media
 // Input: logo variant > string
@@ -1885,13 +1929,7 @@ function setLogoInfo(docRef, logotype, colors, initArtboardsLength, steps) {
         for (abindex = colors.length+1; abindex < abLength; abindex++) {
             color = docRef.artboards[abindex].name.split('-');
             // only add extra added colors here
-            
-            
-            
-            
             if ((colors.indexOf(color[1])==-1) && (color[1]!= "fullcolor")){
-                
-                
             // if (color not in colors){ doesnt work in extendscript
                 colors.push(color[1]);
             }
@@ -1902,14 +1940,46 @@ function setLogoInfo(docRef, logotype, colors, initArtboardsLength, steps) {
         var ab = docRef.artboards[steps-1]; // correct with subtracting -1 for index starts at 0
     } else{
         // var ab = docRef.artboards[docRef.artboards.length - 4];
-        if ((docRef.artboards.length - (colors.length+1)) == -1){
+        if ((docRef.artboards.length - (Number(colors.length)+1)) == -1){
             var ab = docRef.artboards[0];
         } else {
-            var ab = docRef.artboards[docRef.artboards.length - (colors.length+1)]; // Step backwards according to number of colors
+            var ab = docRef.artboards[docRef.artboards.length - (Number(colors.length)+1)]; // Step backwards according to number of colors
             // var ab = docRef.artboards[initArtboardsLength - colors.length+1];
         }
     }
-    
+    ///////////////////////////////////////////////////
+    // Get artboard ranges per logo type
+    // alert("colors "+colors)
+    // alert("typeof "+typeof(colors))
+    // alert(colors.length)
+    // alert((Number(colors.length)+1))
+    logotypes = getArtboardLogoTypes(docRef, true);
+    // alert(logotypes.length)
+    // alert(typeof(colors.length))
+    // alert(typeof(Number(colors.length)))
+    // CASES NAN
+    // alert("AB length - colors length +1 "+(docRef.artboards.length - Number(colors.length+1)))
+    // alert("ab "+ab)
+    // alert("ab.name "+ab.name)
+    // var logtypesLen = logotypes.length;
+    // https://math.stackexchange.com/questions/385514/algorithm-to-separate-an-array-of-numbers-into-low-medium-and-high-ranges
+    // list.sort();
+    // part1 = list[0 : n/3];
+    // part2 = list[n/3 : 2*n/3];
+    // part3 = list[2*n/3 : n];
+    // var abs = docRef.artboards;
+    // var n = abs.length;
+    // var part1 = abs[0] +" "+abs[n/3-1];
+    // var part2 = abs[n/3] +" "+abs[2*n/3-1];
+    // var part3 = abs[2*n/3] +" "+abs[n-1];
+    // var part1 = (0) +" "+(n/3-1);
+    // var part2 = (n/3)+" "+(2*n/3-1);
+    // var part3 = (2*n/3) +" "+(n-1);
+    // alert("part1 "+part1+" part2 "+part2+" part3 "+part3)
+    // if (ab)
+    // abData = docRef.artboards[docRef.artboards.length - (colors.length+1)]+"\n"+docRef.artboards.length + "\n"+(Number(colors.length)+1);
+    // alert(abData)
+    ///////////////////////////////////////////////////
     posX = ab.artboardRect[0]; // Left
     posY = ab.artboardRect[1]; // Top
     addLogoInfo(docRef, logotype, posX - 15, posY - 8, 'right');
@@ -1935,8 +2005,20 @@ function setLogoInfo(docRef, logotype, colors, initArtboardsLength, steps) {
     return run
 }
 
+
+function clearLyrLogoInfo(docRef){
+    try{
+        lyrLogoInfo = docRef.layers.getByName(LOGO_INFO);
+        lyrLogoInfo.locked = false;
+        lyrLogoInfo.remove();
+    } catch(e){
+        // do nothing
+    }
+    run = true;
+    return run
+}
 function addLogoInfo(docRef, layerName, posX, posY, justDir) {
-    appendLog('setLogoInfo()', logFile);
+    appendLog('addLogoInfo()', logFile);
     appendLog(layerName+' \n\t\t\t '+posX+' \n\t\t\t '+posY+' \n\t\t\t '+justDir, logFile);
 
     // find existing layers or add new one
@@ -2432,22 +2514,22 @@ function errorEvent(errorNumber) {
 // Add margins to Artboards
 // 
 ///////////////////////////////////////////////////////////////////////////////
-function addMarginToArtboard(marginVal, margintype, allArtboards, logotype, colors, mediaType, colorSettings) {
+function addMarginToArtboard(marginVal, margintype, allArtboards, logotype, colors, mediaType, colorSettingsJSON) {
     appendLog('', logFile);
-    appendLog('addMarginsToArtboard()', logFile);
-    appendLog(marginVal+' \n\t\t\t '+margintype+' \n\t\t\t '+allArtboards+' \n\t\t\t '+logotype+' \n\t\t\t '+colors+' \n\t\t\t '+mediaType+' \n\t\t\t '+colorSettings, logFile);
+    appendLog('addMarginToArtboard()', logFile);
+    appendLog(marginVal+' \n\t\t\t '+margintype+' \n\t\t\t '+allArtboards+' \n\t\t\t '+logotype+' \n\t\t\t '+colors+' \n\t\t\t '+mediaType+' \n\t\t\t '+colorSettingsJSON, logFile);
     appendLog("artboardLength "+initArtboardsLength, logFile);
-
     run = false;
     if (margins == "") {
         run = "margins";
-    } else if (margintype == "select" || margintype == "") {
+    } else if (margintype == "select" || margintype == "" || margintype == "undefined") {
         run = "margintype";
     } else {
 
         var title = "Add margin to Artboard(s)";
         var docRef = app.activeDocument;
         var ABs = docRef.artboards;
+        var intialActiveAB = ABs.getActiveArtboardIndex();
         
         // ToDo check if margins in print docuemnt works the same. Think we need to check if print or difgital
         // When adding big margins, artboards still get overlapping
@@ -2495,36 +2577,49 @@ function addMarginToArtboard(marginVal, margintype, allArtboards, logotype, colo
             run = false
         }
         
-         // get list of colors
-        var colorList = getLogoColorList(colors, mediaType, colorSettings);
+        // get list of colors
+        var colorList = getLogoColorList(colors, mediaType, colorSettingsJSON);
         var colors = colorList[0];
         var artboardsNames = colorList[1];
 
         // Update logo info around the artboards
         logotypes = getArtboardLogoTypes(docRef, true);
 
-        try{
-            lyrLogoInfo = docRef.layers.getByName(LOGO_INFO);
-            lyrLogoInfo.locked = false;
-            lyrLogoInfo.remove();
-        } catch(e){
-            // do nothing
+        // clear layer with logo info
+        clearLyrLogoInfo(docRef)
+
+        // add logo info
+        abLength = docRef.artboards.length / (artboardsNames.length+1);
+        for (ab = 1; ab < docRef.artboards.length; ab+=(artboardsNames.length+1)) {
+            // ab = ab == 0 ? 0 : ab+4;
+            app.selection = null;
+            docRef.artboards.setActiveArtboardIndex(ab-1); // correct -1 idnex starts at 0
+            run = setLogoInfo(docRef, logotypes[ab], artboardsNames, ab, ab);
         }
-        if (logotype == "alltypes") {
-            // abLength = docRef.artboards.length / 4;
-            // for (ab = 1; ab < docRef.artboards.length; ab+=4) {
-            abLength = docRef.artboards.length / (artboardsNames.length+1);
-            for (ab = 1; ab < docRef.artboards.length; ab+=(artboardsNames.length+1)) {
-                // ab = ab == 0 ? 0 : ab+4;
-                app.selection = null;
-                docRef.artboards.setActiveArtboardIndex(ab-1); // correct -1 idnex starts at 0
-                run = setLogoInfo(docRef, logotypes[ab], artboardsNames, ab, ab);
-            }
-        } else {
-            var oldABindex = docRef.artboards.getActiveArtboardIndex();
-            run = setLogoInfo(docRef, logotype, artboardsNames, initArtboardsLength, false);
-            docRef.artboards.setActiveArtboardIndex(oldABindex)
-        }
+        ///////////////////////////////////////////////////////////////
+        // Add logo info to either all or single artboard > has issues with single artboard
+        // if (logotype == "alltypes") {
+        //     // abLength = docRef.artboards.length / 4;
+        //     // for (ab = 1; ab < docRef.artboards.length; ab+=4) {
+        //     abLength = docRef.artboards.length / (artboardsNames.length+1);
+        //     for (ab = 1; ab < docRef.artboards.length; ab+=(artboardsNames.length+1)) {
+        //         // ab = ab == 0 ? 0 : ab+4;
+        //         app.selection = null;
+        //         docRef.artboards.setActiveArtboardIndex(ab-1); // correct -1 idnex starts at 0
+        //         run = setLogoInfo(docRef, logotypes[ab], artboardsNames, ab, ab);
+        //     }
+        // } else {
+        //     var oldABindex = docRef.artboards.getActiveArtboardIndex();
+        //     run = setLogoInfo(docRef, logotype, artboardsNames, initArtboardsLength, false);
+        //     docRef.artboards.setActiveArtboardIndex(oldABindex)
+        // }
+        ///////////////////////////////////////////////////////////////
+
+        // select prior active artboard again
+        ABs.setActiveArtboardIndex(intialActiveAB);
+
+        // Fit all artboards into view
+        app.executeMenuCommand('fitall');
         return run
     }
 }
@@ -3207,6 +3302,8 @@ function newBaseDoc(clientName, docType) {
             }
             run = true;
         }
+        // Fit all artboards into view
+        app.executeMenuCommand('fitall');
         return run
     } catch (e) {
         appendLog('### ERROR ' + e, logFile);

@@ -43,7 +43,7 @@ $path = {
     window.mediaType = "";
     window.forMats = [];
     window.sepaRator = "";
-    window.marginVal = $("#margins").val();
+    window.marginVal = $("#margins").val().replace(/[^0-9\s]/ig,'').trim().replace(/\s+/g, '');
     window.marginType = $("#margintype").val();
     window.allArtboards = $("input[name='allartboards']:checked").val();
     window.baseDocType = $("#baseDocType").val();
@@ -375,6 +375,10 @@ $path = {
         //         }
         //     });
         // });
+        $("#clientName").on("change", function () {
+            var clientName = $("#clientName").val().replace(/[^a-zA-Z0-9-_]/g, '').trim().replace(/\s+/g, '');
+            $("#clientName").val(clientName);
+        });
         $("#logotype").on("change", function () {
             checkDropzone();
         });
@@ -442,6 +446,34 @@ $path = {
                 });
             },100);
         });
+
+        // Reset logo color info
+        $("#resetlogoinfo_btn").on("click", function () {
+            ColorSettingsJSON();
+            getMarginValues();
+            setTimeout(function () {
+                csInterface.evalScript(`resetLogoInfo('${colors}','${mediaType}','${colorsettingsJSON}')`, function (run) {
+                    if (run == "true") {
+                        throwMessage(run, "Logo info reset");
+                    } else {
+                        throwMessage(run, "Failed to reset logo info");
+                    }
+                });
+            },100);
+        });
+        // Clear logo color info
+        $("#clearlogoinfo_btn").on("click", function () {
+            setTimeout(function () {
+                csInterface.evalScript(`clearLogoInfo()`, function (run) {
+                    if (run == "true") {
+                        throwMessage(run, "Logo info cleared");
+                    } else {
+                        throwMessage(run, "Failed to clear logo info");
+                    }
+                });
+            },100);
+        });
+
         // $("#addmargins_btn").click(function () {
         //     getMarginValues();
         //     setTimeout(function () {
@@ -454,6 +486,9 @@ $path = {
         //         });
         //     },100);
         // });
+        
+        // change is not good > only changes after a real change
+        // onchanging can cause issues as you type as well
         $("#margins").on("change", function () {
         // $("#margins").on("submit", function () {
             ColorSettingsJSON();
@@ -505,8 +540,13 @@ $path = {
 
         window.getMarginValues = function () {
             console.log("Getting Margin values");
-            marginVal = $("#margins").val();
+            marginVal = Number($("#margins").val().replace(/[^0-9\s]/ig,'').trim().replace(/\s+/g, ''));
+            $("#margins").val(marginVal);
+            // console.log("isNaN "+isNaN(marginVal));
+            // console.log("type "+typeof(marginVal));
+            // console.log("margin value "+marginVal);
             marginType = $("#margintype").val();
+            // console.log("marginType "+marginType);
             logoType = $("#logotype").val();
             colors = [];
             $("input:checkbox[name=colors]:checked").each(function () {
@@ -715,6 +755,14 @@ $path = {
             console.log("Color Settings Button click");
             loadJSX('/jsx/colorsettings-dialog.jsx');
         });
+    
+    function buymeacoffee(){
+        csInterface.openURLInDefaultBrowser("https://www.buymeacoffee.com/doingdesign");
+    }    
+    $("#donate").click(()=>{
+        buymeacoffee()
+    })
+    
         // $("input[type='radio']").on("change", function () {
         
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -733,8 +781,9 @@ $path = {
         var menuXML =
             // <MenuItem Id="debugPanel" Label="Debug" Enabled="true" Checkable="true" Checked="false"/> \
             '<Menu> \
-            <MenuItem Label="Logo Packer v1.3.2.1" Enabled="true" Checked="false"/> \
+            <MenuItem Label="Logo Packer v1.3.7" Enabled="true" Checked="false"/> \
             <MenuItem Id="info" Label="Go to info web page" Enabled="true" Checked="false"/> \
+            <MenuItem Id="donate" Label="Buy Me A Coffee" Enabled="true" Checked="false"/> \
             <MenuItem Label="---" /> \
             <MenuItem Id="github" Label="View on Github" Enabled="true" Checked="false"/> \
             <MenuItem Id="githubIssue" Label="Report Issue" Enabled="true" Checked="false"/> \
@@ -752,6 +801,9 @@ $path = {
             var menuId = event.type && event.data ? event.data.menuId : event;
             if (menuId == "info") {
                 csInterface.openURLInDefaultBrowser("https://mevcj.github.io/logo-packer");
+                // LoseFocus();
+            } else if (menuId == "donate") {
+                buymeacoffee()
                 // LoseFocus();
             } else if (menuId == "debugPanel") {
                 // toggleDebug();
@@ -782,10 +834,6 @@ $path = {
         }
         /////////////////////////////////////////////////////////////////////////////////////////
     }
-
-    $("#donate").click(()=>{
-        csInterface.openURLInDefaultBrowser("https://www.buymeacoffee.com/doingdesign");
-    })
 
     init();
     // forced dd change so panel refreshes
