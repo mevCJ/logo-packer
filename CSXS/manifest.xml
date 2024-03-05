@@ -7,7 +7,7 @@
 	</ExtensionList>
 	<ExecutionEnvironment>
 		<HostList>
-			<Host Name="ILST" Version="[17.0,28.1]" />
+			<Host Name="ILST" Version="[17.0,28.3]" />
 		</HostList>
 		<LocaleList>
 			<Locale Code="All" />
