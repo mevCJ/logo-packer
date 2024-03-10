@@ -56,26 +56,27 @@ Open the extension in Window > Extensions > Logo Packer and follow the instructi
 <details>
   <summary>More functions</summary>
   
-  ## Inverted logo type
-  ![inverted-logo-type-demo](https://raw.githubusercontent.com/wiki/schroef/logo-packer/inverted-logo-color-v132.gif?raw=true)
+  <h2>Inverted logo type</h2>
+  <img src="https://raw.githubusercontent.com/wiki/schroef/logo-packer/inverted-logo-color-v132.gif?raw=true" alt="inverted-logo-type-demo">
 
-  ## Export sizes JPG & PNG
-  ![export-sizes-demo](https://raw.githubusercontent.com/wiki/schroef/logo-packer/export-szes-jpg-png-v131.gif?raw=true)
+  <h2>Export sizes JPG & PNG</h2>
+  <img src="https://raw.githubusercontent.com/wiki/schroef/logo-packer/export-szes-jpg-png-v131.gif?raw=true" alt="Export sizes demo">
   
-  ## Custom Black for Print & Digital
-  ![custom-black-demo](https://raw.githubusercontent.com/wiki/schroef/logo-packer/custom-black-color-options-v132.gif?raw=true)
+  <h2>Custom Black for Print & Digital</h2>
+  <img src="https://raw.githubusercontent.com/wiki/schroef/logo-packer/custom-black-color-options-v132.gif?raw=true" alt="Custom black demo">
   
-  ## Custom Gray for Print & Digital
-  ![custom-gray-demo](https://raw.githubusercontent.com/wiki/schroef/logo-packer/custom-gray-colors-v132.gif?raw=true)
+  <h2>Custom Gray for Print & Digital</h2>
+  <img src="https://raw.githubusercontent.com/wiki/schroef/logo-packer/custom-gray-colors-v132.gif?raw=true" alt="Export gray demo">
 
-  ## Margin & padding
-  ![export-files-demo](https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/margin-padding.gif?raw=true)
 
-  ## Export format settings
-  ![export-files-demo](https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/export-format-settings.gif?raw=true)
+  <h2>Margin & padding</h2>
+  <img src="https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/margin-padding.gif?raw=true" alt="Margin demo">
 
-  ## Save all types (beta)
-  ![export-files-demo](https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/save-all-types.gif?raw=true)
+  <h2>Export format settings</h2>
+  <img src="https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/export-format-settings.gif?raw=true" alt="Export format settings">
+
+  <h2>Save all types (beta)</h2>
+    <img src="https://github.com/mevCJ/logo-packer/blob/gh-pages/assets/save-all-types.gif?raw=true" alt="Save all types">
 
 </details>
 
