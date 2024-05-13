@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<ExtensionManifest Version="6.0" ExtensionBundleId="com.doingdesign.logopacker" ExtensionBundleVersion="1.3.7" ExtensionBundleName="Logo Packer"
+<ExtensionManifest Version="6.0" ExtensionBundleId="com.doingdesign.logopacker" ExtensionBundleVersion="1.3.9" ExtensionBundleName="Logo Packer"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<ExtensionList>
-		<Extension Id="com.doingdesign.logopacker" Version="1.3.7" />
+		<Extension Id="com.doingdesign.logopacker" Version="1.3.9" />
 	</ExtensionList>
 	<ExecutionEnvironment>
 		<HostList>
-			<Host Name="ILST" Version="[17.0,28.3]" />
+			<Host Name="ILST" Version="[17.0,28.5]" />
 		</HostList>
 		<LocaleList>
 			<Locale Code="All" />
