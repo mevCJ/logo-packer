@@ -1,21 +1,21 @@
 {
     "generation": {
-        "client": "interieuspullencom",
-        "type": "logotype",
+        "client": "PagaDirect",
+        "type": "logo",
         "mediatype": "Digital",
         "colors": {
             "fullcolor": true,
             "pms": false,
             "inverted": {
-                "inverted": true,
+                "inverted": false,
                 "invertedName": false,
-                "invertedType": "SpotColor",
-                "invertedColor": "PANTONE 3275 C",
-                "invertedPreview": "rgb(0, 175, 154)"
+                "invertedType": "",
+                "invertedColor": "",
+                "invertedPreview": "rgba(0, 0, 0, 0)"
             },
             "grayscale": false,
-            "black": true,
-            "white": true
+            "black": false,
+            "white": false
         },
         "separator": {
             "dash": true,
@@ -23,11 +23,11 @@
         }
     },
     "export": {
-        "destfolder": "~/Desktop/Export/Logo%20Packer/Interieurcom",
+        "destfolder": "~/Desktop/Export/Logo%20Packer/PagaDirect",
         "formats": {
-            "ai": true,
+            "ai": false,
             "pdf": false,
-            "svg": true,
+            "svg": false,
             "eps": false,
             "jpg": true,
             "png": true

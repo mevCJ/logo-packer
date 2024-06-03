@@ -1,3 +1,12 @@
+/*
+ 
+ ToDo
+ - Fix AllTypes when onlu fullcolor is used 2024-06-03
+ - Offset with alltypes somtimes runs into issues with logomark   
+ - Margins doesnt add logo info properly when less than all 4 types are added
+
+*/
+
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, regexp: true, indent: 4, maxerr: 50 */
 /*global $, Folder*/
 // #include "Logger.jsxinc";
@@ -175,17 +184,20 @@ Array.prototype.indexOf = function(item) {
 
 // Get names according to artboards so we can have dynamic order
 function getArtboardLogoTypes(docRef, strip) {
+    appendLog("getArtboardLogoTypes()", logFile)
     var ab = docRef.artboards;
     abLogotypes = new Array();
     for (i = 0; i < ab.length; i++) {
         abPrefix = strip == true ? ab[i].name.split('-')[0] : ab[i].name; //.split('-')[0];
         abLogotypes.push(abPrefix)
     }
+    appendLog('abLogotypes: '+abLogotypes, logFile)
     return abLogotypes
 }
 
 // Get logo colors list, return names and color object for black and white, if custom black is set it uses those values
 function getLogoColorList(colors, mediaType, colorSettingsJSON){
+    appendLog("getLogoColorList()"+' \n\t\t\t '+colors+' \n\t\t\t '+mediaType+' \n\t\t\t '+colorSettingsJSON, logFile)
     // colors variation
     // Set black and white print colors
     colorSettingsJSON = colorSettingsJSON.split(',');
@@ -300,12 +312,15 @@ function generateLogoVariation(clientName, logotype, colors, inverted, mediaType
     clearedItemsDocs = ['']; // clear list of doc with cleared swatches
     sourceProfile = getColorProfile(docRef);
     if (logotype == "alltypes") {
+        appendLog('Logotype: '+logotype, logFile);
         docRefabLength = docRef.artboards.length;
         for (ab = 0; ab < docRefabLength; ab++) {
             app.selection = null;
             
             docRef.artboards.setActiveArtboardIndex(ab);
+            appendLog('setActiveArtboardIndex()', logFile);
             docRef.selectObjectsOnActiveArtboard();
+            appendLog('selectObjectsOnActiveArtboard()', logFile);
             createLogoTypes(docRef, clientName, colors, inverted, logotypes[ab], mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportSettings, colorSettingsJSON, false)
             // switch to generated logo
             if (run==true) app.documents.getByName(docRef.name).activate();
@@ -314,6 +329,7 @@ function generateLogoVariation(clientName, logotype, colors, inverted, mediaType
         if (run==true) app.documents.getByName(clientName).activate();
         resetLogoInfo(colors, mediaType, colorSettingsJSON)
     } else {
+        appendLog('Logotype: '+logotype, logFile);
         createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaType, sepaRator, forMats, autoResize, extensionRoot, sourceProfile, exportSettings, colorSettingsJSON, true);
     }
     if (run!=true) return run
@@ -363,6 +379,7 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
             } 
         }
     }
+    
     if (app.selection.length == 0) {
         return run = "selection"
     } else if (clientName == "") {
@@ -376,7 +393,11 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
     } else if (sepaRator == "undefined" || sepaRator == "") {
         return run = "separator"
     } else {
-        app.copy()
+        docRef.selectObjectsOnActiveArtboard();
+        appendLog("selectObjectsOnActiveArtboard()", logFile);
+        app.copy();
+        appendLog("Copy logo for logotype creation", logFile);
+
         separator = separator == 'dash' ? '-' : '_';
         // var addDocName = 'logo_var.ai';
         addDocName = clientName;
@@ -406,9 +427,11 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
             if (app.documents[i].name == addDocName)
                 hasDoc = true;
         }
-
+        
+        
         //create if doesn't exist
         if (!hasDoc) {
+            appendLog("Create New Document", logFile)
             var docPreset = new DocumentPreset();
             docPreset.title = addDocName;
             // docPreset.units = RulerUnits.Pixels;
@@ -457,7 +480,7 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
         docRef.pageOrigin = [0, 0];
         docRef.rasterEffectSettings.resolution = rasterEffectSettings;
 
-        docRef.artboards[initArtboardsLength - 1].name = logotype + separator + 'fullcolor' + separator + mediatype
+        docRef.artboards[initArtboardsLength - 1].name = logotype + separator + 'fullcolor' + separator + mediatype;
         
         appendLog("Create fullcolor logo", logFile)
 
@@ -493,7 +516,17 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
             
             // works by more then 1
             // var prevArtboard = docRef.artboards[initArtboardsLength - (colors.length +1)]
+            // IF we have only fullcolor, still subtract 1
+            // if (colors.length==0){
+            //     var prevArtboard = docRef.artboards[initArtboardsLength - 1]
+
+            // } else {
+            //     var prevArtboard = docRef.artboards[initArtboardsLength - colors.length]
+            // }
             var prevArtboard = docRef.artboards[initArtboardsLength - colors.length]
+            appendLog("prevArtboard: "+docRef.artboards[initArtboardsLength - colors.length], logFile)
+            appendLog("initArtboardsLength: "+initArtboardsLength, logFile)
+            appendLog("colors.length: "+colors.length, logFile)
 
             var initialObjHeight = Math.abs(prevArtboard.artboardRect[1] - prevArtboard.artboardRect[3]);
 
@@ -1858,7 +1891,7 @@ function scaleTypeMethod(index){
 ///////////////////////////////////////////////////////////////////////////////
 // Function: clearLogoInfo
 // Usage: reset logo info imprint around artboards
-// Input: colors (logotypes), mediatype (print/digital), colorsetttingsJSON
+// Input: colors (logotypes), mediatype (print/digital), colorSettingsJSON
 // Return: logo info imprint  
 ///////////////////////////////////////////////////////////////////////////////   
 function clearLogoInfo(){
@@ -1869,10 +1902,11 @@ function clearLogoInfo(){
 ///////////////////////////////////////////////////////////////////////////////
 // Function: resetLogoInfo
 // Usage: reset logo info imprint around artboards
-// Input: colors (logotypes), mediatype (print/digital), colorsetttingsJSON
+// Input: colors (logotypes), mediatype (print/digital), colorSettingsJSON
 // Return: logo info imprint  
 ///////////////////////////////////////////////////////////////////////////////   
 function resetLogoInfo(colors, mediaType, colorSettingsJSON){
+    appendLog("resetLogoInfo()", logFile)
     var docRef = app.activeDocument;
     // get list of colors
     var colorList = getLogoColorList(colors, mediaType, colorSettingsJSON);
@@ -1887,6 +1921,7 @@ function resetLogoInfo(colors, mediaType, colorSettingsJSON){
     var docRef = app.activeDocument;
     var ABs = docRef.artboards;
     abLength = docRef.artboards.length / (artboardsNames.length+1);
+    appendLog("abLength: "+abLength, logFile)
     for (ab = 1; ab < docRef.artboards.length; ab+=(artboardsNames.length+1)) {
         // ab = ab == 0 ? 0 : ab+4;
         app.selection = null;
@@ -2007,6 +2042,7 @@ function setLogoInfo(docRef, logotype, colors, initArtboardsLength, steps) {
 
 
 function clearLyrLogoInfo(docRef){
+    appendLog("clearLyrLogoInfo()", logFile)
     try{
         lyrLogoInfo = docRef.layers.getByName(LOGO_INFO);
         lyrLogoInfo.locked = false;
