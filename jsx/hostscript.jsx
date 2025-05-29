@@ -625,7 +625,7 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
             // app.executeMenuCommand("Horizontal Align Center");
 
             // Make color logo versions
-            run = fillColor(firstObj, colors[i],inverted, extensionRoot, exportSettings);
+            run = fillColor(firstObj, colors[i],inverted, extensionRoot, exportSettings, clientName);
             // alert("scriptAlertResult "+scriptAlertResult)
             // only check for Inverted
             if(colors[i]=='inverted' && run ==false){
@@ -656,7 +656,7 @@ function createLogoTypes(docRef, clientName, colors, inverted, logotype, mediaTy
 }
 
 // change object colors
-function fillColor(obj, color, inverted, extensionRoot, exportSettings) {
+function fillColor(obj, color, inverted, extensionRoot, exportSettings, clientName) {
     appendLog("fillColor()", logFile);
     appendLog("Color "+color, logFile);
 
@@ -677,8 +677,6 @@ function fillColor(obj, color, inverted, extensionRoot, exportSettings) {
         return true;
     }
     if (color == 'inverted') {
-        // app.executeMenuCommand('expandStyle');
-        // app.executeMenuCommand("ungroup");
         inverted = inverted.split(',');
         
         // docRef.defaultFillColor = docRef.swatches.getByName(inverted[2]).color.spot.color;
@@ -859,6 +857,7 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
             }
 
             // No subfolders by logotype
+            // alert("subFolders "+subFolders)
             if (subFolders != "subfolders") {
                 destPath = new Folder(setDest + '/' + mediaType);
 
@@ -978,25 +977,36 @@ function exportFiles(mediaType, logotype, forMats, subFolders, checkABhasArt, ex
             docRef.selection = null;
             // Only export if we have art on artboard
             // Makes script slower, but prevents empty artboards being saved out
+            // alert("checkABhasArt "+checkABhasArt)
             if (checkABhasArt == "checkABhasArt") {
+                docRef.artboards.setActiveArtboardIndex(i);
+                docRef.selectObjectsOnActiveArtboard();
+
+                // Skip if empty
+                if (docRef.selection.length === 0) {
+                    appendLog('AB check ON\n\t\t\t\tAB empty we skip it ', logFile);
+                    // continue
+                } else {
+                    expArtboards = getABlist(i, logotypePrefix, string, expArtboards);
+                }
+            } else {
                 docRef.artboards.setActiveArtboardIndex(i);
                 docRef.selectObjectsOnActiveArtboard();
 
                 // Turned of Canceling with empty artboards
                 if (docRef.selection.length === 0) {
+                    appendLog('AB check OFF\n\t\t\t\tAB empty we skip it ', logFile);
+                    // alert(docRef.artboards[i].name)
                     var title = "Warning!";
                     // var msg1 = "All artboards are empty, export will be canceled";
-                    var msg1 = "On or more artboards are empty, result will have an empty file.";
+                    var msg1 = "One or more artboards are empty, result will have an empty file.";
                     var msg2 = false;
-                    var okStr = "Exit";
-                    var cancelStr = "Exit";
-                    scriptAlert(title, msg1, msg2, false, true, okStr, cancelStr, aiIcon64);
+                    var okStr = "Continou";
+                    var cancelStr = "Cancel";
+                    scriptAlert(title, msg1, msg2, true, false, okStr, cancelStr, aiIcon64);
                     // run = scriptAlertResult;
                     // return run
-                } else {
-                    expArtboards = getABlist(i, logotypePrefix, string, expArtboards);
-                }
-            } else {
+                } 
                 expArtboards = getABlist(i, logotypePrefix, string, expArtboards);
             }
         }
@@ -1920,13 +1930,24 @@ function resetLogoInfo(colors, mediaType, colorSettingsJSON){
 
     var docRef = app.activeDocument;
     var ABs = docRef.artboards;
-    abLength = docRef.artboards.length / (artboardsNames.length+1);
+    // Correct if only fullcoor is used
+    if (artboardsNames.length == 0) {
+        abLength = docRef.artboards.length / (artboardsNames.length+1);
+    } else {
+        abLength = docRef.artboards.length;
+    }
     appendLog("abLength: "+abLength, logFile)
     for (ab = 1; ab < docRef.artboards.length; ab+=(artboardsNames.length+1)) {
         // ab = ab == 0 ? 0 : ab+4;
         app.selection = null;
         docRef.artboards.setActiveArtboardIndex(ab-1); // correct -1 idnex starts at 0
-        run = setLogoInfo(docRef, logotypes[ab], artboardsNames, ab, ab);
+        // dont correct to skip first logo
+        // IETS ZORGT VOOR VRASH NU
+        // if (artboardsNames.length == 0) {
+        //     ab = ab-1;
+        // }
+        // run = setLogoInfo(docRef, logotypes[ab], artboardsNames, ab, ab);
+        run = setLogoInfo(docRef, logotypes[ab-1], artboardsNames, abLength, ab);
     }
     return run
 }
@@ -1970,6 +1991,8 @@ function setLogoInfo(docRef, logotype, colors, initArtboardsLength, steps) {
             }
         }
     }
+    appendLog("colors length: "+ Number(colors.length)+1, logFile)
+    appendLog("steps: "+ steps, logFile)
     // Add logo info: Logo type & Media type
     if (steps != false){
         var ab = docRef.artboards[steps-1]; // correct with subtracting -1 for index starts at 0
@@ -1981,14 +2004,19 @@ function setLogoInfo(docRef, logotype, colors, initArtboardsLength, steps) {
             var ab = docRef.artboards[docRef.artboards.length - (Number(colors.length)+1)]; // Step backwards according to number of colors
             // var ab = docRef.artboards[initArtboardsLength - colors.length+1];
         }
+        if (Number(colors.length)==0){
+            var ab = docRef.artboards[0];
+        }
     }
+    appendLog("ab: "+ ab, logFile)
     ///////////////////////////////////////////////////
     // Get artboard ranges per logo type
     // alert("colors "+colors)
     // alert("typeof "+typeof(colors))
     // alert(colors.length)
     // alert((Number(colors.length)+1))
-    logotypes = getArtboardLogoTypes(docRef, true);
+
+    // logotypes = getArtboardLogoTypes(docRef, true);
     // alert(logotypes.length)
     // alert(typeof(colors.length))
     // alert(typeof(Number(colors.length)))
@@ -2023,6 +2051,7 @@ function setLogoInfo(docRef, logotype, colors, initArtboardsLength, steps) {
     // Variations like full-color + white text and full-color with black text are very common
     // for (var i = 0; i < 3; i++) {
     for (var i = 0; i < colors.length; i++) {
+        appendLog("i: "+i, logFile)
         if (steps != false){
             var ab = docRef.artboards[(steps+i)];
         } else {
@@ -3282,7 +3311,7 @@ function newBaseDoc(clientName, docType) {
             var docType = docType == 'cmyk' ? 'cmyk' : 'rgb';
             var hasDoc = false;
             var initArtboardsLength = 1;
-            var addDocName = clientName;
+            var addDocName = clientName+'-BaseDoc';
             var docPreset = new DocumentPreset();
             docPreset.title = addDocName;
             docPreset.width = 283.465; // 1 pt > 2.83465mm
@@ -3815,8 +3844,43 @@ function inverseLogo(){
             colorables.push(item);
             item.fillColor = color;
         } else if (item.constructor.name == 'CompoundPathItem' && item.pathItems) {
+            // app.executeMenuCommand('expandStyle');
+            // alert(item.pathItems)
+            // alert(item.pathItems.length)
+            // alert(item.pathItems.fillColor)
+            // alert(item.pathItems.length==0)
+            // alert(item.constructor.name)
+            // var item = _pageItems.getByName((i+1));
+            if (item.pathItems.length == 0) {
+                // app.executeMenuCommand('Live Pathfinder Trim');
+                // app.executeMenuCommand('expandStyle');
+            }
+            // item = app.activeDocument.selection;
+            // alert(item.constructor.name)
+            if (item.constructor.name == 'GroupItem' || item.constructor.name == 'Array') {
+                // add colors from grouped items
+                // for (var i = 0; i <= item.pageItems.length; i++) {
+                //     if (!item.pageItems[i].locked){
+                //         fillPathItem(item.pageItems[i], color);
+                //     }
+                // }
+                // break
+            } else {
+            // if (item.constructor.name == 'GroupItem') {
+            //     // add colors from grouped items
+            //     for (var i = 0; i < item.pageItems.length; i++) {
+            //         if (!item.pageItems[i].locked){
+            //             fillPathItem(item.pageItems[i], color);
+            //         }
+            //     }
+            // } else {
+                // alert(item.pathItems.length)
+                // alert(item.pathItems[0])
+            }
             colorables.push(item.pathItems[0]);
             item.pathItems[0].fillColor = color;
+            // alert(item.constructor.name)
+            // alert(item.pathItems[0].typename)
         } else if (item.constructor.name == 'TextFrame' && item.textRanges) {
             for (var i = item.textRanges.length - 1; i >= 0; i--)
                 colorables.push({

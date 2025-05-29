@@ -781,7 +781,7 @@ $path = {
         var menuXML =
             // <MenuItem Id="debugPanel" Label="Debug" Enabled="true" Checkable="true" Checked="false"/> \
             '<Menu> \
-            <MenuItem Label="Logo Packer v1.4.0" Enabled="true" Checked="false"/> \
+            <MenuItem Label="Logo Packer v1.4.1" Enabled="true" Checked="false"/> \
             <MenuItem Id="info" Label="Go to info web page" Enabled="true" Checked="false"/> \
             <MenuItem Id="donate" Label="Buy Me A Coffee" Enabled="true" Checked="false"/> \
             <MenuItem Label="---" /> \

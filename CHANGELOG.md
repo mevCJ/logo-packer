@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.4.1] - 2025-01-09
+### Added
+- '_BaseDoc' to basedoc when making new doc. Other wise script tries to make all versions in the open file which causes issues
+- appearnce inverted color pick color, make it more visible color needs to be selected
+
+### Fixed
+- empty artboard check, wasnt working properly
+
 ## [1.4.0] - 2024-06-03
 ### Fixed
 <!-- Is caused when item is pre selected and than dragged. Yet it doesnt ahppen 100% of time -->

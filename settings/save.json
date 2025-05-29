@@ -1,21 +1,21 @@
 {
     "generation": {
-        "client": "PagaDirect",
-        "type": "logo",
+        "client": "NextLevel",
+        "type": "alltypes",
         "mediatype": "Digital",
         "colors": {
             "fullcolor": true,
             "pms": false,
             "inverted": {
-                "inverted": false,
+                "inverted": true,
                 "invertedName": false,
                 "invertedType": "",
                 "invertedColor": "",
                 "invertedPreview": "rgba(0, 0, 0, 0)"
             },
             "grayscale": false,
-            "black": false,
-            "white": false
+            "black": true,
+            "white": true
         },
         "separator": {
             "dash": true,
@@ -23,11 +23,11 @@
         }
     },
     "export": {
-        "destfolder": "~/Desktop/Export/Logo%20Packer/PagaDirect",
+        "destfolder": "~/Desktop/Export/Logo%20Packer/Next%20Level",
         "formats": {
-            "ai": false,
-            "pdf": false,
-            "svg": false,
+            "ai": true,
+            "pdf": true,
+            "svg": true,
             "eps": false,
             "jpg": true,
             "png": true
