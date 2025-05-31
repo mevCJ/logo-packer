@@ -678,7 +678,7 @@ label {
     height: 12px;
     width: 12px;
     padding: 0 !important;
-    background: none;
+    background: rgb(123,123,123);
     border: 1px solid var(--darkbg);
     cursor: pointer;
     align-self: flex-end;

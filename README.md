@@ -21,6 +21,12 @@ Logo Packer is an open-sourced Adobe Illustrator extensions that allows you to g
 Download the files on [Github](https://github.com/mevCJ/logo-packer) and place the files into the CEP extension folder. 
 
 ### CEP extensions folder in Windows: 
+lcoation 1
+``` bash
+C:\Program Files\Common Files\Adobe\CEP\extensions
+```
+
+or location 2
 ``` bash
 C:\Program Files\Adobe\Adobe Illustrator CC 2019\Support Files\Required
 ```

@@ -1,7 +1,7 @@
 {
     "generation": {
-        "client": "interieuspullencom",
-        "type": "logotype",
+        "client": "NextLevel",
+        "type": "alltypes",
         "mediatype": "Digital",
         "colors": {
             "fullcolor": true,
@@ -9,9 +9,9 @@
             "inverted": {
                 "inverted": true,
                 "invertedName": false,
-                "invertedType": "SpotColor",
-                "invertedColor": "PANTONE 3275 C",
-                "invertedPreview": "rgb(0, 175, 154)"
+                "invertedType": "",
+                "invertedColor": "",
+                "invertedPreview": "rgba(0, 0, 0, 0)"
             },
             "grayscale": false,
             "black": true,
@@ -23,10 +23,10 @@
         }
     },
     "export": {
-        "destfolder": "~/Desktop/Export/Logo%20Packer/Interieurcom",
+        "destfolder": "~/Desktop/Export/Logo%20Packer/Next%20Level",
         "formats": {
             "ai": true,
-            "pdf": false,
+            "pdf": true,
             "svg": true,
             "eps": false,
             "jpg": true,

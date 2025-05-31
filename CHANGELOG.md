@@ -1,6 +1,29 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.4.1] - 2025-01-09
+### Added
+- '_BaseDoc' to basedoc when making new doc. Other wise script tries to make all versions in the open file which causes issues
+- appearnce inverted color pick color, make it more visible color needs to be selected
+
+### Fixed
+- empty artboard check, wasnt working properly
+
+## [1.4.0] - 2024-06-03
+### Fixed
+<!-- Is caused when item is pre selected and than dragged. Yet it doesnt ahppen 100% of time -->
+- DragNDrop copy command doesnt work in newer Ill version, added extra copy command inside the function when its waiting for a result
+- DragnDrop had small timeout function which waited for data to be loaded, changed from 150 > 200 ms
+
+## [1.3.9] - 2024-05-13
+### Updated
+- Updated supported illustrator version; 28.3 > 28.5
+- logo packer verions from v1.3.7 to v1.3.9 
+
+## [1.3.8] - 2024-03-05
+### Updated
+- Updated supported illustrator version; 28.1 > 28.3 
+
 ## [1.3.7] - 2024-01-18
 ### Fixed
 - When adding margins > getLogoColorList() docRef was not declared

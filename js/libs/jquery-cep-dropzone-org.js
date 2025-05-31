@@ -31,6 +31,7 @@
          * Appends the dropzone to the document.
          */
         function getDropZone() {
+            // var $dropzone = $('<textarea allow="clipboard-read; clipboard-write"/>').attr({
             var $dropzone = $('<textarea readonly allow="clipboard-read; clipboard-write"/>').attr({
                 class: "dropzone",
                 id: "dropzone--" + new Date().getTime(),
@@ -116,6 +117,9 @@
             var $target = $(event.target);
             var csInterface = new CSInterface();
             csInterface.evalScript('app.executeMenuCommand("copy")', function (result) {
+                console.log("Copy inside CEP DropZone script js")
+                csInterface.evalScript('app.copy()')
+                // csInterface.evalScript('app.executeMenuCommand("copy")')
                 try {
                     var svg;
                     var svgHolder = $("#svgHolder");
@@ -198,7 +202,7 @@
                         csInterface.evalScript(`generateLogoVariation('${clientName}','${logoType}','${colors}','${inverted}','${mediaType}','${sepaRator}','${forMats}','${autoResize}', '${$path.extension}', '${exportsettingsJSON}', '${colorsettingsJSON}')`, function (run) {
                             outputRun(run);
                         });
-                    }, 150);
+                    }, 250);
                         
                     if (onSuccess instanceof Function) {
                         // console.info("Dropped Succesfully!");
