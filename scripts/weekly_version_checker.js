@@ -1,6 +1,7 @@
 const { JSDOM } = require('jsdom');
 const fs = require('fs').promises;
 const path = require('path');
+const fetch = require('node-fetch');
 
 /**
  * Scrapes Adobe Illustrator release notes and finds h2 tags with version numbers
@@ -19,14 +20,29 @@ class IllustratorVersionChecker {
      */
     async fetchHTML() {
         try {
-            const response = await fetch(this.url);
+            console.log(`Fetching: ${this.url}`);
+            
+            const response = await fetch(this.url, {
+                timeout: 30000, // 30 second timeout
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                },
+                follow: 5, // Follow up to 5 redirects
+                compress: true
+            });
             
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
             }
             
-            return await response.text();
+            const html = await response.text();
+            console.log(`Successfully fetched ${html.length} characters`);
+            
+            return html;
         } catch (error) {
+            if (error.name === 'FetchError') {
+                throw new Error(`Network error: ${error.message}`);
+            }
             throw new Error(`Failed to fetch HTML: ${error.message}`);
         }
     }
