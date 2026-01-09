@@ -1,0 +1,17 @@
+{
+  "name": "illustrator-version-checker",
+  "version": "1.0.0",
+  "description": "Script to check Adobe Illustrator release notes for version updates",
+  "main": "weekly_version_checker.js",
+  "scripts": {
+    "check-versions": "node scripts/weekly_version_checker.js",
+    "install-deps": "npm install",
+    "build": "node scripts/build.js"
+  },
+  "dependencies": {
+    "jsdom": "^23.0.1"
+  },
+  "keywords": ["adobe", "illustrator", "version", "scraper"],
+  "author": "",
+  "license": "MIT"
+}
