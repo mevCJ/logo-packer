@@ -15,35 +15,95 @@ class IllustratorVersionChecker {
     }
 
     /**
-     * Fetches the HTML content from the Adobe release notes page
+     * Fetches the HTML content from the Adobe release notes page with retry logic
      * @returns {Promise<string>} HTML content
      */
     async fetchHTML() {
+        const maxRetries = 3;
+        const baseTimeout = 60000; // 60 seconds
+        
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                console.log(`Attempt ${attempt}/${maxRetries}: Fetching ${this.url}`);
+                
+                const timeout = baseTimeout * attempt; // Increase timeout with each retry
+                
+                const response = await fetch(this.url, {
+                    timeout: timeout,
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                        'Accept-Language': 'en-US,en;q=0.5',
+                        'Accept-Encoding': 'gzip, deflate, br',
+                        'DNT': '1',
+                        'Connection': 'keep-alive',
+                        'Upgrade-Insecure-Requests': '1'
+                    },
+                    follow: 10, // Follow up to 10 redirects
+                    compress: true,
+                    size: 0, // No size limit
+                    agent: false // Use default agent
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+                }
+                
+                const html = await response.text();
+                console.log(`✅ Successfully fetched ${html.length} characters on attempt ${attempt}`);
+                
+                return html;
+                
+            } catch (error) {
+                console.log(`❌ Attempt ${attempt} failed: ${error.message}`);
+                
+                if (attempt === maxRetries) {
+                    // On final attempt, try fallback method
+                    console.log('🔄 Trying fallback method with curl...');
+                    try {
+                        return await this.fetchHTMLWithCurl();
+                    } catch (curlError) {
+                        console.log(`❌ Curl fallback also failed: ${curlError.message}`);
+                        throw new Error(`All fetch methods failed. Last error: ${error.message}`);
+                    }
+                }
+                
+                // Wait before retrying (exponential backoff)
+                const waitTime = 2000 * attempt; // 2s, 4s, 6s
+                console.log(`⏳ Waiting ${waitTime}ms before retry...`);
+                await new Promise(resolve => setTimeout(resolve, waitTime));
+            }
+        }
+    }
+
+    /**
+     * Fallback method using curl command (for GitHub Actions environment)
+     * @returns {Promise<string>} HTML content
+     */
+    async fetchHTMLWithCurl() {
+        const { exec } = require('child_process');
+        const { promisify } = require('util');
+        const execAsync = promisify(exec);
+        
         try {
-            console.log(`Fetching: ${this.url}`);
+            console.log('Using curl as fallback method...');
             
-            const response = await fetch(this.url, {
-                timeout: 30000, // 30 second timeout
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-                },
-                follow: 5, // Follow up to 5 redirects
-                compress: true
-            });
+            const curlCommand = `curl -L --max-time 120 --retry 3 --retry-delay 5 ` +
+                `--user-agent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36" ` +
+                `--header "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" ` +
+                `--compressed "${this.url}"`;
             
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+            const { stdout, stderr } = await execAsync(curlCommand);
+            
+            if (stderr && !stdout) {
+                throw new Error(`Curl error: ${stderr}`);
             }
             
-            const html = await response.text();
-            console.log(`Successfully fetched ${html.length} characters`);
+            console.log(`✅ Curl successfully fetched ${stdout.length} characters`);
+            return stdout;
             
-            return html;
         } catch (error) {
-            if (error.name === 'FetchError') {
-                throw new Error(`Network error: ${error.message}`);
-            }
-            throw new Error(`Failed to fetch HTML: ${error.message}`);
+            throw new Error(`Curl fallback failed: ${error.message}`);
         }
     }
 
