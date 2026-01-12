@@ -118,6 +118,22 @@ function startLog() {
     }
     // var logopackerFolder = new Folder(userData + "/Adobe/CEP/Extensions/logo-packer-main");
     var logopackerFolder = Folder(userData + "/Adobe/CEP/Extensions/logo-packer-main");
+
+ 
+    // Fix for OSX not writing LOG 20260112
+    if(isMac()){
+        // alert(logopackerFolder)
+        // alert("!logopackerFolder.excists "+!logopackerFolder.excists)
+        // alert("logopackerFolder.excists "+logopackerFolder.excists)
+        if(!logopackerFolder.excists|| logopackerFolder.excists ==='indefined'){
+        // if (!destPath.exists) destPath.create();
+            var logopackerFolder = Folder("/library/Application Support/Adobe/CEP/Extensions/logo-packer-main")
+        }
+        // alert(logopackerFolder)
+
+    }
+
+
     if (useLogging) {
         // Windows cant write to hidden files, not sure why
         logFile = File(logopackerFolder + '/logo-packer.log');
@@ -125,6 +141,8 @@ function startLog() {
         // Remove > we keep log small
         // if (logFile.exists)
         // 	logFile.remove();
+                // alert(userData)
+        // alert(logopackerFolder)
 
         logFile.open('w'); // W overwrites - A appends
         // appendLog("extension "+extension, logFile);
