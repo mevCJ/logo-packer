@@ -38,6 +38,8 @@ C:\Program Files\Adobe\Adobe Illustrator CC 2019\Support Files\Required
 
 <i>note: if the CEP extension folder doesn't exist, simply create one in /Library/Application Support/Adobe </i>
 
+>Please note that the installed folder is named 'logo-packer-main' when unzipping th file
+
 ### Enabling debug mode:
 
 **Windows:** 
