@@ -1,6 +1,51 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.4.5] - 2026-01-08
+-Fix for logfile not created on OSX
+
+## [1.4.4] - 2026-01-08
+### Updated
+- ExtensionBundleVersion in manifest
+- Supported illustrator version; > 30.1
+
+### Added
+- GitHub Actions workflow for weekly version checks (runs every Monday at 9:00 AM UTC)
+- Create Node.js build and version checker scripts for automated version detection
+- Manifest template for dynamic version injection during builds
+- Package.json and package-lock.json for npm dependency management
+- .gitignore to exclude node_modules from version control
+- version.txt for tracking current Illustrator hostVersion compatibility
+- Implement automated PR creation when new Illustrator versions are detected
+- Enable manual workflow trigger via workflow_dispatch for on-demand version checks
+- Upgrade Node.js runtime from version 18 to 20 in GitHub Actions workflow
+- Add node-fetch dependency for improved HTTP request handling with timeouts and redirects
+- Implement comprehensive error handling in version checker script with graceful failure modes
+- Add detailed logging and debugging output to version-check workflow for troubleshooting
+- Set error flag in workflow outputs to distinguish between no updates and checker failures
+- Add User-Agent header and timeout configuration to fetch requests for better reliability
+- Update workflow conditions to skip build and PR creation when errors occur
+- Add summary step with error diagnostics to inform about network or website structure issues
+- Prevent workflow failures on temporary issues, allowing retry on next scheduled run
+- Add retry mechanism with exponential backoff to version checker script (3 attempts)
+- Implement curl fallback method for GitHub Actions environment compatibility
+- Increase timeout handling with progressive timeout scaling per retry attempt
+- Add comprehensive HTTP headers to improve request success rate
+- Add timeout-minutes constraint to workflow job (10 minutes)
+- Add network diagnostics output to workflow for debugging
+- Implement proper timeout detection (exit code 124) with graceful error handling
+- Add detailed logging for each fetch attempt and fallback method invocation
+- Improve error messages with attempt numbers and specific failure reasons
+- Increase curl retry attempts and add delay between retries for robustness
+
+## [1.4.3] - 2025-08-03
+### Updated
+- Supported illustrator version; > 29.7
+
+## [1.4.2] - 2025-06-25
+### Updated
+- Supported illustrator version; > 29.6
+
 ## [1.4.1] - 2025-01-09
 ### Added
 - '_BaseDoc' to basedoc when making new doc. Other wise script tries to make all versions in the open file which causes issues
