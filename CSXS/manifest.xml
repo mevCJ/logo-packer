@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<ExtensionManifest Version="6.0" ExtensionBundleId="com.doingdesign.logopacker" ExtensionBundleVersion="1.4.4" ExtensionBundleName="Logo Packer"
+<ExtensionManifest Version="6.0" ExtensionBundleId="com.doingdesign.logopacker" ExtensionBundleVersion="1.4.5" ExtensionBundleName="Logo Packer"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<ExtensionList>
-		<Extension Id="com.doingdesign.logopacker" Version="1.4.4" />
+		<Extension Id="com.doingdesign.logopacker" Version="1.4.5" />
 	</ExtensionList>
 	<ExecutionEnvironment>
 		<HostList>

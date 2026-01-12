@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.4.5] - 2026-01-08
+-Fix for logfile not created on OSX
+
 ## [1.4.4] - 2026-01-08
 ### Updated
 - ExtensionBundleVersion in manifest
