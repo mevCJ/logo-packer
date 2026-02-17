@@ -9,8 +9,7 @@
     "build": "node scripts/build.js"
   },
   "dependencies": {
-    "jsdom": "^23.0.1",
-    "node-fetch": "^2.7.0"
+    "playwright": "^1.40.0"
   },
   "keywords": ["adobe", "illustrator", "version", "scraper"],
   "author": "",

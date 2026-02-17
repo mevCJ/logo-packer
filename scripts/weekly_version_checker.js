@@ -1,7 +1,6 @@
-const { JSDOM } = require('jsdom');
+const { chromium } = require('playwright');
 const fs = require('fs').promises;
 const path = require('path');
-const fetch = require('node-fetch');
 
 /**
  * Scrapes Adobe Illustrator release notes and finds h2 tags with version numbers
@@ -15,57 +14,59 @@ class IllustratorVersionChecker {
     }
 
     /**
-     * Fetches the HTML content from the Adobe release notes page with retry logic
+     * Fetches the HTML content from the Adobe release notes page using Playwright
      * @returns {Promise<string>} HTML content
      */
     async fetchHTML() {
         const maxRetries = 3;
-        const baseTimeout = 60000; // 60 seconds
+        let browser = null;
         
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
-                console.log(`Attempt ${attempt}/${maxRetries}: Fetching ${this.url}`);
+                console.log(`Attempt ${attempt}/${maxRetries}: Fetching ${this.url} with Playwright`);
                 
-                const timeout = baseTimeout * attempt; // Increase timeout with each retry
-                
-                const response = await fetch(this.url, {
-                    timeout: timeout,
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                        'Accept-Language': 'en-US,en;q=0.5',
-                        'Accept-Encoding': 'gzip, deflate, br',
-                        'DNT': '1',
-                        'Connection': 'keep-alive',
-                        'Upgrade-Insecure-Requests': '1'
-                    },
-                    follow: 10, // Follow up to 10 redirects
-                    compress: true,
-                    size: 0, // No size limit
-                    agent: false // Use default agent
+                // Launch browser in headless mode
+                browser = await chromium.launch({
+                    headless: true,
+                    args: ['--no-sandbox', '--disable-setuid-sandbox'] // Required for GitHub Actions
                 });
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
-                }
+                const context = await browser.newContext({
+                    userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    viewport: { width: 1920, height: 1080 }
+                });
                 
-                const html = await response.text();
+                const page = await context.newPage();
+                
+                // Set timeout for navigation
+                const timeout = 60000 * attempt; // 60s, 120s, 180s
+                
+                // Navigate to the page and wait for network to be idle
+                await page.goto(this.url, {
+                    waitUntil: 'networkidle',
+                    timeout: timeout
+                });
+                
+                // Wait a bit for any dynamic content to load
+                await page.waitForTimeout(2000);
+                
+                // Get the HTML content
+                const html = await page.content();
+                
                 console.log(`✅ Successfully fetched ${html.length} characters on attempt ${attempt}`);
                 
+                await browser.close();
                 return html;
                 
             } catch (error) {
                 console.log(`❌ Attempt ${attempt} failed: ${error.message}`);
                 
+                if (browser) {
+                    await browser.close().catch(() => {});
+                }
+                
                 if (attempt === maxRetries) {
-                    // On final attempt, try fallback method
-                    console.log('🔄 Trying fallback method with curl...');
-                    try {
-                        return await this.fetchHTMLWithCurl();
-                    } catch (curlError) {
-                        console.log(`❌ Curl fallback also failed: ${curlError.message}`);
-                        throw new Error(`All fetch methods failed. Last error: ${error.message}`);
-                    }
+                    throw new Error(`All fetch attempts failed. Last error: ${error.message}`);
                 }
                 
                 // Wait before retrying (exponential backoff)
@@ -77,59 +78,28 @@ class IllustratorVersionChecker {
     }
 
     /**
-     * Fallback method using curl command (for GitHub Actions environment)
-     * @returns {Promise<string>} HTML content
-     */
-    async fetchHTMLWithCurl() {
-        const { exec } = require('child_process');
-        const { promisify } = require('util');
-        const execAsync = promisify(exec);
-        
-        try {
-            console.log('Using curl as fallback method...');
-            
-            const curlCommand = `curl -L --max-time 120 --retry 3 --retry-delay 5 ` +
-                `--user-agent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36" ` +
-                `--header "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" ` +
-                `--compressed "${this.url}"`;
-            
-            const { stdout, stderr } = await execAsync(curlCommand);
-            
-            if (stderr && !stdout) {
-                throw new Error(`Curl error: ${stderr}`);
-            }
-            
-            console.log(`✅ Curl successfully fetched ${stdout.length} characters`);
-            return stdout;
-            
-        } catch (error) {
-            throw new Error(`Curl fallback failed: ${error.message}`);
-        }
-    }
-
-    /**
      * Parses HTML and extracts h2 tags with Illustrator version numbers
      * @param {string} html - HTML content to parse
      * @returns {Array} Array of objects containing version info
      */
     parseVersions(html) {
-        const dom = new JSDOM(html);
-        const document = dom.window.document;
-        const h2Tags = document.querySelectorAll('h2');
+        // Use simple regex parsing instead of JSDOM
+        const h2Regex = /<h2[^>]*>(.*?)<\/h2>/gi;
         const versions = [];
+        let match;
 
-        h2Tags.forEach(h2 => {
-            const text = h2.textContent.trim();
-            const match = text.match(this.versionRegex);
+        while ((match = h2Regex.exec(html)) !== null) {
+            const text = match[1].replace(/<[^>]*>/g, '').trim(); // Remove any inner HTML tags
+            const versionMatch = text.match(this.versionRegex);
             
-            if (match) {
+            if (versionMatch) {
                 versions.push({
                     fullText: text,
-                    version: match[1],
-                    element: h2.outerHTML
+                    version: versionMatch[1],
+                    element: match[0]
                 });
             }
-        });
+        }
 
         return versions;
     }
