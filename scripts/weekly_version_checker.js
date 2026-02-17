@@ -25,30 +25,54 @@ class IllustratorVersionChecker {
             try {
                 console.log(`Attempt ${attempt}/${maxRetries}: Fetching ${this.url} with Playwright`);
                 
-                // Launch browser in headless mode
+                // Launch browser in headless mode with HTTP/2 disabled
                 browser = await chromium.launch({
                     headless: true,
-                    args: ['--no-sandbox', '--disable-setuid-sandbox'] // Required for GitHub Actions
+                    args: [
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox',
+                        '--disable-http2',  // Disable HTTP/2 to avoid protocol errors
+                        '--disable-blink-features=AutomationControlled',
+                        '--disable-dev-shm-usage',
+                        '--disable-gpu'
+                    ]
                 });
                 
                 const context = await browser.newContext({
-                    userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    viewport: { width: 1920, height: 1080 }
+                    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    viewport: { width: 1920, height: 1080 },
+                    ignoreHTTPSErrors: true,
+                    extraHTTPHeaders: {
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                        'Accept-Encoding': 'gzip, deflate, br',
+                        'Connection': 'keep-alive',
+                        'Upgrade-Insecure-Requests': '1'
+                    }
                 });
                 
                 const page = await context.newPage();
                 
                 // Set timeout for navigation
-                const timeout = 60000 * attempt; // 60s, 120s, 180s
+                const timeout = 90000 * attempt; // 90s, 180s, 270s
+                page.setDefaultTimeout(timeout);
+                page.setDefaultNavigationTimeout(timeout);
                 
-                // Navigate to the page and wait for network to be idle
+                // Navigate to the page with more lenient wait conditions
                 await page.goto(this.url, {
-                    waitUntil: 'networkidle',
+                    waitUntil: 'domcontentloaded', // Less strict than networkidle
                     timeout: timeout
                 });
                 
+                // Wait for h2 elements to appear (the content we need)
+                try {
+                    await page.waitForSelector('h2', { timeout: 10000 });
+                } catch (e) {
+                    console.log('Warning: h2 selector timeout, but continuing...');
+                }
+                
                 // Wait a bit for any dynamic content to load
-                await page.waitForTimeout(2000);
+                await page.waitForTimeout(3000);
                 
                 // Get the HTML content
                 const html = await page.content();
@@ -70,7 +94,7 @@ class IllustratorVersionChecker {
                 }
                 
                 // Wait before retrying (exponential backoff)
-                const waitTime = 2000 * attempt; // 2s, 4s, 6s
+                const waitTime = 3000 * attempt; // 3s, 6s, 9s
                 console.log(`⏳ Waiting ${waitTime}ms before retry...`);
                 await new Promise(resolve => setTimeout(resolve, waitTime));
             }
