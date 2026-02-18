@@ -16,22 +16,19 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm install
-
       - name: Check for version updates
         id: version-check
         run: |
           echo "Checking for Illustrator version updates..."
           
+          # Make script executable
+          chmod +x scripts/weekly_version_checker.sh
+          
           # Run the version checker and capture output
-          node scripts/weekly_version_checker.js > version_output.txt 2>&1
+          bash scripts/weekly_version_checker.sh > version_output.txt 2>&1 || true
+          
+          # Display the full output for debugging
+          cat version_output.txt
           
           # Check if version.txt was modified (indicates an update occurred)
           if git diff --quiet version.txt; then
@@ -50,9 +47,17 @@ jobs:
             
             echo "Version updated from $OLD_VERSION to $NEW_VERSION"
           fi
-          
-          # Display the full output for debugging
-          cat version_output.txt
+
+      - name: Setup Node.js (for build)
+        if: steps.version-check.outputs.update_available == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies (for build)
+        if: steps.version-check.outputs.update_available == 'true'
+        run: npm install
 
       - name: Run build if update available
         if: steps.version-check.outputs.update_available == 'true'
@@ -81,10 +86,12 @@ jobs:
             - **Previous version**: ${{ steps.version-check.outputs.old_version }}
             - **New version**: ${{ steps.version-check.outputs.new_version }}
             - Updated `version.txt` with new hostVersion range
+            - Updated `CSXS/manifest.xml` with new version
             - Rebuilt extension for compatibility with new version
             
             ### What's Updated
             - `version.txt`: Updated hostVersion to support Illustrator ${{ steps.version-check.outputs.new_version }}
+            - `CSXS/manifest.xml`: Updated with new extension and host versions
             - Built extension files (if applicable)
             
             ### Next Steps
