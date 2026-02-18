@@ -19,58 +19,27 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm install
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-
       - name: Check for version updates
         id: version-check
-        timeout-minutes: 10  # Give more time for the network requests
         run: |
           echo "Checking for Illustrator version updates..."
-          echo "GitHub Actions Runner IP and network info:"
-          curl -s https://httpbin.org/ip || echo "Could not get IP info"
           
-          # Set error handling
-          set +e  # Don't exit on error immediately
-          
-          # Run the version checker and capture output and exit code
-          timeout 600 node scripts/weekly_version_checker.js > version_output.txt 2>&1
-          EXIT_CODE=$?
-          
-          # Display the output for debugging
-          echo "=== Version Checker Output ==="
-          cat version_output.txt
-          echo "=== End Output ==="
-          
-          # Check exit code
-          if [ $EXIT_CODE -eq 124 ]; then
-            echo "Version checker timed out after 10 minutes"
-            echo "update_available=false" >> $GITHUB_OUTPUT
-            echo "error=true" >> $GITHUB_OUTPUT
-            exit 0
-          elif [ $EXIT_CODE -ne 0 ]; then
-            echo "Version checker failed with exit code $EXIT_CODE"
-            echo "This might be due to network issues or website changes."
-            echo "update_available=false" >> $GITHUB_OUTPUT
-            echo "error=true" >> $GITHUB_OUTPUT
-            exit 0  # Don't fail the workflow, just skip the update
-          fi
+          # Run the version checker and capture output
+          node scripts/weekly_version_checker.js > version_output.txt 2>&1
           
           # Check if version.txt was modified (indicates an update occurred)
           if git diff --quiet version.txt; then
             echo "No version update available"
             echo "update_available=false" >> $GITHUB_OUTPUT
-            echo "error=false" >> $GITHUB_OUTPUT
           else
             echo "Version update detected!"
             echo "update_available=true" >> $GITHUB_OUTPUT
-            echo "error=false" >> $GITHUB_OUTPUT
             
             # Extract version info from git diff
             OLD_VERSION=$(git show HEAD:version.txt | grep hostVersion | sed 's/.*,\([^]]*\)].*/\1/')
@@ -81,15 +50,18 @@ jobs:
             
             echo "Version updated from $OLD_VERSION to $NEW_VERSION"
           fi
+          
+          # Display the full output for debugging
+          cat version_output.txt
 
       - name: Run build if update available
-        if: steps.version-check.outputs.update_available == 'true' && steps.version-check.outputs.error == 'false'
+        if: steps.version-check.outputs.update_available == 'true'
         run: |
           echo "Running build for new version ${{ steps.version-check.outputs.new_version }}..."
           npm run build
 
       - name: Create Pull Request
-        if: steps.version-check.outputs.update_available == 'true' && steps.version-check.outputs.error == 'false'
+        if: steps.version-check.outputs.update_available == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -131,14 +103,7 @@ jobs:
 
       - name: Summary
         run: |
-          if [ "${{ steps.version-check.outputs.error }}" == "true" ]; then
-            echo "⚠️ Version check encountered an error but workflow continued"
-            echo "This could be due to:"
-            echo "  - Network connectivity issues"
-            echo "  - Changes to Adobe's website structure"
-            echo "  - Temporary server issues"
-            echo "The workflow will retry next week."
-          elif [ "${{ steps.version-check.outputs.update_available }}" == "true" ]; then
+          if [ "${{ steps.version-check.outputs.update_available }}" == "true" ]; then
             echo "✅ Version update processed successfully!"
             echo "📦 New version: ${{ steps.version-check.outputs.new_version }}"
             echo "🔄 Build completed"

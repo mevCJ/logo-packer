@@ -1,4 +1,4 @@
-const { chromium } = require('playwright');
+const { JSDOM } = require('jsdom');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -11,93 +11,25 @@ class IllustratorVersionChecker {
         this.url = 'https://helpx.adobe.com/illustrator/desktop/new-features/release-notes.html';
         this.versionRegex = /\(Illustrator\s+(\d+\.\d+)\)/i;
         this.versionFilePath = path.join(__dirname, '..', 'version.txt');
+        this.manifestTemplatePath = path.join(__dirname, '..', 'CSXS', 'manifest.template.xml');
+        this.manifestPath = path.join(__dirname, '..', 'CSXS', 'manifest.xml');
     }
 
     /**
-     * Fetches the HTML content from the Adobe release notes page using Playwright
+     * Fetches the HTML content from the Adobe release notes page
      * @returns {Promise<string>} HTML content
      */
     async fetchHTML() {
-        const maxRetries = 3;
-        let browser = null;
-        
-        for (let attempt = 1; attempt <= maxRetries; attempt++) {
-            try {
-                console.log(`Attempt ${attempt}/${maxRetries}: Fetching ${this.url} with Playwright`);
-                
-                // Launch browser in headless mode with HTTP/2 disabled
-                browser = await chromium.launch({
-                    headless: true,
-                    args: [
-                        '--no-sandbox',
-                        '--disable-setuid-sandbox',
-                        '--disable-http2',  // Disable HTTP/2 to avoid protocol errors
-                        '--disable-blink-features=AutomationControlled',
-                        '--disable-dev-shm-usage',
-                        '--disable-gpu'
-                    ]
-                });
-                
-                const context = await browser.newContext({
-                    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    viewport: { width: 1920, height: 1080 },
-                    ignoreHTTPSErrors: true,
-                    extraHTTPHeaders: {
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                        'Accept-Language': 'en-US,en;q=0.9',
-                        'Accept-Encoding': 'gzip, deflate, br',
-                        'Connection': 'keep-alive',
-                        'Upgrade-Insecure-Requests': '1'
-                    }
-                });
-                
-                const page = await context.newPage();
-                
-                // Set timeout for navigation
-                const timeout = 90000 * attempt; // 90s, 180s, 270s
-                page.setDefaultTimeout(timeout);
-                page.setDefaultNavigationTimeout(timeout);
-                
-                // Navigate to the page with more lenient wait conditions
-                await page.goto(this.url, {
-                    waitUntil: 'domcontentloaded', // Less strict than networkidle
-                    timeout: timeout
-                });
-                
-                // Wait for h2 elements to appear (the content we need)
-                try {
-                    await page.waitForSelector('h2', { timeout: 10000 });
-                } catch (e) {
-                    console.log('Warning: h2 selector timeout, but continuing...');
-                }
-                
-                // Wait a bit for any dynamic content to load
-                await page.waitForTimeout(3000);
-                
-                // Get the HTML content
-                const html = await page.content();
-                
-                console.log(`✅ Successfully fetched ${html.length} characters on attempt ${attempt}`);
-                
-                await browser.close();
-                return html;
-                
-            } catch (error) {
-                console.log(`❌ Attempt ${attempt} failed: ${error.message}`);
-                
-                if (browser) {
-                    await browser.close().catch(() => {});
-                }
-                
-                if (attempt === maxRetries) {
-                    throw new Error(`All fetch attempts failed. Last error: ${error.message}`);
-                }
-                
-                // Wait before retrying (exponential backoff)
-                const waitTime = 3000 * attempt; // 3s, 6s, 9s
-                console.log(`⏳ Waiting ${waitTime}ms before retry...`);
-                await new Promise(resolve => setTimeout(resolve, waitTime));
+        try {
+            const response = await fetch(this.url);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+            
+            return await response.text();
+        } catch (error) {
+            throw new Error(`Failed to fetch HTML: ${error.message}`);
         }
     }
 
@@ -107,23 +39,23 @@ class IllustratorVersionChecker {
      * @returns {Array} Array of objects containing version info
      */
     parseVersions(html) {
-        // Use simple regex parsing instead of JSDOM
-        const h2Regex = /<h2[^>]*>(.*?)<\/h2>/gi;
+        const dom = new JSDOM(html);
+        const document = dom.window.document;
+        const h2Tags = document.querySelectorAll('h2');
         const versions = [];
-        let match;
 
-        while ((match = h2Regex.exec(html)) !== null) {
-            const text = match[1].replace(/<[^>]*>/g, '').trim(); // Remove any inner HTML tags
-            const versionMatch = text.match(this.versionRegex);
+        h2Tags.forEach(h2 => {
+            const text = h2.textContent.trim();
+            const match = text.match(this.versionRegex);
             
-            if (versionMatch) {
+            if (match) {
                 versions.push({
                     fullText: text,
-                    version: versionMatch[1],
-                    element: match[0]
+                    version: match[1],
+                    element: h2.outerHTML
                 });
             }
-        }
+        });
 
         return versions;
     }
@@ -276,16 +208,71 @@ class IllustratorVersionChecker {
     }
 
     /**
+     * Increments the minor version number
+     * @param {string} version - Version string (e.g., "1.4.4")
+     * @returns {string} Incremented version (e.g., "1.4.5")
+     */
+    incrementMinorVersion(version) {
+        const parts = version.split('.');
+        if (parts.length !== 3) {
+            throw new Error(`Invalid version format: ${version}. Expected format: X.Y.Z`);
+        }
+        
+        const [major, minor, patch] = parts.map(Number);
+        const newPatch = patch + 1;
+        
+        return `${major}.${minor}.${newPatch}`;
+    }
+
+    /**
+     * Updates the manifest.xml file using the template
+     * @param {string} version - Extension version (e.g., "1.4.4")
+     * @param {string} hostVersion - Host version range (e.g., "[17.0,30.2]")
+     * @returns {Promise<Object>}
+     */
+    async updateManifestFile(version, hostVersion) {
+        try {
+            console.log(`Updating manifest.xml with version: ${version}, hostVersion: ${hostVersion}`);
+            
+            // Read template
+            const template = await fs.readFile(this.manifestTemplatePath, 'utf8');
+            
+            // Replace placeholders
+            const updatedManifest = template
+                .replace(/\{\{VERSION\}\}/g, version)
+                .replace(/\{\{HOST_VERSION\}\}/g, hostVersion);
+            
+            // Write to manifest.xml
+            await fs.writeFile(this.manifestPath, updatedManifest, 'utf8');
+            
+            console.log(`✅ Successfully updated manifest.xml`);
+            
+            return {
+                success: true,
+                version: version,
+                hostVersion: hostVersion
+            };
+        } catch (error) {
+            console.error(`Failed to update manifest file: ${error.message}`);
+            throw error;
+        }
+    }
+
+    /**
      * Updates the version.txt file with a new version
-     * @param {string} newVersion - New version to set
+     * @param {string} newVersion - New Illustrator version to set
      * @returns {Promise<void>}
      */
     async updateVersionFile(newVersion) {
         try {
-            console.log(`Updating version.txt with new version: ${newVersion}`);
+            console.log(`Updating version.txt with new Illustrator version: ${newVersion}`);
             
             // Read current content
             const versionData = await this.readVersionFile();
+            const oldExtensionVersion = versionData.version;
+            
+            // Increment the extension version
+            const newExtensionVersion = this.incrementMinorVersion(oldExtensionVersion);
             
             // Parse current hostVersion to get the min version
             const currentHostVersion = versionData.hostVersion;
@@ -301,6 +288,7 @@ class IllustratorVersionChecker {
             const newHostVersion = `[${minVersion},${newVersion}]`;
             
             // Update the version data
+            versionData.version = newExtensionVersion;
             versionData.hostVersion = newHostVersion;
             
             // Convert back to file format
@@ -312,14 +300,20 @@ class IllustratorVersionChecker {
             await fs.writeFile(this.versionFilePath, newContent, 'utf8');
             
             console.log(`✅ Successfully updated version.txt:`);
+            console.log(`   version: ${oldExtensionVersion} → ${newExtensionVersion}`);
             console.log(`   hostVersion: ${currentHostVersion} → ${newHostVersion}`);
+            
+            // Also update manifest.xml with the new extension version
+            await this.updateManifestFile(newExtensionVersion, newHostVersion);
             
             return {
                 success: true,
-                oldVersion: match[2].trim(),
-                newVersion: newVersion,
-                oldHostVersion: currentHostVersion,
-                newHostVersion: newHostVersion
+                oldExtensionVersion: oldExtensionVersion,
+                newExtensionVersion: newExtensionVersion,
+                oldHostVersion: match[2].trim(),
+                newHostVersion: newVersion,
+                oldHostVersionRange: currentHostVersion,
+                newHostVersionRange: newHostVersion
             };
         } catch (error) {
             console.error(`Failed to update version file: ${error.message}`);
@@ -396,8 +390,9 @@ if (require.main === module) {
             console.log(result.message);
             
             if (result.updated) {
-                console.log('\n🎉 version.txt has been automatically updated!');
-                console.log(`Updated from ${result.updateResult.oldVersion} to ${result.updateResult.newVersion}`);
+                console.log('\n🎉 Files have been automatically updated!');
+                console.log(`Extension version: ${result.updateResult.oldExtensionVersion} → ${result.updateResult.newExtensionVersion}`);
+                console.log(`Illustrator version: ${result.updateResult.oldHostVersion} → ${result.updateResult.newHostVersion}`);
             } else if (result.hasUpdate) {
                 console.log('\nTo update manually, run with auto-update enabled.');
             }
