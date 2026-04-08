@@ -1,0 +1,17 @@
+[0;34mParsing HTML for version information...[0m
+[0;32mFound 1 version(s):[0m
+1. Illustrator 30.3
+
+[0;34mCurrent max version in version.txt: 30.2[0m
+
+[0;34mLatest version online: 30.3[0m
+
+[0;32m🎉 UPDATE AVAILABLE![0m
+[0;32mCurrent: 30.2 → Latest: 30.3[0m
+
+[0;34m🔄 Auto-updating version files...[0m
+
+[0;32m=== Summary ===[0m
+[0;32m🎉 Files have been automatically updated![0m
+[0;32mExtension version: 1.4.5 → [0;34mUpdating version.txt with new Illustrator version: 30.3[0m[0m
+[0;32mIllustrator version: 30.2 → 30.3[0m
