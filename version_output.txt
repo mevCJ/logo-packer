@@ -1,18 +1,18 @@
 [0;34mParsing HTML for version information...[0m
 [0;32mFound 2 version(s):[0m
-1. Illustrator 30.7
-2. Illustrator 30.6
+1. Illustrator 30.8
+2. Illustrator 30.7
 
-[0;34mCurrent max version in version.txt: 30.6[0m
+[0;34mCurrent max version in version.txt: 30.7[0m
 
-[0;34mLatest version online: 30.7[0m
+[0;34mLatest version online: 30.8[0m
 
 [0;32m🎉 UPDATE AVAILABLE![0m
-[0;32mCurrent: 30.6 → Latest: 30.7[0m
+[0;32mCurrent: 30.7 → Latest: 30.8[0m
 
 [0;34m🔄 Auto-updating version files...[0m
 
 [0;32m=== Summary ===[0m
 [0;32m🎉 Files have been automatically updated![0m
-[0;32mExtension version: 1.4.9 → [0;34mUpdating version.txt with new Illustrator version: 30.7[0m[0m
-[0;32mIllustrator version: 30.6 → 30.7[0m
+[0;32mExtension version: 1.4.10 → [0;34mUpdating version.txt with new Illustrator version: 30.8[0m[0m
+[0;32mIllustrator version: 30.7 → 30.8[0m
