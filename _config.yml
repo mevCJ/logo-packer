@@ -5,5 +5,7 @@ title: Logo variations and exports in minutes | Logo Packer
 description: Adobe Illustrator extension that generates multiple logo variation and export them automatically
 plugins:
   - jemoji
+  - jekyll-redirect-from
 gems:
   - jemoji
+  - jekyll-redirect-from

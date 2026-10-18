@@ -1,3 +1,6 @@
+---
+redirect_to: https://www.logopacker.com/resources/documentation/illustrator-extension
+---
 # What is Logo Packer?
 
 Logo Packer is an open-sourced Adobe Illustrator extensions that allows you to generate your logo in multiple variations and export them for your clients in minutes.
